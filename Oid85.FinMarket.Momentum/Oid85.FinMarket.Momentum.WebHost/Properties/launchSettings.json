@@ -1,0 +1,14 @@
+﻿{
+    "profiles": {
+        "Oid85.FinMarket.Algo.WebHost": {
+            "commandName": "Project",
+            "launchBrowser": true,
+            "launchUrl": "http://localhost:9001",
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "applicationUrl": "http://localhost:9001"
+        }
+    },
+    "$schema": "http://json.schemastore.org/launchsettings.json"
+}

@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
+		<PackageReference Include="NLog.Targets.Seq" />
+		<PackageReference Include="Swashbuckle.AspNetCore" />
+		<PackageReference Include="NLog" />
+		<PackageReference Include="NLog.Web.AspNetCore" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" />
+		<PackageReference Include="Npgsql" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Oid85.FinMarket.Momentum.Application\Oid85.FinMarket.Momentum.Application.csproj" />
+	  <ProjectReference Include="..\Oid85.FinMarket.Momentum.Common\Oid85.FinMarket.Momentum.Common.csproj" />
+	  <ProjectReference Include="..\Oid85.FinMarket.Momentum.Core\Oid85.FinMarket.Momentum.Core.csproj" />
+	  <ProjectReference Include="..\Oid85.FinMarket.Momentum.Infrastructure\Oid85.FinMarket.Momentum.Infrastructure.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Update="SwaggerTest.XML">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+</Project>

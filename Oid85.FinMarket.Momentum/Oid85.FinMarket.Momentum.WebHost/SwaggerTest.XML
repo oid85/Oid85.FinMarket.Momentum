@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DaGroup.WPAnalyst.DataLake.WebHost</name>
+    </assembly>
+    <members>
+        <member name="M:DaGroup.WPAnalyst.DataLake.WebHost.ConfigureServices.ConfigureServicesDependencyInjection.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            ConfigureServices
+            </summary>
+            <param name="services"></param>
+            <param name="configuration"></param>
+        </member>
+        <member name="M:DaGroup.WPAnalyst.DataLake.WebHost.ConfigureServices.ConfigureServicesLogger.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            ConfigureServices
+            </summary>
+            <param name="services"></param>
+            <param name="configuration"></param>
+        </member>
+        <member name="M:DaGroup.WPAnalyst.DataLake.WebHost.ConfigureServices.ConfigureServicesQuartz.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            ConfigureServices
+            </summary>
+            <param name="services"></param>
+            <param name="configuration"></param>
+        </member>
+        <member name="M:DaGroup.WPAnalyst.DataLake.WebHost.ConfigureServices.ConfigureServicesSwagger.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            ConfigureServices
+            </summary>
+            <param name="services"></param>
+            <param name="configuration"></param>
+        </member>
+        <member name="T:DaGroup.WPAnalyst.DataLake.WebHost.Controllers.DataLakeController">
+            <summary>
+            DataLakeController
+            </summary>
+        </member>
+        <member name="M:DaGroup.WPAnalyst.DataLake.WebHost.Controllers.DataLakeController.Save(DaGroup.WPAnalyst.DataLake.WebHost.OpcDataRequests.SaveOpcDataRequest)">
+            <summary>
+            Сохранить данные в озере
+            </summary>
+        </member>
+        <member name="M:DaGroup.WPAnalyst.DataLake.WebHost.Controllers.DataLakeController.Get(DaGroup.WPAnalyst.DataLake.WebHost.OpcDataRequests.GetOpcDataRequest)">
+            <summary>
+            Получить данные из озера
+            </summary>
+        </member>
+        <member name="M:DaGroup.WPAnalyst.DataLake.WebHost.Controllers.DebugController.GetDataCache">
+            <summary>
+            Просмотреть кеш
+            </summary>
+        </member>
+        <member name="T:DaGroup.WPAnalyst.DataLake.WebHost.Controllers.TestController">
+            <summary>
+            Для тестирования
+            </summary>
+        </member>
+        <member name="M:DaGroup.WPAnalyst.DataLake.WebHost.Controllers.TestController.Get">
+            <summary>
+            Заполнить БД тестовыми данными
+            </summary>
+        </member>
+        <member name="M:DaGroup.WPAnalyst.DataLake.WebHost.Helpers.TimescaleHelper.GetDataLakeConnection">
+            <summary>
+            Получить соединение с БД
+            </summary>
+        </member>
+        <member name="M:DaGroup.WPAnalyst.DataLake.WebHost.Helpers.TimescaleHelper.CheckDataLakeTimescaleDBIsInstalledAsync">
+            <summary>
+            Проверяем, установлено ли расширение TimescaleDB
+            </summary>
+        </member>
+        <member name="M:DaGroup.WPAnalyst.DataLake.WebHost.Helpers.TimescaleHelper.CreateTagsRelationalTableAsync">
+            <summary>
+            Создать таблицу tags
+            </summary>
+        </member>
+        <member name="M:DaGroup.WPAnalyst.DataLake.WebHost.Helpers.TimescaleHelper.SyncTagsRelationalTableAsync">
+            <summary>
+            Синхронизируем таблицу tags с API WPAnalyst Configurator
+            </summary>
+        </member>
+        <member name="M:DaGroup.WPAnalyst.DataLake.WebHost.Helpers.TimescaleHelper.CreateTimescaleDataHypertableAsync">
+            <summary>
+            Создать таблицу timescale_data
+            </summary>
+        </member>
+        <member name="M:DaGroup.WPAnalyst.DataLake.WebHost.Helpers.TimescaleHelper.SaveTimescaleDataAsync(System.Collections.Generic.List{DaGroup.DataFormats.OpcFormat.OpcItem},System.Int64)">
+            <summary>
+            Вставить данные в таблицу timescale_data
+            </summary>
+        </member>
+        <member name="M:DaGroup.WPAnalyst.DataLake.WebHost.Helpers.TimescaleHelper.GetListTablesAsync">
+            <summary>
+            Получить список таблиц в БД
+            </summary>
+        </member>
+        <member name="M:DaGroup.WPAnalyst.DataLake.WebHost.Jobs.Job.Execute(Quartz.IJobExecutionContext)">
+            <summary>
+            Добавление данных в озеро с периодом (задается в конфигурации)
+            </summary>
+            <param name="context"></param>
+        </member>
+        <member name="P:DaGroup.WPAnalyst.DataLake.WebHost.Startup.Configuration">
+            <summary>
+            Configuration
+            </summary>
+        </member>
+    </members>
+</doc>

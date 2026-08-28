@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36429.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oid85.FinMarket.Momentum.WebHost", "Oid85.FinMarket.Momentum.WebHost\Oid85.FinMarket.Momentum.WebHost.csproj", "{E6482F6E-31BE-404D-9ADF-6FCF5672B98D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oid85.FinMarket.Momentum.Core", "Oid85.FinMarket.Momentum.Core\Oid85.FinMarket.Momentum.Core.csproj", "{431B35CF-8C6D-41AA-AB1C-47DF15B4B0D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oid85.FinMarket.Momentum.Infrastructure", "Oid85.FinMarket.Momentum.Infrastructure\Oid85.FinMarket.Momentum.Infrastructure.csproj", "{C2441A24-CD48-4970-B05E-B205EFB733FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oid85.FinMarket.Momentum.Application", "Oid85.FinMarket.Momentum.Application\Oid85.FinMarket.Momentum.Application.csproj", "{6B5F091F-9B10-45D8-B83B-E061F34B6BC7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oid85.FinMarket.Momentum.Common", "Oid85.FinMarket.Momentum.Common\Oid85.FinMarket.Momentum.Common.csproj", "{8EB0E380-C51D-4B7C-B01C-F9C576D3F1F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Oid85.FinMarket.Momentum.Application", "Test.Oid85.FinMarket.Momentum.Application\Test.Oid85.FinMarket.Momentum.Application.csproj", "{A6057506-0686-8498-38DF-C2FFFDE5DCBF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E6482F6E-31BE-404D-9ADF-6FCF5672B98D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6482F6E-31BE-404D-9ADF-6FCF5672B98D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6482F6E-31BE-404D-9ADF-6FCF5672B98D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6482F6E-31BE-404D-9ADF-6FCF5672B98D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{431B35CF-8C6D-41AA-AB1C-47DF15B4B0D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{431B35CF-8C6D-41AA-AB1C-47DF15B4B0D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{431B35CF-8C6D-41AA-AB1C-47DF15B4B0D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{431B35CF-8C6D-41AA-AB1C-47DF15B4B0D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2441A24-CD48-4970-B05E-B205EFB733FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2441A24-CD48-4970-B05E-B205EFB733FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2441A24-CD48-4970-B05E-B205EFB733FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2441A24-CD48-4970-B05E-B205EFB733FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B5F091F-9B10-45D8-B83B-E061F34B6BC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B5F091F-9B10-45D8-B83B-E061F34B6BC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B5F091F-9B10-45D8-B83B-E061F34B6BC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B5F091F-9B10-45D8-B83B-E061F34B6BC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EB0E380-C51D-4B7C-B01C-F9C576D3F1F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EB0E380-C51D-4B7C-B01C-F9C576D3F1F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EB0E380-C51D-4B7C-B01C-F9C576D3F1F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EB0E380-C51D-4B7C-B01C-F9C576D3F1F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6057506-0686-8498-38DF-C2FFFDE5DCBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6057506-0686-8498-38DF-C2FFFDE5DCBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6057506-0686-8498-38DF-C2FFFDE5DCBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6057506-0686-8498-38DF-C2FFFDE5DCBF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B84FA9FC-06B1-46F1-92F9-39E0612292EA}
+	EndGlobalSection
+EndGlobal
