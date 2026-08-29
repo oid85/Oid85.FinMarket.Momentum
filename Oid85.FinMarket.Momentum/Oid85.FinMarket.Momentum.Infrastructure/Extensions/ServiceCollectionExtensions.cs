@@ -2,14 +2,14 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Oid85.FinMarket.Algo.Application.Interfaces.ApiClients;
-using Oid85.FinMarket.Algo.Application.Interfaces.Repositories;
-using Oid85.FinMarket.Algo.Common.KnownConstants;
-using Oid85.FinMarket.Algo.Infrastructure.ApiClients;
-using Oid85.FinMarket.Algo.Infrastructure.Database;
-using Oid85.FinMarket.Algo.Infrastructure.Database.Repositories;
+using Oid85.FinMarket.Momentum.Application.Interfaces.ApiClients;
+using Oid85.FinMarket.Momentum.Application.Interfaces.Repositories;
+using Oid85.FinMarket.Momentum.Common.KnownConstants;
+using Oid85.FinMarket.Momentum.Infrastructure.ApiClients;
+using Oid85.FinMarket.Momentum.Infrastructure.Database;
+using Oid85.FinMarket.Momentum.Infrastructure.Database.Repositories;
 
-namespace Oid85.FinMarket.Algo.Infrastructure.Extensions;
+namespace Oid85.FinMarket.Momentum.Infrastructure.Extensions;
 
 public static class ServiceCollectionExtensions
 {

@@ -1,6 +1,6 @@
-﻿using Oid85.FinMarket.Algo.Infrastructure.Database.Entities.Base;
+﻿using Oid85.FinMarket.Momentum.Infrastructure.Database.Entities.Base;
 
-namespace Oid85.FinMarket.Algo.Infrastructure.Database.Entities
+namespace Oid85.FinMarket.Momentum.Infrastructure.Database.Entities
 {
     /// <summary>
     /// Параметр

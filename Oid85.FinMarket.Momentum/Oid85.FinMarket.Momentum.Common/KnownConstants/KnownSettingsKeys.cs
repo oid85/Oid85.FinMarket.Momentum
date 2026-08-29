@@ -1,4 +1,4 @@
-﻿namespace Oid85.FinMarket.Algo.Common.KnownConstants;
+﻿namespace Oid85.FinMarket.Momentum.Common.KnownConstants;
 
 public static class KnownSettingsKeys
 {

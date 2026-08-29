@@ -1,6 +1,6 @@
-﻿using Oid85.FinMarket.Algo.Core.Models;
+﻿using Oid85.FinMarket.Momentum.Core.Models;
 
-namespace Oid85.FinMarket.Algo.Application.Interfaces.Services
+namespace Oid85.FinMarket.Momentum.Application.Interfaces.Services
 {
     public interface IDataService
     {

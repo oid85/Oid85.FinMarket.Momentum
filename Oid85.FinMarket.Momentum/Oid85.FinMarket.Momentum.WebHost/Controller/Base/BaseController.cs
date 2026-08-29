@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Oid85.FinMarket.Algo.Core;
-using Oid85.FinMarket.Algo.Core.Exceptions;
+using Oid85.FinMarket.Momentum.Core;
+using Oid85.FinMarket.Momentum.Core.Exceptions;
 
-namespace Oid85.FinMarket.Algo.WebHost.Controller.Base;
+namespace Oid85.FinMarket.Momentum.WebHost.Controller.Base;
 
 [ApiController]
 public abstract class BaseController : ControllerBase

@@ -3,7 +3,7 @@ using Microsoft.OpenApi.Models;
 using NLog;
 using ILogger = NLog.ILogger;
 
-namespace Oid85.FinMarket.Algo.WebHost.Extensions;
+namespace Oid85.FinMarket.Momentum.WebHost.Extensions;
 
 public static class ServiceCollectionExtensions
 {

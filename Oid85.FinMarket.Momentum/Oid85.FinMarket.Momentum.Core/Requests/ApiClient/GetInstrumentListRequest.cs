@@ -1,4 +1,4 @@
-﻿namespace Oid85.FinMarket.Algo.Core.Requests.ApiClient
+﻿namespace Oid85.FinMarket.Momentum.Core.Requests.ApiClient
 {
     public class GetInstrumentListRequest
     {

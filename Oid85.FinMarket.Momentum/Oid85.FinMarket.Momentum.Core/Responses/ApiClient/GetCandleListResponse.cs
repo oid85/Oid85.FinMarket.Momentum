@@ -1,4 +1,4 @@
-﻿namespace Oid85.FinMarket.Algo.Core.Responses.ApiClient
+﻿namespace Oid85.FinMarket.Momentum.Core.Responses.ApiClient
 {
     public class GetCandleListResponse
     {

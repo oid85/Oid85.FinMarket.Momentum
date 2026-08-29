@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Oid85.FinMarket.Algo.Application.Interfaces.Repositories;
+using Oid85.FinMarket.Momentum.Application.Interfaces.Repositories;
 
-namespace Oid85.FinMarket.Algo.Infrastructure.Database.Repositories
+namespace Oid85.FinMarket.Momentum.Infrastructure.Database.Repositories
 {
     public class ParameterRepository(
         IDbContextFactory<AlgoContext> contextFactory)

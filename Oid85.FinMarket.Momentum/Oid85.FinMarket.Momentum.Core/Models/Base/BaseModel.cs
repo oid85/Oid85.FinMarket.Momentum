@@ -1,4 +1,4 @@
-﻿namespace Oid85.FinMarket.Algo.Core.Models.Base;
+﻿namespace Oid85.FinMarket.Momentum.Core.Models.Base;
 
 public class BaseModel
 {

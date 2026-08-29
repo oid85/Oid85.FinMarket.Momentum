@@ -1,14 +1,13 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
-using Oid85.FinMarket.Algo.Application.Interfaces.ApiClients;
-using Oid85.FinMarket.Algo.Common.KnownConstants;
-using Oid85.FinMarket.Algo.Common.Utils;
-using Oid85.FinMarket.Algo.Core.Exceptions;
-using Oid85.FinMarket.Algo.Core.Requests.ApiClient;
-using Oid85.FinMarket.Algo.Core.Responses.ApiClient;
+using Oid85.FinMarket.Momentum.Application.Interfaces.ApiClients;
+using Oid85.FinMarket.Momentum.Common.KnownConstants;
+using Oid85.FinMarket.Momentum.Common.Utils;
+using Oid85.FinMarket.Momentum.Core.Requests.ApiClient;
+using Oid85.FinMarket.Momentum.Core.Responses.ApiClient;
 
-namespace Oid85.FinMarket.Algo.Infrastructure.ApiClients
+namespace Oid85.FinMarket.Momentum.Infrastructure.ApiClients
 {
     /// <inheritdoc />
     public class StorageApiClient(

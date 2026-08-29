@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Oid85.FinMarket.Algo.Common.KnownConstants;
-using Oid85.FinMarket.Algo.Infrastructure.Database.Entities;
-using Oid85.FinMarket.Algo.Infrastructure.Database.Schemas;
+using Oid85.FinMarket.Momentum.Common.KnownConstants;
+using Oid85.FinMarket.Momentum.Infrastructure.Database.Entities;
+using Oid85.FinMarket.Momentum.Infrastructure.Database.Schemas;
 
-namespace Oid85.FinMarket.Algo.Infrastructure.Database;
+namespace Oid85.FinMarket.Momentum.Infrastructure.Database;
 
 public class AlgoContext(DbContextOptions<AlgoContext> options) : DbContext(options)
 {

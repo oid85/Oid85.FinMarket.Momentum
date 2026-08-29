@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Oid85.FinMarket.Algo.Common.Converters;
+namespace Oid85.FinMarket.Momentum.Common.Converters;
 
 public class DateOnlyJsonConverter : JsonConverter<DateOnly>
 {

@@ -1,4 +1,4 @@
-﻿namespace Oid85.FinMarket.Algo.Core.Responses
+﻿namespace Oid85.FinMarket.Momentum.Core.Responses
 {
     public class MonitorResponse
     {

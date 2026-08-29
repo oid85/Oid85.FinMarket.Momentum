@@ -1,7 +1,7 @@
-﻿namespace Oid85.FinMarket.Algo.Core.Requests
+﻿namespace Oid85.FinMarket.Momentum.Core.Requests
 {
     public class MonitorRequest
     {
-        public string PortfolioName { get; set; } = string.Empty;
+
     }
 }

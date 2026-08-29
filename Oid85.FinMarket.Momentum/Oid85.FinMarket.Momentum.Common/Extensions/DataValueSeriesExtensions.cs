@@ -1,6 +1,6 @@
-﻿using Oid85.FinMarket.Algo.Common.Utils;
+﻿using Oid85.FinMarket.Momentum.Common.Utils;
 
-namespace Oid85.FinMarket.Algo.Common.Extensions;
+namespace Oid85.FinMarket.Momentum.Common.Extensions;
 
 public static class DataValueSeriesExtensions
 {

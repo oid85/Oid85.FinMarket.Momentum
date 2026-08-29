@@ -1,4 +1,4 @@
-﻿namespace Oid85.FinMarket.Algo.Infrastructure.Database.Schemas;
+﻿namespace Oid85.FinMarket.Momentum.Infrastructure.Database.Schemas;
 
 public interface IAlgoSchema
 {

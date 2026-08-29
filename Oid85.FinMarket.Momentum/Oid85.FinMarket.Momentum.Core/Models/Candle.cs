@@ -1,4 +1,4 @@
-﻿namespace Oid85.FinMarket.Algo.Core.Models;
+﻿namespace Oid85.FinMarket.Momentum.Core.Models;
 
 public class Candle
 {

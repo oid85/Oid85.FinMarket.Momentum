@@ -1,4 +1,4 @@
-﻿namespace Oid85.FinMarket.Algo.Core;
+﻿namespace Oid85.FinMarket.Momentum.Core;
 
 public class ResponseError
 {

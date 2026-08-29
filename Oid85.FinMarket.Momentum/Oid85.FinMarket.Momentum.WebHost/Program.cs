@@ -1,13 +1,12 @@
-using System.Globalization;
 using System.Text.Json.Serialization;
-using Oid85.FinMarket.Algo.Application.Extensions;
-using Oid85.FinMarket.Algo.Common.Converters;
-using Oid85.FinMarket.Algo.Common.KnownConstants;
-using Oid85.FinMarket.Algo.Core.Configuration;
-using Oid85.FinMarket.Algo.Infrastructure.Extensions;
-using Oid85.FinMarket.Algo.WebHost.Extensions;
+using Oid85.FinMarket.Momentum.Application.Extensions;
+using Oid85.FinMarket.Momentum.Common.Converters;
+using Oid85.FinMarket.Momentum.Common.KnownConstants;
+using Oid85.FinMarket.Momentum.Core.Configuration;
+using Oid85.FinMarket.Momentum.Infrastructure.Extensions;
+using Oid85.FinMarket.Momentum.WebHost.Extensions;
 
-namespace Oid85.FinMarket.Algo.WebHost
+namespace Oid85.FinMarket.Momentum.WebHost
 {
     public class Program
     {
@@ -15,8 +14,8 @@ namespace Oid85.FinMarket.Algo.WebHost
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.Configure<AlgoSettings>(
-                builder.Configuration.GetSection("AlgoSettings")
+            builder.Services.Configure<MomentumSettings>(
+                builder.Configuration.GetSection(nameof(MomentumSettings))
             );
 
             builder.Services.AddControllers()

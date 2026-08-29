@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Oid85.FinMarket.Algo.Common.Utils;
+namespace Oid85.FinMarket.Momentum.Common.Utils;
 
 public static class StringUtils
 {

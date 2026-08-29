@@ -1,4 +1,4 @@
-﻿namespace Oid85.FinMarket.Algo.Core.Exceptions;
+﻿namespace Oid85.FinMarket.Momentum.Core.Exceptions;
 
 [Serializable]
 public class CustomBusinessException : Exception
