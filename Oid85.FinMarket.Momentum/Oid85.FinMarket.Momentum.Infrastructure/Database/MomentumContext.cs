@@ -5,9 +5,8 @@ using Oid85.FinMarket.Momentum.Infrastructure.Database.Schemas;
 
 namespace Oid85.FinMarket.Momentum.Infrastructure.Database;
 
-public class AlgoContext(DbContextOptions<AlgoContext> options) : DbContext(options)
+public class MomentumContext(DbContextOptions<MomentumContext> options) : DbContext(options)
 {
-    public DbSet<StrategyExecuteResultEntity> StrategyExecuteResultEntities { get; set; }
     public DbSet<ParameterEntity> ParameterEntities { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -17,9 +16,9 @@ public class AlgoContext(DbContextOptions<AlgoContext> options) : DbContext(opti
         modelBuilder
             .HasDefaultSchema(KnownDatabaseSchemas.Default)
             .ApplyConfigurationsFromAssembly(
-                typeof(AlgoContext).Assembly,
+                typeof(MomentumContext).Assembly,
                 type => type
-                    .GetInterface(typeof(IAlgoSchema).ToString()) != null)
+                    .GetInterface(typeof(IMomentumSchema).ToString()) != null)
             .UseIdentityAlwaysColumns();
     }    
 }

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Oid85.FinMarket.Momentum.Application.Interfaces.ApiClients;
 using Oid85.FinMarket.Momentum.Common.KnownConstants;
 using Oid85.FinMarket.Momentum.Common.Utils;
+using Oid85.FinMarket.Momentum.Core.Exceptions;
 using Oid85.FinMarket.Momentum.Core.Requests.ApiClient;
 using Oid85.FinMarket.Momentum.Core.Responses.ApiClient;
 

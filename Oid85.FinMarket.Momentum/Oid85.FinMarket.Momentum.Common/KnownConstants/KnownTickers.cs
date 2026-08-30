@@ -2,5 +2,5 @@
 
 public static class KnownTickers
 {
-    public const string TMON = "TMON";
+    public const string MON = "MON";
 }

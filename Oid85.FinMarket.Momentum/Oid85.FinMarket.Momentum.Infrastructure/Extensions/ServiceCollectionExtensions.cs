@@ -17,17 +17,16 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {    
-        services.AddDbContextPool<AlgoContext>((serviceProvider, options) =>
+        services.AddDbContextPool<MomentumContext>((serviceProvider, options) =>
         {  
-            options.UseNpgsql(configuration.GetValue<string>(KnownSettingsKeys.PostgresAlgoConnectionString)!);
+            options.UseNpgsql(configuration.GetValue<string>(KnownSettingsKeys.PostgresMomentumConnectionString));
         });
 
-        services.AddPooledDbContextFactory<AlgoContext>(options =>
+        services.AddPooledDbContextFactory<MomentumContext>(options =>
             options
-                .UseNpgsql(configuration.GetValue<string>(KnownSettingsKeys.PostgresAlgoConnectionString)!)
+                .UseNpgsql(configuration.GetValue<string>(KnownSettingsKeys.PostgresMomentumConnectionString))
                 .EnableServiceProviderCaching(false), poolSize: 32);
 
-        services.AddScoped<IStrategyExecuteResultRepository, StrategyExecuteResultRepository>();
         services.AddScoped<IParameterRepository, ParameterRepository>();
     }
 
@@ -48,7 +47,7 @@ public static class ServiceCollectionExtensions
     {
         var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
         await using var scope = scopeFactory.CreateAsyncScope();
-        await using var context = scope.ServiceProvider.GetRequiredService<AlgoContext>();
+        await using var context = scope.ServiceProvider.GetRequiredService<MomentumContext>();
         await context.Database.MigrateAsync();
     }
 }

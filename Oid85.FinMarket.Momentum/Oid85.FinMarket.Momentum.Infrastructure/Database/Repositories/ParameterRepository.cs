@@ -4,7 +4,7 @@ using Oid85.FinMarket.Momentum.Application.Interfaces.Repositories;
 namespace Oid85.FinMarket.Momentum.Infrastructure.Database.Repositories
 {
     public class ParameterRepository(
-        IDbContextFactory<AlgoContext> contextFactory)
+        IDbContextFactory<MomentumContext> contextFactory)
         : IParameterRepository
     {
         public async Task<string?> GetParameterValueAsync(string name)

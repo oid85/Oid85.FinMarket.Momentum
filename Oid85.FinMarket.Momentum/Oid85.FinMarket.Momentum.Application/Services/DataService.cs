@@ -3,6 +3,7 @@ using Oid85.FinMarket.Momentum.Application.Interfaces.ApiClients;
 using Oid85.FinMarket.Momentum.Application.Interfaces.Services;
 using Oid85.FinMarket.Momentum.Common.Extensions;
 using Oid85.FinMarket.Momentum.Common.KnownConstants;
+using Oid85.FinMarket.Momentum.Common.Utils;
 using Oid85.FinMarket.Momentum.Core.Models;
 
 namespace Oid85.FinMarket.Momentum.Application.Services
@@ -28,9 +29,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             _candleData = [];
 
-            List<string> tickerList = [.. tickers, KnownTickers.TMON];
-
-            foreach (var ticker in tickerList.Distinct()) 
+            foreach (var ticker in tickers.Distinct()) 
                 _candleData.Add(ticker, await GetCandlesByTickerAsync(ticker));
 
             return _candleData;
@@ -57,91 +56,22 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             return _instrumentData;
         }
 
-        public List<string> GetMomentumTopTickers(Dictionary<string, List<Candle>> candleData, DateOnly date, int period, int percent)
+        public async Task<List<Candle>> GetMoneyEquivalentDataAsync(DateOnly from, DateOnly to)
         {
-            string key = $"GetMomentumTopTickers:{date}:{period}:{percent}";
+            var dates = DateUtils.GetDates(from, to);
 
-            if (memoryCache.TryGetValue(key, out List<string>? cacheTopTickers))
-                return cacheTopTickers ?? [];
+            double price = 100.0;
 
-            DateOnly from = date.AddDays(-1 * period);
-            DateOnly to = date;
-
-            int count = Convert.ToInt32(Math.Truncate(candleData.Count * percent / 100.0));
-
-            var topTickers = candleData
-                .ToDictionary(k => k.Key, v => GetMomentumPercent(v.Value, from, to))
-                .Where(x => x.Value > 0)
-                .OrderByDescending(x => x.Value)
-                .Take(count)
-                .Select(x => x.Key)
-                .ToList();
-
-            memoryCache.Set(key, topTickers, new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(60)));
-
-            return topTickers ?? [];
-
-            double GetMomentumPercent(List<Candle> candles, DateOnly from, DateOnly to)
+            return [.. dates.Select(x => 
+            new Candle
             {
-                var filteredCandles = candles.Where(x => x.Date >= from).Where(x => x.Date <= to).ToList();
-
-                if (filteredCandles is []) return 0.0;
-
-                var prices = filteredCandles.Select(x => x.Close).ToList();
-
-                double firstPrice = prices[0];
-                double lastPrice = prices[^1];
-
-                if (firstPrice == 0.0) return 0.0;
-                if (lastPrice == 0.0) return 0.0;
-
-                return (lastPrice - firstPrice) / firstPrice * 100.0;
-            }
-        }
-
-        public List<string> GetNormalizedMomentumTopTickers(Dictionary<string, List<Candle>> candleData, DateOnly date, int period, int percent)
-        {
-            string key = $"GetNormalizedMomentumTopTickers:{date}:{period}:{percent}";
-
-            if (memoryCache.TryGetValue(key, out List<string>? cacheTopTickers))
-                return cacheTopTickers ?? [];
-
-            DateOnly from = date.AddDays(-1 * period);
-            DateOnly to = date;
-
-            int count = Convert.ToInt32(Math.Truncate(candleData.Count * percent / 100.0));
-
-            var topTickers = candleData
-                .ToDictionary(k => k.Key, v => GetNormalizedMomentumPercent(v.Value, from, to))
-                .Where(x => x.Value > 0)
-                .OrderByDescending(x => x.Value)
-                .Take(count)
-                .Select(x => x.Key)
-                .ToList();
-
-            memoryCache.Set(key, topTickers, new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(60)));
-
-            return topTickers ?? [];
-
-            double GetNormalizedMomentumPercent(List<Candle> candles, DateOnly from, DateOnly to)
-            {
-                var filteredCandles = candles.Where(x => x.Date >= from).Where(x => x.Date <= to).ToList();
-
-                if (filteredCandles is []) return 0.0;
-
-                var prices = filteredCandles.Select(x => x.Close).ToList();
-
-                double firstPrice = prices[0];
-                double lastPrice = prices[^1];
-
-                if (firstPrice == 0.0) return 0.0;
-                if (lastPrice == 0.0) return 0.0;
-
-                double momentum = lastPrice - firstPrice;
-                double stdDev = prices.StdDev();
-
-                return momentum / stdDev;
-            }
+                Date = x,
+                Open = price,
+                Close = price,
+                High = price,
+                Low = price,
+                Volume = 0
+            })];
         }
 
         public double? GetPrice(string ticker, DateOnly date)
