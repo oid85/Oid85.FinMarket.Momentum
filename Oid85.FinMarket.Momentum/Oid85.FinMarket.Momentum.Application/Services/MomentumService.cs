@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.Extensions.Options;
+using Oid85.FinMarket.Momentum.Application.Interfaces.Repositories;
 using Oid85.FinMarket.Momentum.Application.Interfaces.Services;
 using Oid85.FinMarket.Momentum.Common.Extensions;
 using Oid85.FinMarket.Momentum.Common.KnownConstants;
@@ -13,7 +14,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 {
     public class MomentumService(
         IOptions<MomentumSettings> options,
-        IDataService dataService)
+        IDataService dataService,
+        IParameterRepository parameterRepository)
         : IMomentumService
     {
         public async Task<MonitorResponse> MonitorAsync(MonitorRequest request)
@@ -44,6 +46,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             var weights = new Dictionary<string, double>() { { KnownTickers.MON, (double) momentumSettings.CountBestTickers } };
             var costs = new Dictionary<string, double>();
             var sizes = new Dictionary<string, double>();
+            var stops = new Dictionary<string, double>();
 
             var equitySeries = new DiagramSeries
             {
@@ -55,18 +58,19 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             var moneySeries = new DiagramSeries
             {
                 Name = "Ден. ср-ва и экв.",
-                Color = KnownColors.Blue,
-                ColorFill = KnownColors.Blue
-            };
+                Color = KnownColors.LightBlue,
+                ColorFill = KnownColors.LightBlue
+            };            
 
             foreach (var date in dates)
             {                
                 if (date.Day == 1)
                 {
-                    UpdateTickers();
-                    UpdateWeight();
+                    SetTickers();
+                    SetWeight();
                     UpdatePrices();
-                    UpdateSizes();
+                    SetStops();
+                    SetSizes();
                     UpdateCosts();
                     UpdateMoney();
                     UpdateTotalSum();
@@ -76,6 +80,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 {
                     UpdatePrices();
                     UpdateCosts();
+                    CheckStops();                    
                     UpdateTotalSum();
                 }
 
@@ -93,13 +98,13 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         Value = (money + costs[KnownTickers.MON]).RoundTo(2)
                     });
 
-                void UpdateTickers()
+                void SetTickers()
                 {
                     tickers = GetMomentumTopTickers(candleData, date, momentumSettings.PeriodInDays, momentumSettings.CountBestTickers);
                     tickers.Add(KnownTickers.MON);
                 }
 
-                void UpdateWeight()
+                void SetWeight()
                 {
                     weights = tickers.ToDictionary(k => k, v => 1.0);
                     weights[KnownTickers.MON] = momentumSettings.CountBestTickers - tickers.Count(x => x != KnownTickers.MON);
@@ -111,7 +116,35 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         prices[ticker] = dataService.GetPrice(ticker, date) ?? 0.0;
                 }
 
-                void UpdateSizes()
+                void SetStops()
+                {
+                    foreach (var ticker in weights.Keys.Where(x => x != KnownTickers.MON))
+                        stops[ticker] = GetStopPrice(candleData[ticker], prices[ticker], date, momentumSettings.PeriodInDays);
+                }
+
+                void CheckStops()
+                {
+                    foreach (var ticker in weights.Keys.Where(x => x != KnownTickers.MON))
+                    {
+                        if (prices[ticker] < stops[ticker])
+                        {
+                            weights.Remove(ticker);
+                            weights[KnownTickers.MON] += 1.0;
+                            sizes[ticker] = 0.0;
+                            money += costs[ticker];
+                            costs[ticker] = 0.0;
+
+                            double monSize = Math.Truncate(money / prices[KnownTickers.MON]);
+                            double monCost = monSize * prices[KnownTickers.MON];                            
+                            money -= monCost;
+
+                            sizes[KnownTickers.MON] += monSize;
+                            costs[KnownTickers.MON] += monCost;
+                        }
+                    }
+                }
+
+                void SetSizes()
                 {
                     sizes = [];
 
@@ -154,10 +187,151 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 }
             }
 
+            var drawdownSeries = GetDrawdownSeries(equitySeries);
+            var drawdownPercentSeries = GetDrawdownPercentSeries(equitySeries);
+
+            double totalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum")) ?? "0").Replace(" ", "").Trim());
+
+            var currentPositions = new List<PortfolioPosition>();
+
+            foreach (var (ticker, weight) in weights)
+            {
+                var price = dataService.GetPrice(ticker, dates.Last());
+                var lot = lots[ticker];
+
+                double baseUnit = totalSumLife / weights.Values.Sum();
+                double tickerCost = baseUnit * weight;
+                double tickerSize = tickerCost / price!.Value;
+                tickerSize /= lot;
+                tickerSize = Math.Truncate(tickerSize);
+                tickerSize *= lot;
+
+                currentPositions.Add(
+                    new PortfolioPosition
+                    {
+                        Ticker = ticker,
+                        Weight = weight,
+                        Size = Convert.ToInt32(tickerSize),
+                        Cost = tickerCost.RoundTo(2),
+                        StopPrice = ticker == KnownTickers.MON ? 0.0 : stops[ticker].RoundTo(4)
+                    });
+            }
+
             return new MonitorResponse
             {
-                Series = [equitySeries, moneySeries]
+                Series = [equitySeries, moneySeries, drawdownSeries],
+                CurrentPositions = [.. currentPositions.OrderByDescending(x => x.Cost)],
+                Yield = GetAverageYearYieldPercent(equitySeries),
+                MaxDrawdown = drawdownPercentSeries.Data.Where(x => x.Value.HasValue).Min(x => x.Value!.Value),
+                CurrentDrawdown = drawdownPercentSeries.Data.Last(x => x.Value.HasValue).Value!.Value
             };
+        }
+
+        private static double GetAverageYearYieldPercent(DiagramSeries equitySeries)
+        {
+            double firstValue = equitySeries.Data.First().Value ?? 0.0;
+            double lastValue = equitySeries.Data.Last().Value ?? 0.0;
+
+            var firstDate = equitySeries.Data.First().Date.ToDateTime(TimeOnly.MinValue);
+            var lastDate = equitySeries.Data.Last().Date.ToDateTime(TimeOnly.MaxValue);
+
+            if (lastValue == 0.0) return 0.0;
+
+            var years = (lastDate - firstDate).TotalDays / 365.0;
+
+            return ((lastValue - firstValue) / firstValue * 100.0 / years).RoundTo(2);
+        }
+
+        private static DiagramSeries GetDrawdownSeries(DiagramSeries equitySeries)
+        {
+            var drawdownSeries = new DiagramSeries
+            {
+                Name = "Просадка",
+                Color = KnownColors.Red,
+                ColorFill = KnownColors.Red
+            };
+
+            for (int i = 0; i < equitySeries.Data.Count; i++)
+            {
+                if (i == 0)
+                    drawdownSeries.Data.Add(
+                        new DateValue<double?>
+                        {
+                            Date = equitySeries.Data[i].Date,
+                            Value = 0.0
+                        });
+
+                else
+                {
+                    var maxEquity = equitySeries.Data.Take(i).Max(x => x.Value);
+
+                    var dateValue = new DateValue<double?>
+                    {
+                        Date = equitySeries.Data[i].Date,
+                        Value = 0.0
+                    };
+
+                    if (equitySeries.Data[i].Value <= maxEquity)
+                        dateValue.Value = (equitySeries.Data[i].Value - maxEquity).RoundTo(2);
+
+                    drawdownSeries.Data.Add(dateValue);
+                }
+            }
+
+            return drawdownSeries;
+        }
+
+        private static DiagramSeries GetDrawdownPercentSeries(DiagramSeries equitySeries)
+        {
+            var drawdownSeries = new DiagramSeries
+            {
+                Name = "Просадка, %",
+                Color = KnownColors.Red,
+                ColorFill = KnownColors.Red
+            };
+
+            for (int i = 0; i < equitySeries.Data.Count; i++)
+            {
+                if (i == 0)
+                    drawdownSeries.Data.Add(
+                        new DateValue<double?>
+                        {
+                            Date = equitySeries.Data[i].Date,
+                            Value = 0.0
+                        });
+
+                else
+                {
+                    var maxEquity = equitySeries.Data.Take(i).Max(x => x.Value);
+
+                    var dateValue = new DateValue<double?>
+                    {
+                        Date = equitySeries.Data[i].Date,
+                        Value = 0.0
+                    };
+
+                    if (equitySeries.Data[i].Value <= maxEquity)
+                        dateValue.Value = ((equitySeries.Data[i].Value - maxEquity) / maxEquity * 100.0).RoundTo(2);
+
+                    drawdownSeries.Data.Add(dateValue);
+                }
+            }
+
+            return drawdownSeries;
+        }
+
+        private static double GetStopPrice(List<Candle> candles, double price, DateOnly date, int period)
+        {
+            if (candles is []) return 0.0;
+
+            DateOnly from = date.AddDays(-1 * period);
+            DateOnly to = date;
+
+            var averageRange = candles
+                .Where(x => x.Date >= from && x.Date <= to)
+                .Average(x => Math.Abs(x.Close - x.Open));
+
+            return price - averageRange;
         }
 
         private static List<string> GetMomentumTopTickers(
@@ -171,28 +345,26 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             DateOnly from = date.AddDays(-1 * period);
             DateOnly to = date;
 
-            var topTickers = candleData
+            var tickers = candleData
                 .Where(x => x.Key != KnownTickers.MON)
-                .ToDictionary(k => k.Key, v => GetDeltaPricePercent(v.Value, from, to))
+                .ToDictionary(
+                    k => k.Key, 
+                    v => GetDeltaPricePercent([.. v.Value.Where(x => x.Date >= from && x.Date <= to)]))
                 .Where(x => x.Value > 0.0)
                 .OrderByDescending(x => x.Value)
                 .Take(count)
                 .Select(x => x.Key)                
                 .ToList();
 
-            return topTickers ?? [];
+            return tickers ?? [];
         }
 
-        private static double GetDeltaPricePercent(List<Candle> candles, DateOnly from, DateOnly to)
+        private static double GetDeltaPricePercent(List<Candle> candles)
         {
-            var filteredCandles = candles.Where(x => x.Date >= from).Where(x => x.Date <= to).ToList();
+            if (candles is []) return 0.0;
 
-            if (filteredCandles is []) return 0.0;
-
-            var prices = filteredCandles.Select(x => x.Close).ToList();
-
-            double firstPrice = prices.First();
-            double lastPrice = prices.Last();
+            double firstPrice = candles.First().Close;
+            double lastPrice = candles.Last().Close;
 
             if (firstPrice == 0.0) return 0.0;
             if (lastPrice == 0.0) return 0.0;

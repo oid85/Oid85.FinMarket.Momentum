@@ -62,16 +62,37 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             double price = 100.0;
 
-            return [.. dates.Select(x => 
-            new Candle
+            var candles = new List<Candle>
             {
-                Date = x,
-                Open = price,
-                Close = price,
-                High = price,
-                Low = price,
-                Volume = 0
-            })];
+                new() {
+                    Date = dates[0],
+                    Open = price,
+                    Close = price,
+                    High = price,
+                    Low = price,
+                    Volume = 0
+                }
+            };
+
+            double keyRate = 12.0;
+            double dayPercentRate = keyRate / 365.0;
+            double multipleCoefficient = 1.0 + dayPercentRate / 100.0;
+
+            for (int i = 1; i < dates.Count; i++)
+            {
+                candles.Add(
+                    new()
+                    {
+                        Date = dates[i],
+                        Open = candles[i - 1].Open * multipleCoefficient,
+                        Close = candles[i - 1].Close * multipleCoefficient,
+                        High = candles[i - 1].High * multipleCoefficient,
+                        Low = candles[i - 1].Low * multipleCoefficient,
+                        Volume = 0
+                    });
+            }
+
+            return candles;
         }
 
         public double? GetPrice(string ticker, DateOnly date)
