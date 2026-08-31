@@ -25,9 +25,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             double startMoneySum = 1_000_000.0;
             double money = startMoneySum;
             double totalSum = startMoneySum;
-
-            var dt = DateOnly.FromDateTime(DateTime.Today.AddYears(-5));
-            var from = new DateOnly(dt.Year, dt.Month, 1);
+            
+            var from = new DateOnly(2021, 1, 1);
             var to = DateOnly.FromDateTime(DateTime.Today);
             var dates = DateUtils.GetDates(from, to);
 
@@ -222,9 +221,32 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 Series = [equitySeries, moneySeries, drawdownSeries],
                 CurrentPositions = [.. currentPositions.OrderByDescending(x => x.Cost)],
                 Yield = GetAverageYearYieldPercent(equitySeries),
+                Yield2021 = GetYearYieldPercent(equitySeries, 2021),
+                Yield2022 = GetYearYieldPercent(equitySeries, 2022),
+                Yield2023 = GetYearYieldPercent(equitySeries, 2023),
+                Yield2024 = GetYearYieldPercent(equitySeries, 2024),
+                Yield2025 = GetYearYieldPercent(equitySeries, 2025),
+                Yield2026 = GetYearYieldPercent(equitySeries, 2026),
                 MaxDrawdown = drawdownPercentSeries.Data.Where(x => x.Value.HasValue).Min(x => x.Value!.Value),
                 CurrentDrawdown = drawdownPercentSeries.Data.Last(x => x.Value.HasValue).Value!.Value
             };
+        }
+
+        private static double GetYearYieldPercent(DiagramSeries equitySeries, int year)
+        {
+            var dataValues = equitySeries.Data.Where(x => x.Date.Year == year);
+
+            double firstValue = dataValues.First().Value ?? 0.0;
+            double lastValue = dataValues.Last().Value ?? 0.0;
+
+            var firstDate = dataValues.First().Date.ToDateTime(TimeOnly.MinValue);
+            var lastDate = dataValues.Last().Date.ToDateTime(TimeOnly.MaxValue);
+
+            if (lastValue == 0.0) return 0.0;
+
+            var years = (lastDate - firstDate).TotalDays / 365.0;
+
+            return ((lastValue - firstValue) / firstValue * 100.0 / years).RoundTo(2);
         }
 
         private static double GetAverageYearYieldPercent(DiagramSeries equitySeries)
