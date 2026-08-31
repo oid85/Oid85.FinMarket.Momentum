@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Oid85.FinMarket.Momentum.Application.Interfaces.ApiClients;
 using Oid85.FinMarket.Momentum.Application.Interfaces.Services;
-using Oid85.FinMarket.Momentum.Common.Extensions;
-using Oid85.FinMarket.Momentum.Common.KnownConstants;
 using Oid85.FinMarket.Momentum.Common.Utils;
 using Oid85.FinMarket.Momentum.Core.Models;
 

@@ -2,8 +2,10 @@
 {
     public class MomentumSettings
     {
+        public double StartMoneySum { get; set; }
         public int PeriodInDays { get; set; }
         public int CountBestTickers { get; set; }
         public List<string> Tickers { get; set; }
+        public List<int> RebalanceDays { get; set; }
     }
 }

@@ -20,10 +20,4 @@
     <ProjectReference Include="..\Oid85.FinMarket.Momentum.Core\Oid85.FinMarket.Momentum.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Factories\" />
-    <Folder Include="Helpers\" />
-    <Folder Include="Interfaces\Factories\" />
-  </ItemGroup>
-
 </Project>
