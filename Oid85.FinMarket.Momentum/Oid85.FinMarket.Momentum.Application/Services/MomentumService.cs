@@ -56,7 +56,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var moneySeries = new DiagramSeries
             {
-                Name = "Ден. ср-ва и экв.",
+                Name = "Фонд ликвидности",
                 Color = KnownColors.LightBlue,
                 ColorFill = KnownColors.LightBlue
             };            
