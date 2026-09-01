@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using Oid85.FinMarket.Momentum.Application.Helpers;
 using Oid85.FinMarket.Momentum.Application.Interfaces.Repositories;
 using Oid85.FinMarket.Momentum.Application.Interfaces.Services;
 using Oid85.FinMarket.Momentum.Common.Extensions;
@@ -97,7 +98,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
                 void SetTickers()
                 {
-                    tickers = GetMomentumTopTickers(candleData, date, momentumSettings.PeriodInDays, momentumSettings.CountBestTickers);
+                    tickers = MomentumHelper.GetMomentumTopTickers(candleData, date, momentumSettings.PeriodInDays, momentumSettings.CountBestTickers);
                     tickers.Add(KnownTickers.MON);
                 }
 
@@ -116,7 +117,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 void SetStops()
                 {
                     foreach (var ticker in weights.Keys.Where(x => x != KnownTickers.MON))
-                        stops[ticker] = GetStopPrice(candleData[ticker], prices[ticker], date, momentumSettings.PeriodInDays);
+                        stops[ticker] = MomentumHelper.GetStopPrice(candleData[ticker], prices[ticker], date, momentumSettings.PeriodInDays);
                 }
 
                 void CheckStops()
@@ -188,8 +189,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 }
             }
 
-            var drawdownSeries = GetDrawdownSeries(equitySeries);
-            var drawdownPercentSeries = GetDrawdownPercentSeries(equitySeries);
+            var drawdownSeries = DiagramSeriesHelper.GetDrawdownSeries(equitySeries);
+            var drawdownPercentSeries = DiagramSeriesHelper.GetDrawdownPercentSeries(equitySeries);
 
             double totalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum")) ?? "0").Replace(" ", "").Trim());
 
@@ -222,175 +223,16 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             {
                 Series = [equitySeries, moneySeries, drawdownSeries],
                 CurrentPositions = [.. currentPositions.OrderByDescending(x => x.Cost)],
-                Yield = GetAverageYearYieldPercent(equitySeries),
-                Yield2021 = GetYearYieldPercent(equitySeries, 2021),
-                Yield2022 = GetYearYieldPercent(equitySeries, 2022),
-                Yield2023 = GetYearYieldPercent(equitySeries, 2023),
-                Yield2024 = GetYearYieldPercent(equitySeries, 2024),
-                Yield2025 = GetYearYieldPercent(equitySeries, 2025),
-                Yield2026 = GetYearYieldPercent(equitySeries, 2026),
+                Yield = DiagramSeriesHelper.GetAverageYearYieldPercent(equitySeries),
+                Yield2021 = DiagramSeriesHelper.GetYearYieldPercent(equitySeries, 2021),
+                Yield2022 = DiagramSeriesHelper.GetYearYieldPercent(equitySeries, 2022),
+                Yield2023 = DiagramSeriesHelper.GetYearYieldPercent(equitySeries, 2023),
+                Yield2024 = DiagramSeriesHelper.GetYearYieldPercent(equitySeries, 2024),
+                Yield2025 = DiagramSeriesHelper.GetYearYieldPercent(equitySeries, 2025),
+                Yield2026 = DiagramSeriesHelper.GetYearYieldPercent(equitySeries, 2026),
                 MaxDrawdown = drawdownPercentSeries.Data.Where(x => x.Value.HasValue).Min(x => x.Value!.Value),
                 CurrentDrawdown = drawdownPercentSeries.Data.Last(x => x.Value.HasValue).Value!.Value
             };
-        }
-
-        private static double GetYearYieldPercent(DiagramSeries equitySeries, int year)
-        {
-            var dataValues = equitySeries.Data.Where(x => x.Date.Year == year);
-
-            double firstValue = dataValues.First().Value ?? 0.0;
-            double lastValue = dataValues.Last().Value ?? 0.0;
-
-            var firstDate = dataValues.First().Date.ToDateTime(TimeOnly.MinValue);
-            var lastDate = dataValues.Last().Date.ToDateTime(TimeOnly.MaxValue);
-
-            if (lastValue == 0.0) return 0.0;
-
-            var years = (lastDate - firstDate).TotalDays / 365.0;
-
-            return ((lastValue - firstValue) / firstValue * 100.0 / years).RoundTo(2);
-        }
-
-        private static double GetAverageYearYieldPercent(DiagramSeries equitySeries)
-        {
-            double firstValue = equitySeries.Data.First().Value ?? 0.0;
-            double lastValue = equitySeries.Data.Last().Value ?? 0.0;
-
-            var firstDate = equitySeries.Data.First().Date.ToDateTime(TimeOnly.MinValue);
-            var lastDate = equitySeries.Data.Last().Date.ToDateTime(TimeOnly.MaxValue);
-
-            if (lastValue == 0.0) return 0.0;
-
-            var years = (lastDate - firstDate).TotalDays / 365.0;
-
-            return ((lastValue - firstValue) / firstValue * 100.0 / years).RoundTo(2);
-        }
-
-        private static DiagramSeries GetDrawdownSeries(DiagramSeries equitySeries)
-        {
-            var drawdownSeries = new DiagramSeries
-            {
-                Name = "Просадка",
-                Color = KnownColors.Red,
-                ColorFill = KnownColors.Red
-            };
-
-            for (int i = 0; i < equitySeries.Data.Count; i++)
-            {
-                if (i == 0)
-                    drawdownSeries.Data.Add(
-                        new DateValue<double?>
-                        {
-                            Date = equitySeries.Data[i].Date,
-                            Value = 0.0
-                        });
-
-                else
-                {
-                    var maxEquity = equitySeries.Data.Take(i).Max(x => x.Value);
-
-                    var dateValue = new DateValue<double?>
-                    {
-                        Date = equitySeries.Data[i].Date,
-                        Value = 0.0
-                    };
-
-                    if (equitySeries.Data[i].Value <= maxEquity)
-                        dateValue.Value = (equitySeries.Data[i].Value - maxEquity).RoundTo(2);
-
-                    drawdownSeries.Data.Add(dateValue);
-                }
-            }
-
-            return drawdownSeries;
-        }
-
-        private static DiagramSeries GetDrawdownPercentSeries(DiagramSeries equitySeries)
-        {
-            var drawdownSeries = new DiagramSeries
-            {
-                Name = "Просадка, %",
-                Color = KnownColors.Red,
-                ColorFill = KnownColors.Red
-            };
-
-            for (int i = 0; i < equitySeries.Data.Count; i++)
-            {
-                if (i == 0)
-                    drawdownSeries.Data.Add(
-                        new DateValue<double?>
-                        {
-                            Date = equitySeries.Data[i].Date,
-                            Value = 0.0
-                        });
-
-                else
-                {
-                    var maxEquity = equitySeries.Data.Take(i).Max(x => x.Value);
-
-                    var dateValue = new DateValue<double?>
-                    {
-                        Date = equitySeries.Data[i].Date,
-                        Value = 0.0
-                    };
-
-                    if (equitySeries.Data[i].Value <= maxEquity)
-                        dateValue.Value = ((equitySeries.Data[i].Value - maxEquity) / maxEquity * 100.0).RoundTo(2);
-
-                    drawdownSeries.Data.Add(dateValue);
-                }
-            }
-
-            return drawdownSeries;
-        }
-
-        private static double GetStopPrice(List<Candle> candles, double price, DateOnly date, int period)
-        {
-            if (candles is []) return 0.0;
-
-            DateOnly from = date.AddDays(-1 * period);
-            DateOnly to = date;
-
-            var averageRange = candles
-                .Where(x => x.Date >= from && x.Date <= to)
-                .Average(x => Math.Abs(x.Close - x.Open));
-
-            return price - averageRange;
-        }
-
-        private static List<string> GetMomentumTopTickers(
-            Dictionary<string, List<Candle>> candleData, DateOnly date, int period, int count)
-        {
-            if (candleData is null) return [];
-
-            DateOnly from = date.AddDays(-1 * period);
-            DateOnly to = date;
-
-            var tickers = candleData
-                .Where(x => x.Key != KnownTickers.MON)
-                .ToDictionary(
-                    k => k.Key, 
-                    v => GetDeltaPricePercent([.. v.Value.Where(x => x.Date >= from && x.Date <= to)]))
-                .Where(x => x.Value > 0.0)
-                .OrderByDescending(x => x.Value)
-                .Take(count)
-                .Select(x => x.Key)                
-                .ToList();
-
-            return tickers ?? [];
-        }
-
-        private static double GetDeltaPricePercent(List<Candle> candles)
-        {
-            if (candles is []) return 0.0;
-
-            double firstPrice = candles.First().Close;
-            double lastPrice = candles.Last().Close;
-
-            if (firstPrice == 0.0) return 0.0;
-            if (lastPrice == 0.0) return 0.0;
-
-            return (lastPrice - firstPrice) / firstPrice * 100.0;
         }
     }
 }
