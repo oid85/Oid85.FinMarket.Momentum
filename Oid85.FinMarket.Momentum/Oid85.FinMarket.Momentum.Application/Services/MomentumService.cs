@@ -226,7 +226,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             return new MonitorResponse
             {
-                Series = [equitySeries, moneySeries, drawdownSeries],
+                BacktestSeries = [equitySeries, moneySeries, drawdownSeries],
                 CurrentPositions = [.. currentPositions.OrderByDescending(x => x.Cost)],
                 Yield = DiagramSeriesHelper.GetAverageYearYieldPercent(equitySeries),
                 Yield2021 = DiagramSeriesHelper.GetYearYieldPercent(equitySeries, 2021),
