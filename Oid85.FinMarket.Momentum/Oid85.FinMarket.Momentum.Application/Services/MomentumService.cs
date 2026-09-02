@@ -196,6 +196,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var currentPositions = new List<PortfolioPosition>();
 
+            int number = 0;
+
             foreach (var (ticker, weight) in weights)
             {
                 var price = dataService.GetPrice(ticker, dates.Last());
@@ -208,9 +210,12 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 tickerSize = Math.Truncate(tickerSize);
                 tickerSize *= lot;
 
+                number++;
+
                 currentPositions.Add(
                     new PortfolioPosition
                     {
+                        Number = number,
                         Ticker = ticker,
                         Weight = weight,
                         Size = Convert.ToInt32(tickerSize),
@@ -230,8 +235,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 Yield2024 = DiagramSeriesHelper.GetYearYieldPercent(equitySeries, 2024),
                 Yield2025 = DiagramSeriesHelper.GetYearYieldPercent(equitySeries, 2025),
                 Yield2026 = DiagramSeriesHelper.GetYearYieldPercent(equitySeries, 2026),
-                MaxDrawdown = drawdownPercentSeries.Data.Where(x => x.Value.HasValue).Min(x => x.Value!.Value),
-                CurrentDrawdown = drawdownPercentSeries.Data.Last(x => x.Value.HasValue).Value!.Value
+                MaxDrawdown = drawdownPercentSeries.Data.Where(x => x.Value.HasValue).Min(x => x.Value!.Value).RoundTo(1),
+                CurrentDrawdown = drawdownPercentSeries.Data.Last(x => x.Value.HasValue).Value!.Value.RoundTo(1)
             };
         }
     }

@@ -20,7 +20,7 @@ namespace Oid85.FinMarket.Momentum.Application.Helpers
 
             var years = (lastDate - firstDate).TotalDays / 365.0;
 
-            return ((lastValue - firstValue) / firstValue * 100.0 / years).RoundTo(2);
+            return ((lastValue - firstValue) / firstValue * 100.0 / years).RoundTo(1);
         }
 
         public static double GetAverageYearYieldPercent(DiagramSeries equitySeries)
@@ -35,7 +35,7 @@ namespace Oid85.FinMarket.Momentum.Application.Helpers
 
             var years = (lastDate - firstDate).TotalDays / 365.0;
 
-            return ((lastValue - firstValue) / firstValue * 100.0 / years).RoundTo(2);
+            return ((lastValue - firstValue) / firstValue * 100.0 / years).RoundTo(1);
         }
 
         public static DiagramSeries GetDrawdownSeries(DiagramSeries equitySeries)
