@@ -126,24 +126,29 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     {
                         if (prices[ticker] < stops[ticker])
                         {
-                            // Корректируем веса
-                            weights.Remove(ticker);
-                            weights[KnownTickers.MON] += 1.0;
-
-                            // Продаем актив
-                            sizes[ticker] = 0.0;
-                            money += costs[ticker];
-                            costs[ticker] = 0.0;
-
-                            // Покупаем фонд ликвидности
-                            double monSize = Math.Truncate(money / prices[KnownTickers.MON]);
-                            double monCost = monSize * prices[KnownTickers.MON];                            
-                            money -= monCost;
-
-                            sizes[KnownTickers.MON] += monSize;
-                            costs[KnownTickers.MON] += monCost;
+                            CloseTickerPosition(ticker);
+                            AddOneUnitMon();
                         }
                     }
+                }
+
+                void CloseTickerPosition(string ticker)
+                {
+                    weights.Remove(ticker);
+                    sizes[ticker] = 0.0;
+                    money += costs[ticker];
+                    costs[ticker] = 0.0;
+                }
+
+                void AddOneUnitMon()
+                {
+                    weights[KnownTickers.MON] += 1.0;
+                    double monSize = Math.Truncate(money / prices[KnownTickers.MON]);
+                    double monCost = monSize * prices[KnownTickers.MON];
+                    money -= monCost;
+
+                    sizes[KnownTickers.MON] += monSize;
+                    costs[KnownTickers.MON] += monCost;
                 }
 
                 void SetSizes()
@@ -190,14 +195,12 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             }
 
             var drawdownSeries = DiagramSeriesHelper.GetDrawdownSeries(equitySeries);
-            var drawdownPercentSeries = DiagramSeriesHelper.GetDrawdownPercentSeries(equitySeries);
+            var drawdownPercentSeries = DiagramSeriesHelper.GetDrawdownSeries(equitySeries, true);
 
             double totalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum")) ?? "0").Replace(" ", "").Trim());
 
             var currentPositions = new List<PortfolioPosition>();
-
-            int number = 0;
-
+            
             foreach (var (ticker, weight) in weights)
             {
                 var price = dataService.GetPrice(ticker, dates.Last());
@@ -210,12 +213,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 tickerSize = Math.Truncate(tickerSize);
                 tickerSize *= lot;
 
-                number++;
-
                 currentPositions.Add(
                     new PortfolioPosition
                     {
-                        Number = number,
                         Ticker = ticker,
                         Weight = weight,
                         Size = Convert.ToInt32(tickerSize),
@@ -224,17 +224,26 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     });
             }
 
+            List<PortfolioPosition> orderedCurrentPositions = [
+                    .. currentPositions.Where(x => x.Ticker != KnownTickers.MON).OrderBy(x => x.Ticker),
+                    .. currentPositions.Where(x => x.Ticker == KnownTickers.MON)
+                    ];
+
+            int number = 1;
+            foreach (var currentPosition in orderedCurrentPositions)
+                currentPosition.Number = number++;
+
             return new MonitorResponse
             {
                 BacktestSeries = [equitySeries, moneySeries, drawdownSeries],
-                CurrentPositions = [.. currentPositions.OrderByDescending(x => x.Cost)],
-                Yield = DiagramSeriesHelper.GetAverageYearYieldPercent(equitySeries),
-                Yield2021 = DiagramSeriesHelper.GetYearYieldPercent(equitySeries, 2021),
-                Yield2022 = DiagramSeriesHelper.GetYearYieldPercent(equitySeries, 2022),
-                Yield2023 = DiagramSeriesHelper.GetYearYieldPercent(equitySeries, 2023),
-                Yield2024 = DiagramSeriesHelper.GetYearYieldPercent(equitySeries, 2024),
-                Yield2025 = DiagramSeriesHelper.GetYearYieldPercent(equitySeries, 2025),
-                Yield2026 = DiagramSeriesHelper.GetYearYieldPercent(equitySeries, 2026),
+                CurrentPositions = orderedCurrentPositions,
+                Yield = DiagramSeriesHelper.GetAnnualPercentageYield(equitySeries),
+                Yield2021 = DiagramSeriesHelper.GetAnnualPercentageYield(equitySeries, 2021),
+                Yield2022 = DiagramSeriesHelper.GetAnnualPercentageYield(equitySeries, 2022),
+                Yield2023 = DiagramSeriesHelper.GetAnnualPercentageYield(equitySeries, 2023),
+                Yield2024 = DiagramSeriesHelper.GetAnnualPercentageYield(equitySeries, 2024),
+                Yield2025 = DiagramSeriesHelper.GetAnnualPercentageYield(equitySeries, 2025),
+                Yield2026 = DiagramSeriesHelper.GetAnnualPercentageYield(equitySeries, 2026),
                 MaxDrawdown = drawdownPercentSeries.Data.Where(x => x.Value.HasValue).Min(x => x.Value!.Value).RoundTo(1),
                 CurrentDrawdown = drawdownPercentSeries.Data.Last(x => x.Value.HasValue).Value!.Value.RoundTo(1)
             };
