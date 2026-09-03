@@ -5,6 +5,7 @@ namespace Oid85.FinMarket.Momentum.Core.Responses
     public class MonitorResponse
     {
         public List<DiagramSeries> BacktestSeries { get; set; } = [];
+        public List<DiagramSeries> PriceDynamicSeries { get; set; } = [];
         public List<PortfolioPosition> CurrentPositions { get; set; } = [];        
         public double Yield { get; set; }
         public double Yield2021 { get; set; }

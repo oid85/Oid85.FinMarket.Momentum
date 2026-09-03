@@ -9,6 +9,7 @@ using Oid85.FinMarket.Momentum.Core.Configuration;
 using Oid85.FinMarket.Momentum.Core.Models;
 using Oid85.FinMarket.Momentum.Core.Requests;
 using Oid85.FinMarket.Momentum.Core.Responses;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Oid85.FinMarket.Momentum.Application.Services
 {
@@ -126,22 +127,20 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     {
                         if (prices[ticker] < stops[ticker])
                         {
-                            CloseTickerPosition(ticker);
-                            AddOneUnitMon();
+                            ClosePosition(ticker);
                         }
                     }
                 }
 
-                void CloseTickerPosition(string ticker)
+                void ClosePosition(string ticker)
                 {
+                    // Продаем актив
                     weights.Remove(ticker);
                     sizes[ticker] = 0.0;
                     money += costs[ticker];
                     costs[ticker] = 0.0;
-                }
 
-                void AddOneUnitMon()
-                {
+                    // Покупаем фонд ликвидности
                     weights[KnownTickers.MON] += 1.0;
                     double monSize = Math.Truncate(money / prices[KnownTickers.MON]);
                     double monCost = monSize * prices[KnownTickers.MON];
@@ -233,9 +232,42 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             foreach (var currentPosition in orderedCurrentPositions)
                 currentPosition.Number = number++;
 
+            var priceDynamicSeries = new List<DiagramSeries>();
+
+            var currentTopTickers = MomentumHelper.GetMomentumTopTickers(candleData, DateOnly.FromDateTime(DateTime.Today), momentumSettings.PeriodInDays, momentumSettings.CountBestTickers);
+
+            from = DateOnly.FromDateTime(DateTime.Today).AddDays(-1 * momentumSettings.PeriodInDays);
+            to = DateOnly.FromDateTime(DateTime.Today);
+
+            foreach (var (ticker, candles) in candleData.Where(x => x.Key != KnownTickers.MON))
+            {
+                var candlesByDates = candles.Where(x => x.Date >= from && x.Date <= to).ToList();
+                double firstPrice = candlesByDates.First().Close;
+
+                string color = currentTopTickers.Contains(ticker) 
+                    ? KnownColors.Green 
+                    : KnownColors.LightBlue;
+
+                priceDynamicSeries.Add(
+                    new DiagramSeries
+                    {
+                        Name = ticker,
+                        Color = color,
+                        ColorFill = color,
+                        Data = [.. candlesByDates
+                        .Select(x => 
+                        new DateValue<double?>
+                        {
+                            Date = x.Date,
+                            Value = (x.Close / firstPrice).RoundTo(4)
+                        })]
+                    });
+            }
+
             return new MonitorResponse
             {
                 BacktestSeries = [equitySeries, moneySeries, drawdownSeries],
+                PriceDynamicSeries = priceDynamicSeries,
                 CurrentPositions = orderedCurrentPositions,
                 Yield = DiagramSeriesHelper.GetAnnualPercentageYield(equitySeries),
                 Yield2021 = DiagramSeriesHelper.GetAnnualPercentageYield(equitySeries, 2021),
