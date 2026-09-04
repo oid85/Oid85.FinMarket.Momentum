@@ -173,7 +173,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 void ChangePosition(string ticker)
                 {
                     string tickerForRemove = ticker;
-                    var currentTickers = weights.Keys.ToList();
+                    var currentTickers = weights.Where(x => x.Value > 0.0).ToDictionary().Keys.ToList();
 
                     // Продаем актив
                     weights[tickerForRemove] = 0.0;
