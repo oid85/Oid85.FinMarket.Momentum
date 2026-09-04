@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System.Timers;
+using Microsoft.Extensions.Options;
 using Oid85.FinMarket.Momentum.Application.Helpers;
 using Oid85.FinMarket.Momentum.Application.Interfaces.Repositories;
 using Oid85.FinMarket.Momentum.Application.Interfaces.Services;
@@ -9,7 +10,7 @@ using Oid85.FinMarket.Momentum.Core.Configuration;
 using Oid85.FinMarket.Momentum.Core.Models;
 using Oid85.FinMarket.Momentum.Core.Requests;
 using Oid85.FinMarket.Momentum.Core.Responses;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using static Oid85.FinMarket.Momentum.Common.KnownConstants.KnownTickers;
 
 namespace Oid85.FinMarket.Momentum.Application.Services
 {
@@ -34,21 +35,15 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             var instrumentData = await dataService.GetInstrumentDataAsync(tickers);
 
             var candleData = await dataService.GetCandleDataAsync(tickers);
-            candleData.TryAdd(KnownTickers.MON, await dataService.GetMoneyEquivalentDataAsync(from, to));
+            candleData.TryAdd(MON, await dataService.GetMoneyEquivalentDataAsync(from, to));
 
-            var prices = tickers.ToDictionary(k => k, v => 0.0);
-            prices.TryAdd(KnownTickers.MON, 0.0);
-
-            var lowPrices = tickers.ToDictionary(k => k, v => 0.0);
-            lowPrices.TryAdd(KnownTickers.MON, 0.0);
-
-            var lots = instrumentData.ToDictionary(k => k.Key, v => v.Value.Lot ?? 1);
-            lots.TryAdd(KnownTickers.MON, 1);
-
-            var weights = new Dictionary<string, double>();
-            var costs = new Dictionary<string, double>();
-            var sizes = new Dictionary<string, double>();
-            var stops = new Dictionary<string, double>();
+            var prices = tickers.ToDictionary(k => k, v => 0.0); prices.TryAdd(MON, 0.0);
+            var lowPrices = tickers.ToDictionary(k => k, v => 0.0); lowPrices.TryAdd(MON, 0.0);
+            var lots = instrumentData.ToDictionary(k => k.Key, v => v.Value.Lot ?? 1); lots.TryAdd(MON, 1);
+            var weights = tickers.ToDictionary(k => k, v => 0.0); weights.TryAdd(MON, 0.0);
+            var costs = tickers.ToDictionary(k => k, v => 0.0); costs.TryAdd(MON, 0.0);
+            var sizes = tickers.ToDictionary(k => k, v => 0.0); sizes.TryAdd(MON, 0.0);
+            var stops = tickers.ToDictionary(k => k, v => 0.0); stops.TryAdd(MON, 0.0);
 
             var equitySeries = new DiagramSeries
             {
@@ -101,7 +96,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 }
 
                 if (CurrentDrawdown() >= 15.0)
-                    foreach (var ticker in weights.Keys.Where(x => x != KnownTickers.MON))
+                    foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys.Where(x => x != MON))
                         ClosePosition(ticker);
 
                 equitySeries.Data.Add(
@@ -115,39 +110,44 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     new()
                     {
                         Date = date,
-                        Value = ((money + costs[KnownTickers.MON]) / 1000.0).RoundTo(2)
+                        Value = ((money + costs[MON]) / 1000.0).RoundTo(2)
                     });
 
                 void SetTickers()
                 {
                     tickers = MomentumHelper.GetMomentumTopTickers(candleData, date, momentumSettings.PeriodInDays, momentumSettings.CountBestTickers);
-                    tickers.Add(KnownTickers.MON);
+                    tickers.Add(MON);
                 }
 
                 void SetWeight()
                 {
-                    weights = tickers.ToDictionary(k => k, v => 1.0);
-                    weights[KnownTickers.MON] = momentumSettings.CountBestTickers - tickers.Count(x => x != KnownTickers.MON);
+                    foreach (var ticker in weights.Keys) 
+                        weights[ticker] = 0.0;
+
+                    foreach (var ticker in tickers) 
+                        weights[ticker] = 1.0;
+                    
+                    weights[MON] = momentumSettings.CountBestTickers - tickers.Count(x => x != MON);
                 }
 
                 void UpdatePrices()
                 {
-                    foreach (var ticker in weights.Keys) 
+                    foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys) 
                         prices[ticker] = dataService.GetPrice(ticker, date) ?? 0.0;
 
-                    foreach (var ticker in weights.Keys) 
+                    foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys) 
                         lowPrices[ticker] = dataService.GetLowPrice(ticker, date) ?? 0.0;
                 }
 
                 void SetStops()
                 {
-                    foreach (var ticker in weights.Keys.Where(x => x != KnownTickers.MON))
+                    foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys.Where(x => x != MON))
                         stops[ticker] = MomentumHelper.GetStopPrice(candleData[ticker], prices[ticker], date, momentumSettings.PeriodInDays);
                 }
 
                 void CheckStops()
                 {
-                    foreach (var ticker in weights.Keys.Where(x => x != KnownTickers.MON))
+                    foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys.Where(x => x != MON))
                         if (lowPrices[ticker] < stops[ticker])
                             ClosePosition(ticker);
                 }
@@ -155,28 +155,79 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 void ClosePosition(string ticker)
                 {
                     // Продаем актив
-                    weights.Remove(ticker);
+                    weights[ticker] = 0.0;
                     sizes[ticker] = 0.0;
                     money += costs[ticker];
                     costs[ticker] = 0.0;
 
                     // Покупаем фонд ликвидности
-                    weights[KnownTickers.MON] += 1.0;
-                    double monSize = Math.Truncate(money / prices[KnownTickers.MON]);
-                    double monCost = monSize * prices[KnownTickers.MON];
+                    weights[MON] += 1.0;
+                    double monSize = Math.Truncate(money / prices[MON]);
+                    double monCost = monSize * prices[MON];
                     money -= monCost;
 
-                    sizes[KnownTickers.MON] += monSize;
-                    costs[KnownTickers.MON] += monCost;
+                    sizes[MON] += monSize;
+                    costs[MON] += monCost;
+                }
+
+                void ChangePosition(string ticker)
+                {
+                    string tickerForRemove = ticker;
+                    var currentTickers = weights.Keys.ToList();
+
+                    // Продаем актив
+                    weights[tickerForRemove] = 0.0;
+                    sizes[tickerForRemove] = 0.0;
+                    money += costs[tickerForRemove];
+                    costs[tickerForRemove] = 0.0;
+
+                    // Определяем новых лидеров
+                    var newTopTickers = MomentumHelper.GetMomentumTopTickers(candleData, date, momentumSettings.PeriodInDays, momentumSettings.CountBestTickers)
+                        .Where(x => !currentTickers.Contains(x))
+                        .Where(x => x != MON)
+                        .ToList();
+
+                    var tickerForAdd = newTopTickers.Count == 0 
+                        ? MON 
+                        : newTopTickers[0];
+
+                    if (tickerForAdd == MON)
+                    {
+                        // Покупаем фонд ликвидности
+                        weights[MON] += 1.0;
+                        double monSize = Math.Truncate(money / prices[MON]);
+                        double monCost = monSize * prices[MON];
+                        money -= monCost;
+
+                        sizes[MON] += monSize;
+                        costs[MON] += monCost;
+                    }
+
+                    else
+                    {
+                        // Покупаем другой актив
+                        weights[tickerForAdd] = 1.0;
+
+                        prices[tickerForAdd] = dataService.GetPrice(tickerForAdd, date) ?? 0.0;
+                        lowPrices[tickerForAdd] = dataService.GetLowPrice(tickerForAdd, date) ?? 0.0;
+
+                        double tickerSize = Math.Truncate(money / prices[tickerForAdd] / lots[tickerForAdd]) * lots[tickerForAdd];                        
+
+                        sizes[tickerForAdd] = Convert.ToInt32(tickerSize);
+                        costs[tickerForAdd] = prices[tickerForAdd] * sizes[tickerForAdd];
+
+                        money -= costs[tickerForAdd];
+                    }
                 }
 
                 void SetSizes()
                 {
-                    sizes.Clear();
+                    foreach (var ticker in sizes.Keys)
+                        sizes[ticker] = 0.0;
 
                     double baseUnit = totalSum / weights.Values.Sum();
 
-                    foreach (var ticker in weights.Keys)
+                    foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys)
                     {
                         if (prices[ticker] == 0.0)
                         {
@@ -190,16 +241,17 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         tickerSize = Math.Truncate(tickerSize);
                         tickerSize *= lots[ticker];
                         
-                        sizes.TryAdd(ticker, Convert.ToInt32(tickerSize));
+                        sizes[ticker] = Convert.ToInt32(tickerSize);
                     }
                 }
 
                 void UpdateCosts()
                 {
-                    costs.Clear();
+                    foreach (var ticker in costs.Keys)
+                        costs[ticker] = 0.0;
 
-                    foreach (var ticker in weights.Keys)
-                        costs.TryAdd(ticker, prices[ticker] * sizes[ticker]);
+                    foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys)
+                        costs[ticker] = prices[ticker] * sizes[ticker];
                 }
 
                 void UpdateTotalSum()
@@ -220,7 +272,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var currentPositions = new List<PortfolioPosition>();
             
-            foreach (var (ticker, weight) in weights)
+            foreach (var (ticker, weight) in weights.Where(x => x.Value > 0).ToDictionary())
             {
                 var price = dataService.GetPrice(ticker, dates.Last());
                 var lot = lots[ticker];
@@ -239,13 +291,13 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         Weight = weight,
                         Size = Convert.ToInt32(tickerSize),
                         Cost = tickerCost.RoundTo(2),
-                        StopPrice = ticker == KnownTickers.MON ? 0.0 : stops[ticker].RoundTo(4)
+                        StopPrice = ticker == MON ? 0.0 : stops[ticker].RoundTo(4)
                     });
             }
 
             List<PortfolioPosition> orderedCurrentPositions = [
-                    .. currentPositions.Where(x => x.Ticker != KnownTickers.MON).OrderBy(x => x.Ticker),
-                    .. currentPositions.Where(x => x.Ticker == KnownTickers.MON)
+                    .. currentPositions.Where(x => x.Ticker != MON).OrderBy(x => x.Ticker),
+                    .. currentPositions.Where(x => x.Ticker == MON)
                     ];
 
             int number = 1;
@@ -259,12 +311,12 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             from = DateOnly.FromDateTime(DateTime.Today).AddDays(-1 * momentumSettings.PeriodInDays);
             to = DateOnly.FromDateTime(DateTime.Today);
 
-            foreach (var (ticker, candles) in candleData.Where(x => x.Key != KnownTickers.MON))
+            foreach (var (ticker, candles) in candleData.Where(x => x.Key != MON))
             {
                 var candlesByDates = candles.Where(x => x.Date >= from && x.Date <= to).ToList();
                 double firstPrice = candlesByDates.First().Close;
 
-                string color = weights.ContainsKey(ticker)
+                string color = weights.Where(x => x.Value > 0).ToDictionary().ContainsKey(ticker)
                     ? KnownColors.Green 
                     : KnownColors.LightBlue;
 
