@@ -264,7 +264,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 var candlesByDates = candles.Where(x => x.Date >= from && x.Date <= to).ToList();
                 double firstPrice = candlesByDates.First().Close;
 
-                string color = currentTopTickers.Contains(ticker) 
+                string color = weights.ContainsKey(ticker)
                     ? KnownColors.Green 
                     : KnownColors.LightBlue;
 
