@@ -61,8 +61,22 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 ColorFill = KnownColors.LightBlue
             };            
 
+            double CurrentDrawdown()
+            {
+                var equityValues = equitySeries.Data.Select(x => x.Value ?? 0.0).ToList();
+
+                if (equityValues.Count == 0) return 0.0;
+
+                double lastEquity = equityValues.Last();
+                double maxEquity = equityValues.Max();
+
+                if (maxEquity == 0.0) return 0.0;
+
+                return Math.Abs((maxEquity - lastEquity) / maxEquity * 100.0);
+            }
+
             foreach (var date in dates)
-            {                
+            {               
                 if (momentumSettings.RebalanceDays.Contains(date.Day))
                 {
                     SetTickers();
@@ -82,6 +96,10 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     CheckStops();                    
                     UpdateTotalSum();
                 }
+
+                if (CurrentDrawdown() >= 15.0)
+                    foreach (var ticker in weights.Keys.Where(x => x != KnownTickers.MON))
+                        ClosePosition(ticker);
 
                 equitySeries.Data.Add(
                     new()
