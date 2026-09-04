@@ -183,13 +183,11 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
                     // Определяем новых лидеров
                     var newTopTickers = MomentumHelper.GetMomentumTopTickers(candleData, date, momentumSettings.PeriodInDays, momentumSettings.CountBestTickers)
-                        .Where(x => !currentTickers.Contains(x))
-                        .Where(x => x != MON)
-                        .ToList();
+                        .Where(x => !currentTickers.Contains(x)).Where(x => x != MON).ToList();
 
                     var tickerForAdd = newTopTickers.Count == 0 
                         ? MON 
-                        : newTopTickers[0];
+                        : newTopTickers.First();
 
                     if (tickerForAdd == MON)
                     {
@@ -211,9 +209,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         prices[tickerForAdd] = dataService.GetPrice(tickerForAdd, date) ?? 0.0;
                         lowPrices[tickerForAdd] = dataService.GetLowPrice(tickerForAdd, date) ?? 0.0;
 
-                        double tickerSize = Math.Truncate(money / prices[tickerForAdd] / lots[tickerForAdd]) * lots[tickerForAdd];                        
-
-                        sizes[tickerForAdd] = Convert.ToInt32(tickerSize);
+                        sizes[tickerForAdd] = Math.Truncate(money / prices[tickerForAdd] / lots[tickerForAdd]) * lots[tickerForAdd];
                         costs[tickerForAdd] = prices[tickerForAdd] * sizes[tickerForAdd];
 
                         money -= costs[tickerForAdd];
@@ -222,8 +218,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
                 void SetSizes()
                 {
-                    foreach (var ticker in sizes.Keys)
-                        sizes[ticker] = 0.0;
+                    ClearSizes();
 
                     double baseUnit = totalSum / weights.Values.Sum();
 
@@ -234,24 +229,29 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                             costs[ticker] = 0.0;
                             continue;
                         }
-
-                        double tickerCost = baseUnit * weights[ticker];
-                        double tickerSize = tickerCost / prices[ticker];
-                        tickerSize /= lots[ticker];
-                        tickerSize = Math.Truncate(tickerSize);
-                        tickerSize *= lots[ticker];
-                        
-                        sizes[ticker] = Convert.ToInt32(tickerSize);
+                                
+                        sizes[ticker] = Math.Truncate(baseUnit * weights[ticker] / prices[ticker] / lots[ticker]) * lots[ticker];
                     }
+                }
+
+                void ClearSizes()
+                {
+                    foreach (var ticker in sizes.Keys)
+                        sizes[ticker] = 0.0;
                 }
 
                 void UpdateCosts()
                 {
-                    foreach (var ticker in costs.Keys)
-                        costs[ticker] = 0.0;
+                    ClearCosts();
 
                     foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys)
                         costs[ticker] = prices[ticker] * sizes[ticker];
+                }
+
+                void ClearCosts()
+                {
+                    foreach (var ticker in costs.Keys)
+                        costs[ticker] = 0.0;
                 }
 
                 void UpdateTotalSum()
