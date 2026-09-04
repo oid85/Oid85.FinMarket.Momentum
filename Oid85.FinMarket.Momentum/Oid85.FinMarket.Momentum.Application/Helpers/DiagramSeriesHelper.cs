@@ -57,7 +57,7 @@ namespace Oid85.FinMarket.Momentum.Application.Helpers
                     if (equitySeries.Data[i].Value <= maxEquity)
                         dateValue.Value = inPercent
                             ? ((equitySeries.Data[i].Value - maxEquity) / maxEquity * 100.0).RoundTo(2)
-                            : (equitySeries.Data[i].Value - maxEquity).RoundTo(2);
+                            : (equitySeries.Data[i].Value - maxEquity).RoundTo(2);                    
 
                     drawdownSeries.Data.Add(dateValue);
                 }

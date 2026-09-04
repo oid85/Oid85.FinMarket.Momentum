@@ -39,6 +39,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             var prices = tickers.ToDictionary(k => k, v => 0.0);
             prices.TryAdd(KnownTickers.MON, 0.0);
 
+            var lowPrices = tickers.ToDictionary(k => k, v => 0.0);
+            lowPrices.TryAdd(KnownTickers.MON, 0.0);
+
             var lots = instrumentData.ToDictionary(k => k.Key, v => v.Value.Lot ?? 1);
             lots.TryAdd(KnownTickers.MON, 1);
 
@@ -105,14 +108,14 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     new()
                     {
                         Date = date,
-                        Value = totalSum.RoundTo(2)
+                        Value = (totalSum / 1000.0).RoundTo(2)
                     });
 
                 moneySeries.Data.Add(
                     new()
                     {
                         Date = date,
-                        Value = (money + costs[KnownTickers.MON]).RoundTo(2)
+                        Value = ((money + costs[KnownTickers.MON]) / 1000.0).RoundTo(2)
                     });
 
                 void SetTickers()
@@ -129,8 +132,11 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
                 void UpdatePrices()
                 {
-                    foreach (var ticker in weights.Keys)
+                    foreach (var ticker in weights.Keys) 
                         prices[ticker] = dataService.GetPrice(ticker, date) ?? 0.0;
+
+                    foreach (var ticker in weights.Keys) 
+                        lowPrices[ticker] = dataService.GetLowPrice(ticker, date) ?? 0.0;
                 }
 
                 void SetStops()
@@ -142,12 +148,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 void CheckStops()
                 {
                     foreach (var ticker in weights.Keys.Where(x => x != KnownTickers.MON))
-                    {
-                        if (prices[ticker] < stops[ticker])
-                        {
+                        if (lowPrices[ticker] < stops[ticker])
                             ClosePosition(ticker);
-                        }
-                    }
                 }
 
                 void ClosePosition(string ticker)

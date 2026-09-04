@@ -108,6 +108,21 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             return candle.Close;
         }
 
+        public double? GetLowPrice(string ticker, DateOnly date)
+        {
+            if (_candleData is null) return null;
+
+            var candles = _candleData[ticker];
+
+            if (candles is null) return null;
+
+            var candle = candles.FindLast(x => x.Date <= date);
+
+            if (candle is null) return null;
+
+            return candle.Low;
+        }
+
         private async Task<List<Candle>> GetCandlesByTickerAsync(string ticker)
         {
             var from = DateOnly.FromDateTime(DateTime.Today.AddYears(-10));
