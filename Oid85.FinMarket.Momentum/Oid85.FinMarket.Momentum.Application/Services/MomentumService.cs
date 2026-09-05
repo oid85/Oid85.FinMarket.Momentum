@@ -90,7 +90,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     UpdateTotalSum();
 
                     foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys.Where(x => x != MON))
-                        AddMessage(date, ticker, $"Ребалансировка моментума. Добавлен {ticker}");
+                        AddMessage(date, ticker, $"Ребалансировка моментума. Позиция {ticker}");
                 }
 
                 else
