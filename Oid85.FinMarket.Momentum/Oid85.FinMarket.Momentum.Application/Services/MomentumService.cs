@@ -198,6 +198,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         ? MON 
                         : newTopTickers.First();
 
+                    AddMessage(date, ticker, $"Стоп-лосс. Удален {ticker}");
+
                     if (tickerForAdd == MON)
                     {
                         // Покупаем фонд ликвидности
@@ -208,6 +210,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
                         sizes[MON] += monSize;
                         costs[MON] += monCost;
+
+                        AddMessage(date, MON, $"Увеличена доля фонда ликвидности");
                     }
 
                     else
@@ -222,6 +226,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         costs[tickerForAdd] = prices[tickerForAdd] * sizes[tickerForAdd];
 
                         money -= costs[tickerForAdd];
+
+                        AddMessage(date, tickerForAdd, $"Замена актива. Добавлен {tickerForAdd}");
                     }
                 }
 
