@@ -27,5 +27,18 @@ public class MomentumController(
         [FromBody] MonitorRequest request) =>
         GetResponseAsync(
             () => momentumService.MonitorAsync(request),
-            result => new BaseResponse<MonitorResponse> { Result = result });   
+            result => new BaseResponse<MonitorResponse> { Result = result });
+
+    /// <summary>
+    /// Редактировать сумму портфеля
+    /// </summary>
+    [HttpPost("portfolio/total-sum/edit")]
+    [ProducesResponseType(typeof(BaseResponse<EditPortfolioTotalSumResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BaseResponse<EditPortfolioTotalSumResponse>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(BaseResponse<EditPortfolioTotalSumResponse>), StatusCodes.Status500InternalServerError)]
+    public Task<IActionResult> EditPortfolioTotalSumAsync(
+        [FromBody] EditPortfolioTotalSumRequest request) =>
+        GetResponseAsync(
+            () => momentumService.EditPortfolioTotalSumAsync(request),
+            result => new BaseResponse<EditPortfolioTotalSumResponse> { Result = result });
 }

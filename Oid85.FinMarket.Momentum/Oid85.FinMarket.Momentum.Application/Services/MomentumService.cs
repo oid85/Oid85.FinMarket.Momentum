@@ -1,5 +1,4 @@
-﻿using System.Timers;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Oid85.FinMarket.Momentum.Application.Helpers;
 using Oid85.FinMarket.Momentum.Application.Interfaces.Repositories;
 using Oid85.FinMarket.Momentum.Application.Interfaces.Services;
@@ -265,10 +264,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 }
             }
 
-            var drawdownSeries = DiagramSeriesHelper.GetDrawdownSeries(equitySeries);
-            var drawdownPercentSeries = DiagramSeriesHelper.GetDrawdownSeries(equitySeries, true);
-
-            double totalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum")) ?? "0").Replace(" ", "").Trim());
+            double totalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum:Momentum")) ?? "0").Replace(" ", "").Trim());
 
             var currentPositions = new List<PortfolioPosition>();
             
@@ -302,14 +298,14 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             int number = 1;
             foreach (var currentPosition in orderedCurrentPositions)
-                currentPosition.Number = number++;
-
-            var priceDynamicSeries = new List<DiagramSeries>();
+                currentPosition.Number = number++;            
 
             var currentTopTickers = MomentumHelper.GetMomentumTopTickers(candleData, DateOnly.FromDateTime(DateTime.Today), momentumSettings.PeriodInDays, momentumSettings.CountBestTickers);
 
             from = DateOnly.FromDateTime(DateTime.Today).AddDays(-1 * momentumSettings.PeriodInDays);
             to = DateOnly.FromDateTime(DateTime.Today);
+
+            var priceDynamicSeries = new List<DiagramSeries>();
 
             foreach (var (ticker, candles) in candleData.Where(x => x.Key != MON))
             {
@@ -336,8 +332,15 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     });
             }
 
+            var drawdownSeries = DiagramSeriesHelper.GetDrawdownSeries(equitySeries);
+            var drawdownPercentSeries = DiagramSeriesHelper.GetDrawdownSeries(equitySeries, true);
+
+            double maxDrawdown = drawdownPercentSeries.Data.Where(x => x.Value.HasValue).Min(x => x.Value!.Value).RoundTo(1);
+            double currentDrawdown = drawdownPercentSeries.Data.Last(x => x.Value.HasValue).Value!.Value.RoundTo(1);
+
             return new MonitorResponse
             {
+                TotalSumLife = totalSumLife,
                 BacktestSeries = [equitySeries, moneySeries, drawdownSeries],
                 PriceDynamicSeries = priceDynamicSeries,
                 CurrentPositions = orderedCurrentPositions,
@@ -348,9 +351,15 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 Yield2024 = DiagramSeriesHelper.GetAnnualPercentageYield(equitySeries, 2024),
                 Yield2025 = DiagramSeriesHelper.GetAnnualPercentageYield(equitySeries, 2025),
                 Yield2026 = DiagramSeriesHelper.GetAnnualPercentageYield(equitySeries, 2026),
-                MaxDrawdown = drawdownPercentSeries.Data.Where(x => x.Value.HasValue).Min(x => x.Value!.Value).RoundTo(1),
-                CurrentDrawdown = drawdownPercentSeries.Data.Last(x => x.Value.HasValue).Value!.Value.RoundTo(1)
+                MaxDrawdown = maxDrawdown,
+                CurrentDrawdown = currentDrawdown
             };
+        }
+
+        public async Task<EditPortfolioTotalSumResponse> EditPortfolioTotalSumAsync(EditPortfolioTotalSumRequest request)
+        {
+            await parameterRepository.SetParameterValueAsync($"TotalSum:Momentum", request.TotalSum.ToString("N0"));
+            return new();
         }
     }
 }

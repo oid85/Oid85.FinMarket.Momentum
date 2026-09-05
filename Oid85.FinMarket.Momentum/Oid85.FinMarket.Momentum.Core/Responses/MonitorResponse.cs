@@ -15,6 +15,7 @@ namespace Oid85.FinMarket.Momentum.Core.Responses
         public double Yield2025 { get; set; }
         public double Yield2026 { get; set; }
         public double MaxDrawdown { get; set; }
-        public double CurrentDrawdown { get; set; }        
+        public double CurrentDrawdown { get; set; }
+        public double TotalSumLife { get; set; }
     }
 }
