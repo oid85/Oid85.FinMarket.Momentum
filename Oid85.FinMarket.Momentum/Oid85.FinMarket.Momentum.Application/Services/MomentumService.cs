@@ -72,10 +72,14 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 return Math.Abs((maxEquity - lastEquity) / maxEquity * 100.0);
             }
 
+            List<ProtocolMessage> protocolMessages = [];
+
             foreach (var date in dates)
             {               
                 if (momentumSettings.RebalanceDays.Contains(date.Day))
                 {
+                    protocolMessages.Clear();
+
                     SetTickers();
                     SetWeight();
                     UpdatePrices();
@@ -84,6 +88,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     UpdateCosts();
                     UpdateMoney();
                     UpdateTotalSum();
+
+                    foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys.Where(x => x != MON))
+                        AddMessage(date, ticker, $"Ребалансировка моментума. Добавлен {ticker}");
                 }
 
                 else
@@ -167,6 +174,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
                     sizes[MON] += monSize;
                     costs[MON] += monCost;
+
+                    AddMessage(date, ticker, $"Стоп-лосс. Удален {ticker}");
+                    AddMessage(date, MON, $"Увеличена доля фонда ликвидности");
                 }
 
                 void ChangePosition(string ticker)
@@ -262,6 +272,17 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 {
                     money = totalSum - costs.Values.Sum();
                 }
+
+                void AddMessage(DateOnly date, string ticker, string message)
+                {
+                    protocolMessages.Add(
+                        new ProtocolMessage()
+                        {
+                            Date = date,
+                            Ticker = ticker,
+                            Message = message
+                        });
+                }
             }
 
             double totalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum:Momentum")) ?? "0").Replace(" ", "").Trim());
@@ -340,6 +361,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             return new MonitorResponse
             {
+                ProtocolMessages = [.. protocolMessages.OrderByDescending(x => x.Date)],
                 TotalSumLife = totalSumLife,
                 BacktestSeries = [equitySeries, moneySeries, drawdownSeries],
                 PriceDynamicSeries = priceDynamicSeries,
