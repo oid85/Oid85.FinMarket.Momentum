@@ -5,5 +5,6 @@
         public DateOnly Date { get; set; }
         public string Ticker { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
+        public string ColorFill { get; set; } = string.Empty;
     }
 }

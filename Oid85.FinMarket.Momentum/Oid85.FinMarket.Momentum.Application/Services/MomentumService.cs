@@ -89,7 +89,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     UpdateTotalSum();
 
                     foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys.Where(x => x != MON))
-                        AddMessage(date, ticker, $"Ребалансировка моментума. Позиция {ticker}");
+                        AddMessage(date, ticker, $"Ребалансировка моментума. Позиция {ticker}", KnownColors.LightGreen);
                 }
 
                 else
@@ -171,8 +171,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     sizes[MON] += monSize;
                     costs[MON] += monCost;
 
-                    AddMessage(date, ticker, $"Стоп-лосс. Удален {ticker}");
-                    AddMessage(date, MON, $"Увеличена доля фонда ликвидности");
+                    AddMessage(date, ticker, $"Стоп-лосс. Удален {ticker}", KnownColors.LightRed);
+                    AddMessage(date, MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
                 }
 
                 void ChangePosition(string ticker)
@@ -194,7 +194,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         ? MON 
                         : newTopTickers.First();
 
-                    AddMessage(date, ticker, $"Стоп-лосс. Удален {ticker}");
+                    AddMessage(date, ticker, $"Стоп-лосс. Удален {ticker}", KnownColors.LightRed);
 
                     if (tickerForAdd == MON)
                     {
@@ -207,7 +207,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         sizes[MON] += monSize;
                         costs[MON] += monCost;
 
-                        AddMessage(date, MON, $"Увеличена доля фонда ликвидности");
+                        AddMessage(date, MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
                     }
 
                     else
@@ -220,7 +220,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
                         money -= costs[tickerForAdd];
 
-                        AddMessage(date, tickerForAdd, $"Замена актива. Добавлен {tickerForAdd}");
+                        AddMessage(date, tickerForAdd, $"Замена актива. Добавлен {tickerForAdd}", KnownColors.LightGreen);
                     }
                 }
 
@@ -272,16 +272,15 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     money = totalSum - costs.Values.Sum();
                 }
 
-                void AddMessage(DateOnly date, string ticker, string message)
-                {
+                void AddMessage(DateOnly date, string ticker, string message, string colorFill) => 
                     protocolMessages.Add(
                         new ProtocolMessage()
                         {
                             Date = date,
                             Ticker = ticker,
-                            Message = message
+                            Message = message,
+                            ColorFill = colorFill
                         });
-                }
             }
 
             double totalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum:Momentum")) ?? "0").Replace(" ", "").Trim());
