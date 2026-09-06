@@ -13,38 +13,14 @@ namespace Oid85.FinMarket.Momentum.Application.Extensions
             return context;
         }
 
-        public static List<string> GetPortfolioNoMonTickers(this Dictionary<string, MomentumTickerContext> context)
-        {
-            List<string> tickers = [];
+        public static List<string> GetPortfolioNoMonTickers(this Dictionary<string, MomentumTickerContext> context) =>
+            [.. context.Values.Where(x => x.Ticker != KnownTickers.MON).Where(x => x.Weight > 0.0).Select(x => x.Ticker)];
 
-            foreach (var (ticker, item) in context)
-                if (ticker != KnownTickers.MON)
-                    if (item.Weight > 0.0)
-                        tickers.Add(ticker);
+        public static List<string> GetPortfolioTickers(this Dictionary<string, MomentumTickerContext> context) =>
+            [.. context.Values.Where(x => x.Weight > 0.0).Select(x => x.Ticker)];
 
-            return tickers;
-        }
-
-        public static List<string> GetPortfolioTickers(this Dictionary<string, MomentumTickerContext> context)
-        {
-            List<string> tickers = [];
-
-            foreach (var (ticker, item) in context)                
-                if (item.Weight > 0.0)
-                    tickers.Add(ticker);
-
-            return tickers;
-        }
-
-        public static List<string> GetTickers(this Dictionary<string, MomentumTickerContext> context)
-        {
-            List<string> tickers = [];
-
-            foreach (var (ticker, _) in context)
-                tickers.Add(ticker);
-
-            return tickers;
-        }
+        public static List<string> GetTickers(this Dictionary<string, MomentumTickerContext> context) => 
+            [.. context.Keys];
 
         public static double GetWeightSum(this Dictionary<string, MomentumTickerContext> context) => 
             context.Values.Sum(x => x.Weight);
