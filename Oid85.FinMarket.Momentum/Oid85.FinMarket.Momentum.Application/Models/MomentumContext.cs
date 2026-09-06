@@ -91,6 +91,65 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 TickerData[ticker].Size = 0.0;
         }
 
+        public void ClearCosts()
+        {
+            foreach (var (ticker, _) in TickerData)
+                TickerData[ticker].Cost = 0.0;
+        }
+
+        public void UpdateCosts()
+        {
+            ClearCosts();
+
+            foreach (var ticker in GetPortfolioTickers())
+                TickerData[ticker].Cost = TickerData[ticker].Candle.Close * TickerData[ticker].Size;
+        }
+
+        public void UpdateTotalSum()
+        {
+            TotalSum = GetCostSum() + Money;
+        }
+
+        public void UpdateMoney()
+        {
+            Money = TotalSum - GetCostSum();
+        }
+
+        public void CheckStopsVersion1(DateOnly date)
+        {
+            foreach (var ticker in GetPortfolioNoMonTickers())
+                if (TickerData[ticker].Candle.Low < TickerData[ticker].Stop)
+                    ClosePosition(ticker, date);
+        }
+
+        public void CheckStopsVersion2(DateOnly date, int period, int count)
+        {
+            foreach (var ticker in GetPortfolioNoMonTickers())
+                if (TickerData[ticker].Candle.Low < TickerData[ticker].Stop)
+                    ChangePosition(ticker, date, period, count);
+        }
+
+        public void ClosePosition(string ticker, DateOnly date)
+        {
+            // Продаем актив
+            TickerData[ticker].Weight = 0.0;
+            TickerData[ticker].Size = 0.0;
+            Money += TickerData[ticker].Cost;
+            TickerData[ticker].Cost = 0.0;
+
+            // Покупаем фонд ликвидности
+            TickerData[KnownTickers.MON].Weight += 1.0;
+            double monSize = Math.Truncate(Money / TickerData[KnownTickers.MON].Candle.Close);
+            double monCost = monSize * TickerData[KnownTickers.MON].Candle.Close;
+            Money -= monCost;
+
+            TickerData[KnownTickers.MON].Size += monSize;
+            TickerData[KnownTickers.MON].Cost += monCost;
+
+            AddMessage(date, ticker, $"Стоп-лосс. Удален {ticker}", KnownColors.LightRed);
+            AddMessage(date, KnownTickers.MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
+        }
+
         public void ChangePosition(string ticker, DateOnly date, int period, int count)
         {
             string tickerForRemove = ticker;

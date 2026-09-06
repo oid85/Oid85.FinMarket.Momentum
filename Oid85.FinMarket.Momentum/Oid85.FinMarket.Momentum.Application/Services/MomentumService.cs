@@ -86,9 +86,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     context.UpdateCandles(date);
                     context.SetStops(date, momentumSettings.PeriodInDays);
                     context.SetSizes();
-                    UpdateCosts();
-                    UpdateMoney();
-                    UpdateTotalSum();
+                    context.UpdateCosts();
+                    context.UpdateMoney();
+                    context.UpdateTotalSum();
                     
                     foreach (var ticker in context.GetPortfolioNoMonTickers())
                         context.AddMessage(date, ticker, $"Ребалансировка моментума. Позиция {ticker}", KnownColors.LightGreen);
@@ -97,14 +97,14 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 else
                 {
                     context.UpdateCandles(date);
-                    UpdateCosts();
-                    CheckStops();                    
-                    UpdateTotalSum();
+                    context.UpdateCosts();
+                    context.CheckStopsVersion1(date);
+                    context.UpdateTotalSum();
                 }
 
                 if (CurrentDrawdown() >= 15.0)
                     foreach (var ticker in context.GetPortfolioNoMonTickers())
-                        ClosePosition(ticker);
+                        context.ClosePosition(ticker, date);
 
                 equitySeries.Data.Add(
                     new()
@@ -119,58 +119,6 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         Date = date,
                         Value = ((context.Money + context.TickerData[MON].Cost) / 1000.0).RoundTo(2)
                     });
-
-                void CheckStops()
-                {
-                    foreach (var ticker in context.GetPortfolioNoMonTickers())
-                        if (context.TickerData[ticker].Candle.Low < context.TickerData[ticker].Stop)
-                            ClosePosition(ticker);
-                }
-
-                void ClosePosition(string ticker)
-                {
-                    // Продаем актив
-                    context.TickerData[ticker].Weight = 0.0;
-                    context.TickerData[ticker].Size = 0.0;
-                    context.Money += context.TickerData[ticker].Cost;
-                    context.TickerData[ticker].Cost = 0.0;
-
-                    // Покупаем фонд ликвидности
-                    context.TickerData[MON].Weight += 1.0;
-                    double monSize = Math.Truncate(context.Money / context.TickerData[MON].Candle.Close);
-                    double monCost = monSize * context.TickerData[MON].Candle.Close;
-                    context.Money -= monCost;
-
-                    context.TickerData[MON].Size += monSize;
-                    context.TickerData[MON].Cost += monCost;
-
-                    context.AddMessage(date, ticker, $"Стоп-лосс. Удален {ticker}", KnownColors.LightRed);
-                    context.AddMessage(date, MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
-                }
-
-                void UpdateCosts()
-                {
-                    ClearCosts();
-
-                    foreach (var ticker in context.GetPortfolioTickers())
-                        context.TickerData[ticker].Cost = context.TickerData[ticker].Candle.Close * context.TickerData[ticker].Size;
-                }
-
-                void ClearCosts()
-                {
-                    foreach (var (ticker, item) in context.TickerData)
-                        context.TickerData[ticker].Cost = 0.0;
-                }
-
-                void UpdateTotalSum()
-                {
-                    context.TotalSum = context.GetCostSum() + context.Money;
-                }
-
-                void UpdateMoney()
-                {
-                    context.Money = context.TotalSum - context.GetCostSum();
-                }
             }
 
             double totalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum:Momentum")) ?? "0").Replace(" ", "").Trim());
