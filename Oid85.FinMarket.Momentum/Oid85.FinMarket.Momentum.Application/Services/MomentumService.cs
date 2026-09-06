@@ -40,9 +40,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var context = new MomentumContext
             {
-                Data = tickers.ToDictionary(k => k, v => new MomentumTickerContext { Ticker = v, Lot = instrumentData[v].Lot ?? 1 })
+                Data = tickers.ToDictionary(k => k, v => new MomentumTickerData { Ticker = v, Lot = instrumentData[v].Lot ?? 1 })
             };
-            context.Data.TryAdd(MON, new MomentumTickerContext { Ticker = MON, Lot = 1 });                                   
+            context.Data.TryAdd(MON, new MomentumTickerData { Ticker = MON, Lot = 1 });                                   
 
             var equitySeries = new DiagramSeries
             {
@@ -81,8 +81,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 {
                     context.ProtocolMessages.Clear();
 
-                    SetTickers();
-                    SetWeight();
+                    context.SetTopTickers(candleData, date, momentumSettings.PeriodInDays, momentumSettings.CountBestTickers);
+                    context.SetWeight(momentumSettings.CountBestTickers);
                     UpdateCandles();
                     SetStops();
                     SetSizes();
@@ -119,23 +119,6 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         Date = date,
                         Value = ((money + context.Data[MON].Cost) / 1000.0).RoundTo(2)
                     });
-
-                void SetTickers()
-                {
-                    tickers = MomentumHelper.GetMomentumTopTickers(candleData, date, momentumSettings.PeriodInDays, momentumSettings.CountBestTickers);
-                    tickers.Add(MON);
-                }
-
-                void SetWeight()
-                {
-                    foreach (var ticker in context.GetTickers())
-                        context.Data[ticker].Weight = 0.0;
-
-                    foreach (var ticker in tickers)
-                        context.Data[ticker].Weight = 1.0;
-
-                    context.Data[MON].Weight = momentumSettings.CountBestTickers - tickers.Count(x => x != MON);
-                }
 
                 void UpdateCandles()
                 {
