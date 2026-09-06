@@ -40,8 +40,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var context = tickers.ToDictionary(k => k, v => new MomentumTickerContext { Ticker = v, Lot = instrumentData[v].Lot ?? 1 }); 
             context.TryAdd(MON, new MomentumTickerContext { Ticker = MON, Lot = 1 });
-            
-            var weights = tickers.ToDictionary(k => k, v => 0.0); weights.TryAdd(MON, 0.0);
+
             var costs = tickers.ToDictionary(k => k, v => 0.0); costs.TryAdd(MON, 0.0);
             var sizes = tickers.ToDictionary(k => k, v => 0.0); sizes.TryAdd(MON, 0.0);
             var stops = tickers.ToDictionary(k => k, v => 0.0); stops.TryAdd(MON, 0.0);
@@ -94,7 +93,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     UpdateMoney();
                     UpdateTotalSum();
 
-                    foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys.Where(x => x != MON))
+                    
+
+                    foreach (var ticker in context.GetPortfolioNoMonTickers())
                         AddMessage(date, ticker, $"Ребалансировка моментума. Позиция {ticker}", KnownColors.LightGreen);
                 }
 
@@ -107,7 +108,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 }
 
                 if (CurrentDrawdown() >= 15.0)
-                    foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys.Where(x => x != MON))
+                    foreach (var ticker in context.GetPortfolioNoMonTickers())
                         ClosePosition(ticker);
 
                 equitySeries.Data.Add(
@@ -132,30 +133,30 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
                 void SetWeight()
                 {
-                    foreach (var ticker in weights.Keys) 
-                        weights[ticker] = 0.0;
+                    foreach (var ticker in context.GetTickers())
+                        context[ticker].Weight = 0.0;
 
-                    foreach (var ticker in tickers) 
-                        weights[ticker] = 1.0;
-                    
-                    weights[MON] = momentumSettings.CountBestTickers - tickers.Count(x => x != MON);
+                    foreach (var ticker in tickers)
+                        context[ticker].Weight = 1.0;
+
+                    context[MON].Weight = momentumSettings.CountBestTickers - tickers.Count(x => x != MON);
                 }
 
                 void UpdateCandles()
                 {
-                    foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys) 
+                    foreach (var ticker in context.GetPortfolioTickers()) 
                         context[ticker].Candle = dataService.GetCandle(ticker, date) ?? new Candle();
                 }
 
                 void SetStops()
                 {
-                    foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys.Where(x => x != MON))
+                    foreach (var ticker in context.GetPortfolioNoMonTickers())
                         stops[ticker] = MomentumHelper.GetStopPrice(candleData[ticker], context[ticker].Candle.Close, date, momentumSettings.PeriodInDays);
                 }
 
                 void CheckStops()
                 {
-                    foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys.Where(x => x != MON))
+                    foreach (var ticker in context.GetPortfolioNoMonTickers())
                         if (context[ticker].Candle.Low < stops[ticker])
                             ClosePosition(ticker);
                 }
@@ -163,13 +164,13 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 void ClosePosition(string ticker)
                 {
                     // Продаем актив
-                    weights[ticker] = 0.0;
+                    context[ticker].Weight = 0.0;
                     sizes[ticker] = 0.0;
                     money += costs[ticker];
                     costs[ticker] = 0.0;
 
                     // Покупаем фонд ликвидности
-                    weights[MON] += 1.0;
+                    context[MON].Weight += 1.0;
                     double monSize = Math.Truncate(money / context[MON].Candle.Close);
                     double monCost = monSize * context[MON].Candle.Close;
                     money -= monCost;
@@ -184,10 +185,10 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 void ChangePosition(string ticker)
                 {
                     string tickerForRemove = ticker;
-                    var currentTickers = weights.Where(x => x.Value > 0.0).ToDictionary().Keys.ToList();
+                    var currentTickers = context.GetPortfolioTickers();
 
                     // Продаем актив
-                    weights[tickerForRemove] = 0.0;
+                    context[tickerForRemove].Weight = 0.0;
                     sizes[tickerForRemove] = 0.0;
                     money += costs[tickerForRemove];
                     costs[tickerForRemove] = 0.0;
@@ -205,7 +206,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     if (tickerForAdd == MON)
                     {
                         // Покупаем фонд ликвидности
-                        weights[MON] += 1.0;
+                        context[MON].Weight += 1.0;
                         double monSize = Math.Truncate(money / context[MON].Candle.Close);
                         double monCost = monSize * context[MON].Candle.Close;
                         money -= monCost;
@@ -219,7 +220,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     else
                     {
                         // Покупаем другой актив
-                        weights[tickerForAdd] = 1.0;
+                        context[tickerForAdd].Weight = 1.0;
                         context[tickerForAdd].Candle = dataService.GetCandle(tickerForAdd, date) ?? new Candle();                       
                         sizes[tickerForAdd] = Math.Truncate(money / context[tickerForAdd].Candle.Close / context[tickerForAdd].Lot) * context[tickerForAdd].Lot;
                         costs[tickerForAdd] = context[tickerForAdd].Candle.Close * sizes[tickerForAdd];
@@ -234,9 +235,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 {
                     ClearSizes();
 
-                    double baseUnit = totalSum / weights.Values.Sum();
+                    double baseUnit = totalSum / context.GetWeightSum();
 
-                    foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys)
+                    foreach (var ticker in context.GetPortfolioTickers())
                     {
                         if (context[ticker].Candle.Close == 0.0)
                         {
@@ -244,7 +245,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                             continue;
                         }
                                 
-                        sizes[ticker] = Math.Truncate(baseUnit * weights[ticker] / context[ticker].Candle.Close / context[ticker].Lot) * context[ticker].Lot;
+                        sizes[ticker] = Math.Truncate(baseUnit * context[ticker].Weight / context[ticker].Candle.Close / context[ticker].Lot) * context[ticker].Lot;
                     }
                 }
 
@@ -258,7 +259,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 {
                     ClearCosts();
 
-                    foreach (var ticker in weights.Where(x => x.Value > 0.0).ToDictionary().Keys)
+                    foreach (var ticker in context.GetPortfolioTickers())
                         costs[ticker] = context[ticker].Candle.Close * sizes[ticker];
                 }
 
@@ -293,13 +294,13 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var currentPositions = new List<PortfolioPosition>();
             
-            foreach (var (ticker, weight) in weights.Where(x => x.Value > 0).ToDictionary())
+            foreach (var ticker in context.GetPortfolioTickers())
             {
                 var candle = dataService.GetCandle(ticker, dates.Last());
                 var lot = context[ticker].Lot;
 
-                double baseUnit = totalSumLife / weights.Values.Sum();
-                double tickerCost = baseUnit * weight;
+                double baseUnit = totalSumLife / context.GetWeightSum();
+                double tickerCost = baseUnit * context[ticker].Weight;
                 double tickerSize = tickerCost / candle!.Close;
                 tickerSize /= lot;
                 tickerSize = Math.Truncate(tickerSize);
@@ -309,7 +310,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     new PortfolioPosition
                     {
                         Ticker = ticker,
-                        Weight = weight,
+                        Weight = context[ticker].Weight,
                         Size = Convert.ToInt32(tickerSize),
                         Cost = tickerCost.RoundTo(2),
                         StopPrice = ticker == MON ? 0.0 : stops[ticker].RoundTo(4)
@@ -337,7 +338,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 var candlesByDates = candleList.Where(x => x.Date >= from && x.Date <= to).ToList();
                 double firstPrice = candlesByDates.First().Close;
 
-                string color = weights.Where(x => x.Value > 0).ToDictionary().ContainsKey(ticker)
+                string color = context.GetPortfolioTickers().Contains(ticker)
                     ? KnownColors.Green 
                     : KnownColors.LightBlue;
 
