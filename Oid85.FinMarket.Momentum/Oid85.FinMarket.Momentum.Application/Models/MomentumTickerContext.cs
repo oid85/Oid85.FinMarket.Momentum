@@ -7,5 +7,6 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         public DateOnly Date { get; set; }
         public string Ticker { get; set; } = string.Empty;
         public Candle Candle { get; set; } = new Candle();
+        public int Lot { get; set; } = 1;
     }
 }

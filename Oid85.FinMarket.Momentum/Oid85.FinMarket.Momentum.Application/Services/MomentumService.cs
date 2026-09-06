@@ -38,9 +38,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             var candleData = await dataService.GetCandleDataAsync(tickers);
             candleData.TryAdd(MON, await dataService.GetMoneyEquivalentCandlesAsync(from, to));
 
-            var context = tickers.ToDictionary(k => k, v => new MomentumTickerContext { Ticker = v }); context.TryAdd(MON, new MomentumTickerContext { Ticker = MON });
+            var context = tickers.ToDictionary(k => k, v => new MomentumTickerContext { Ticker = v, Lot = instrumentData[v].Lot ?? 1 }); 
+            context.TryAdd(MON, new MomentumTickerContext { Ticker = MON, Lot = 1 });
             
-            var lots = instrumentData.ToDictionary(k => k.Key, v => v.Value.Lot ?? 1); lots.TryAdd(MON, 1);
             var weights = tickers.ToDictionary(k => k, v => 0.0); weights.TryAdd(MON, 0.0);
             var costs = tickers.ToDictionary(k => k, v => 0.0); costs.TryAdd(MON, 0.0);
             var sizes = tickers.ToDictionary(k => k, v => 0.0); sizes.TryAdd(MON, 0.0);
@@ -221,7 +221,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         // Покупаем другой актив
                         weights[tickerForAdd] = 1.0;
                         context[tickerForAdd].Candle = dataService.GetCandle(tickerForAdd, date) ?? new Candle();                       
-                        sizes[tickerForAdd] = Math.Truncate(money / context[tickerForAdd].Candle.Close / lots[tickerForAdd]) * lots[tickerForAdd];
+                        sizes[tickerForAdd] = Math.Truncate(money / context[tickerForAdd].Candle.Close / context[tickerForAdd].Lot) * context[tickerForAdd].Lot;
                         costs[tickerForAdd] = context[tickerForAdd].Candle.Close * sizes[tickerForAdd];
 
                         money -= costs[tickerForAdd];
@@ -244,7 +244,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                             continue;
                         }
                                 
-                        sizes[ticker] = Math.Truncate(baseUnit * weights[ticker] / context[ticker].Candle.Close / lots[ticker]) * lots[ticker];
+                        sizes[ticker] = Math.Truncate(baseUnit * weights[ticker] / context[ticker].Candle.Close / context[ticker].Lot) * context[ticker].Lot;
                     }
                 }
 
@@ -296,7 +296,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             foreach (var (ticker, weight) in weights.Where(x => x.Value > 0).ToDictionary())
             {
                 var candle = dataService.GetCandle(ticker, dates.Last());
-                var lot = lots[ticker];
+                var lot = context[ticker].Lot;
 
                 double baseUnit = totalSumLife / weights.Values.Sum();
                 double tickerCost = baseUnit * weight;
