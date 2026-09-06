@@ -56,21 +56,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 Name = "Фонд ликвидности",
                 Color = KnownColors.LightBlue,
                 ColorFill = KnownColors.LightBlue
-            };            
-
-            double CurrentDrawdown()
-            {
-                var equityValues = equitySeries.Data.Select(x => x.Value ?? 0.0).ToList();
-
-                if (equityValues.Count == 0) return 0.0;
-
-                double lastEquity = equityValues.Last();
-                double maxEquity = equityValues.Max();
-
-                if (maxEquity == 0.0) return 0.0;
-
-                return Math.Abs((maxEquity - lastEquity) / maxEquity * 100.0);
-            }            
+            };                       
 
             foreach (var date in dates)
             {
@@ -82,7 +68,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     context.ProtocolMessages.Clear();
 
                     context.SetTopTickers(date, momentumSettings.PeriodInDays, momentumSettings.CountBestTickers);
-                    context.SetWeight(momentumSettings.CountBestTickers);
+                    context.SetWeights(momentumSettings.CountBestTickers);
                     context.UpdateCandles(date);
                     context.SetStops(date, momentumSettings.PeriodInDays);
                     context.SetSizes();
@@ -221,6 +207,20 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 MaxDrawdown = maxDrawdown,
                 CurrentDrawdown = currentDrawdown
             };
+
+            double CurrentDrawdown()
+            {
+                var equityValues = equitySeries.Data.Select(x => x.Value ?? 0.0).ToList();
+
+                if (equityValues.Count == 0) return 0.0;
+
+                double lastEquity = equityValues.Last();
+                double maxEquity = equityValues.Max();
+
+                if (maxEquity == 0.0) return 0.0;
+
+                return Math.Abs((maxEquity - lastEquity) / maxEquity * 100.0);
+            }
         }
 
         public async Task<EditPortfolioTotalSumResponse> EditPortfolioTotalSumAsync(EditPortfolioTotalSumRequest request)

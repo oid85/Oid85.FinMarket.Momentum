@@ -45,7 +45,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             TopTickers.Add(KnownTickers.MON);
         }
 
-        public void SetWeight(int count)
+        public void SetWeights(int count)
         {
             foreach (var ticker in GetAllTickers()) TickerData[ticker].Weight = 0.0;
             foreach (var ticker in TopTickers) TickerData[ticker].Weight = 1.0;
