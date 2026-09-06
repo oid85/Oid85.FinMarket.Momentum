@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Options;
+using Oid85.FinMarket.Momentum.Application.Extensions;
 using Oid85.FinMarket.Momentum.Application.Helpers;
 using Oid85.FinMarket.Momentum.Application.Interfaces.Repositories;
 using Oid85.FinMarket.Momentum.Application.Interfaces.Services;
+using Oid85.FinMarket.Momentum.Application.Models;
 using Oid85.FinMarket.Momentum.Common.Extensions;
 using Oid85.FinMarket.Momentum.Common.KnownConstants;
 using Oid85.FinMarket.Momentum.Common.Utils;
@@ -35,6 +37,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var candleData = await dataService.GetCandleDataAsync(tickers);
             candleData.TryAdd(MON, await dataService.GetMoneyEquivalentCandlesAsync(from, to));
+
+            var momentumContext = tickers.ToDictionary(k => k, v => new MomentumTickerContext { Ticker = v }); momentumContext.TryAdd(MON, new MomentumTickerContext { Ticker = MON });
 
             var candles = tickers.ToDictionary(k => k, v => new Candle()); candles.TryAdd(MON, new Candle());
             var lots = instrumentData.ToDictionary(k => k.Key, v => v.Value.Lot ?? 1); lots.TryAdd(MON, 1);
@@ -74,7 +78,10 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             List<ProtocolMessage> protocolMessages = [];
 
             foreach (var date in dates)
-            {               
+            {
+                // Устанавливаем текущую дату для контекста
+                momentumContext.SetDate(date);
+
                 if (momentumSettings.RebalanceDays.Contains(date.Day))
                 {
                     protocolMessages.Clear();
