@@ -70,9 +70,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 if (maxEquity == 0.0) return 0.0;
 
                 return Math.Abs((maxEquity - lastEquity) / maxEquity * 100.0);
-            }
-
-            List<ProtocolMessage> protocolMessages = [];
+            }            
 
             foreach (var date in dates)
             {
@@ -81,7 +79,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
                 if (momentumSettings.RebalanceDays.Contains(date.Day))
                 {
-                    protocolMessages.Clear();
+                    context.ProtocolMessages.Clear();
 
                     SetTickers();
                     SetWeight();
@@ -93,7 +91,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     UpdateTotalSum();
                     
                     foreach (var ticker in context.GetPortfolioNoMonTickers())
-                        AddMessage(date, ticker, $"Ребалансировка моментума. Позиция {ticker}", KnownColors.LightGreen);
+                        context.AddMessage(date, ticker, $"Ребалансировка моментума. Позиция {ticker}", KnownColors.LightGreen);
                 }
 
                 else
@@ -175,8 +173,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     context.Data[MON].Size += monSize;
                     context.Data[MON].Cost += monCost;
 
-                    AddMessage(date, ticker, $"Стоп-лосс. Удален {ticker}", KnownColors.LightRed);
-                    AddMessage(date, MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
+                    context.AddMessage(date, ticker, $"Стоп-лосс. Удален {ticker}", KnownColors.LightRed);
+                    context.AddMessage(date, MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
                 }
 
                 void ChangePosition(string ticker)
@@ -198,7 +196,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         ? MON 
                         : newTopTickers.First();
 
-                    AddMessage(date, ticker, $"Стоп-лосс. Удален {ticker}", KnownColors.LightRed);
+                    context.AddMessage(date, ticker, $"Стоп-лосс. Удален {ticker}", KnownColors.LightRed);
 
                     if (tickerForAdd == MON)
                     {
@@ -211,7 +209,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         context.Data[MON].Size += monSize;
                         context.Data[MON].Cost += monCost;
 
-                        AddMessage(date, MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
+                        context.AddMessage(date, MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
                     }
 
                     else
@@ -224,7 +222,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
                         money -= context.Data[tickerForAdd].Cost;
 
-                        AddMessage(date, tickerForAdd, $"Замена актива. Добавлен {tickerForAdd}", KnownColors.LightGreen);
+                        context.AddMessage(date, tickerForAdd, $"Замена актива. Добавлен {tickerForAdd}", KnownColors.LightGreen);
                     }
                 }
 
@@ -275,16 +273,6 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 {
                     money = totalSum - context.GetCostSum();
                 }
-
-                void AddMessage(DateOnly date, string ticker, string message, string colorFill) => 
-                    protocolMessages.Add(
-                        new ProtocolMessage()
-                        {
-                            Date = date,
-                            Ticker = ticker,
-                            Message = message,
-                            ColorFill = colorFill
-                        });
             }
 
             double totalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum:Momentum")) ?? "0").Replace(" ", "").Trim());
@@ -363,7 +351,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             return new MonitorResponse
             {
-                ProtocolMessages = [.. protocolMessages.OrderByDescending(x => x.Date)],
+                ProtocolMessages = [.. context.ProtocolMessages.OrderByDescending(x => x.Date)],
                 TotalSumLife = totalSumLife,
                 BacktestSeries = [equitySeries, moneySeries, drawdownSeries],
                 PriceDynamicSeries = priceDynamicSeries,
