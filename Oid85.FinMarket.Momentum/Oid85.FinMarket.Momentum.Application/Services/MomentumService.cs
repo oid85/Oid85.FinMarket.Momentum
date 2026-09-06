@@ -37,6 +37,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var context = new MomentumContext
             {
+                PeriodInDays = momentumSettings.PeriodInDays,
+                CountBestTickers = momentumSettings.CountBestTickers,
                 Money = momentumSettings.StartMoneySum,
                 TotalSum = momentumSettings.StartMoneySum,
                 CandleData = candleData,
@@ -60,38 +62,37 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             foreach (var date in dates)
             {
-                // Устанавливаем текущую дату для контекста
                 context.SetDate(date);
 
                 if (momentumSettings.RebalanceDays.Contains(date.Day))
                 {
                     context.ProtocolMessages.Clear();
 
-                    context.SetTopTickers(date, momentumSettings.PeriodInDays, momentumSettings.CountBestTickers);
-                    context.SetWeights(momentumSettings.CountBestTickers);
-                    context.UpdateCandles(date);
-                    context.SetStops(date, momentumSettings.PeriodInDays);
+                    context.SetTopTickers();
+                    context.SetWeights();
+                    context.UpdateCandles();
+                    context.SetStops();
                     context.SetSizes();
                     context.UpdateCosts();
                     context.UpdateMoney();
                     context.UpdateTotalSum();
                     
                     foreach (var ticker in context.GetPortfolioNoMonTickers())
-                        context.AddMessage(date, ticker, $"Ребалансировка моментума. Позиция {ticker}", KnownColors.LightGreen);
+                        context.AddMessage(ticker, $"Ребалансировка моментума. Позиция {ticker}", KnownColors.LightGreen);
                 }
 
                 else
                 {
-                    context.UpdateCandles(date);
+                    context.UpdateCandles();
                     context.UpdateCosts();
-                    if (momentumSettings.CheckStopsVersion == 1) context.CheckStopsVersion1(date);
-                    if (momentumSettings.CheckStopsVersion == 2) context.CheckStopsVersion2(date, momentumSettings.PeriodInDays, momentumSettings.CountBestTickers);
+                    if (momentumSettings.CheckStopsVersion == 1) context.CheckStopsVersion1();
+                    if (momentumSettings.CheckStopsVersion == 2) context.CheckStopsVersion2();
                     context.UpdateTotalSum();
                 }
 
                 if (CurrentDrawdown() >= 15.0)
                     foreach (var ticker in context.GetPortfolioNoMonTickers())
-                        context.ClosePosition(ticker, date);
+                        context.ClosePosition(ticker);
 
                 equitySeries.Data.Add(
                     new()
