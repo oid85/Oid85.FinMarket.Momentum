@@ -2,7 +2,6 @@
 using Oid85.FinMarket.Momentum.Common.KnownConstants;
 using Oid85.FinMarket.Momentum.Core.Configuration;
 using Oid85.FinMarket.Momentum.Core.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Oid85.FinMarket.Momentum.Application.Models
 {
@@ -15,7 +14,10 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         public List<ProtocolMessage> ProtocolMessages { get; set; } = [];
 
         public List<string> TopTickers { get; set; } = [];
-        
+
+        public double TotalSum { get; set; } = 0.0;
+        public double Money { get; set; } = 0.0;
+
         public void SetDate(DateOnly date)
         {
             foreach (var (ticker, _) in TickerData) 
@@ -68,6 +70,30 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         {
             foreach (var ticker in GetPortfolioNoMonTickers())
                 TickerData[ticker].Stop = MomentumHelper.GetStopPrice(CandleData[ticker], TickerData[ticker].Candle.Close, date, period);
+        }
+
+        public void SetSizes()
+        {
+            ClearSizes();
+
+            double baseUnit = TotalSum / GetWeightSum();
+
+            foreach (var ticker in GetPortfolioTickers())
+            {
+                if (TickerData[ticker].Candle.Close == 0.0)
+                {
+                    TickerData[ticker].Cost = 0.0;
+                    continue;
+                }
+
+                TickerData[ticker].Size = Math.Truncate(baseUnit * TickerData[ticker].Weight / TickerData[ticker].Candle.Close / TickerData[ticker].Lot) * TickerData[ticker].Lot;
+            }
+        }
+
+        void ClearSizes()
+        {
+            foreach (var (ticker, _) in TickerData)
+                TickerData[ticker].Size = 0.0;
         }
     }
 }
