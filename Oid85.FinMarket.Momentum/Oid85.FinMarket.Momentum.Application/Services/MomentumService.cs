@@ -98,7 +98,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 {
                     context.UpdateCandles(date);
                     context.UpdateCosts();
-                    context.CheckStopsVersion1(date);
+                    if (momentumSettings.CheckStopsVersion == 1) context.CheckStopsVersion1(date);
+                    if (momentumSettings.CheckStopsVersion == 2) context.CheckStopsVersion2(date, momentumSettings.PeriodInDays, momentumSettings.CountBestTickers);
                     context.UpdateTotalSum();
                 }
 
@@ -120,6 +121,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         Value = ((context.Money + context.TickerData[MON].Cost) / 1000.0).RoundTo(2)
                     });
             }
+
+            #region CurrentPositions
 
             double totalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum:Momentum")) ?? "0").Replace(" ", "").Trim());
 
@@ -155,7 +158,11 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             int number = 1;
             foreach (var currentPosition in orderedCurrentPositions)
-                currentPosition.Number = number++;            
+                currentPosition.Number = number++;
+
+            #endregion
+
+            #region PriceDynamicSeries
 
             var currentTopTickers = MomentumHelper.GetMomentumTopTickers(candleData, DateOnly.FromDateTime(DateTime.Today), momentumSettings.PeriodInDays, momentumSettings.CountBestTickers);
 
@@ -188,6 +195,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         })]
                     });
             }
+
+            #endregion
 
             var drawdownSeries = DiagramSeriesHelper.GetDrawdownSeries(equitySeries);
             var drawdownPercentSeries = DiagramSeriesHelper.GetDrawdownSeries(equitySeries, true);

@@ -2,6 +2,7 @@
 {
     public class MomentumSettings
     {
+        public int CheckStopsVersion { get; set; }
         public double StartMoneySum { get; set; }
         public int PeriodInDays { get; set; }
         public int CountBestTickers { get; set; }
