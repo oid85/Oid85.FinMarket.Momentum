@@ -55,5 +55,15 @@ namespace Oid85.FinMarket.Momentum.Application.Extensions
 
             return sum;
         }
+
+        public static double GetCostSum(this Dictionary<string, MomentumTickerContext> context)
+        {
+            double sum = 0.0;
+
+            foreach (var (ticker, item) in context)
+                sum += item.Cost;
+
+            return sum;
+        }
     }
 }

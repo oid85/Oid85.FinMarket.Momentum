@@ -9,5 +9,6 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         public Candle Candle { get; set; } = new Candle();
         public int Lot { get; set; } = 1;
         public double Weight { get; set; } = 0.0;
+        public double Cost { get; set; } = 0.0;
     }
 }

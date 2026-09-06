@@ -40,8 +40,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var context = tickers.ToDictionary(k => k, v => new MomentumTickerContext { Ticker = v, Lot = instrumentData[v].Lot ?? 1 }); 
             context.TryAdd(MON, new MomentumTickerContext { Ticker = MON, Lot = 1 });
-
-            var costs = tickers.ToDictionary(k => k, v => 0.0); costs.TryAdd(MON, 0.0);
+            
             var sizes = tickers.ToDictionary(k => k, v => 0.0); sizes.TryAdd(MON, 0.0);
             var stops = tickers.ToDictionary(k => k, v => 0.0); stops.TryAdd(MON, 0.0);
 
@@ -122,7 +121,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     new()
                     {
                         Date = date,
-                        Value = ((money + costs[MON]) / 1000.0).RoundTo(2)
+                        Value = ((money + context[MON].Cost) / 1000.0).RoundTo(2)
                     });
 
                 void SetTickers()
@@ -166,8 +165,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     // Продаем актив
                     context[ticker].Weight = 0.0;
                     sizes[ticker] = 0.0;
-                    money += costs[ticker];
-                    costs[ticker] = 0.0;
+                    money += context[ticker].Cost;
+                    context[ticker].Cost = 0.0;
 
                     // Покупаем фонд ликвидности
                     context[MON].Weight += 1.0;
@@ -176,7 +175,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     money -= monCost;
 
                     sizes[MON] += monSize;
-                    costs[MON] += monCost;
+                    context[MON].Cost += monCost;
 
                     AddMessage(date, ticker, $"Стоп-лосс. Удален {ticker}", KnownColors.LightRed);
                     AddMessage(date, MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
@@ -190,8 +189,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     // Продаем актив
                     context[tickerForRemove].Weight = 0.0;
                     sizes[tickerForRemove] = 0.0;
-                    money += costs[tickerForRemove];
-                    costs[tickerForRemove] = 0.0;
+                    money += context[tickerForRemove].Cost;
+                    context[tickerForRemove].Cost = 0.0;
 
                     // Определяем новых лидеров
                     var newTopTickers = MomentumHelper.GetMomentumTopTickers(candleData, date, momentumSettings.PeriodInDays, momentumSettings.CountBestTickers)
@@ -212,7 +211,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         money -= monCost;
 
                         sizes[MON] += monSize;
-                        costs[MON] += monCost;
+                        context[MON].Cost += monCost;
 
                         AddMessage(date, MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
                     }
@@ -223,9 +222,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         context[tickerForAdd].Weight = 1.0;
                         context[tickerForAdd].Candle = dataService.GetCandle(tickerForAdd, date) ?? new Candle();                       
                         sizes[tickerForAdd] = Math.Truncate(money / context[tickerForAdd].Candle.Close / context[tickerForAdd].Lot) * context[tickerForAdd].Lot;
-                        costs[tickerForAdd] = context[tickerForAdd].Candle.Close * sizes[tickerForAdd];
+                        context[tickerForAdd].Cost = context[tickerForAdd].Candle.Close * sizes[tickerForAdd];
 
-                        money -= costs[tickerForAdd];
+                        money -= context[tickerForAdd].Cost;
 
                         AddMessage(date, tickerForAdd, $"Замена актива. Добавлен {tickerForAdd}", KnownColors.LightGreen);
                     }
@@ -241,7 +240,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     {
                         if (context[ticker].Candle.Close == 0.0)
                         {
-                            costs[ticker] = 0.0;
+                            context[ticker].Cost = 0.0;
                             continue;
                         }
                                 
@@ -260,23 +259,23 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     ClearCosts();
 
                     foreach (var ticker in context.GetPortfolioTickers())
-                        costs[ticker] = context[ticker].Candle.Close * sizes[ticker];
+                        context[ticker].Cost = context[ticker].Candle.Close * sizes[ticker];
                 }
 
                 void ClearCosts()
                 {
-                    foreach (var ticker in costs.Keys)
-                        costs[ticker] = 0.0;
+                    foreach (var (ticker, item) in context)
+                        context[ticker].Cost = 0.0;
                 }
 
                 void UpdateTotalSum()
                 {
-                    totalSum = costs.Values.Sum() + money;
+                    totalSum = context.GetCostSum() + money;
                 }
 
                 void UpdateMoney()
                 {
-                    money = totalSum - costs.Values.Sum();
+                    money = totalSum - context.GetCostSum();
                 }
 
                 void AddMessage(DateOnly date, string ticker, string message, string colorFill) => 
