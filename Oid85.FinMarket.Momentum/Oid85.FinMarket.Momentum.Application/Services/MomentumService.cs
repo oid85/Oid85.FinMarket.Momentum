@@ -39,9 +39,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             candleData.TryAdd(MON, await dataService.GetMoneyEquivalentCandlesAsync(from, to));
 
             var context = tickers.ToDictionary(k => k, v => new MomentumTickerContext { Ticker = v, Lot = instrumentData[v].Lot ?? 1 }); 
-            context.TryAdd(MON, new MomentumTickerContext { Ticker = MON, Lot = 1 });
-                        
-            var stops = tickers.ToDictionary(k => k, v => 0.0); stops.TryAdd(MON, 0.0);
+            context.TryAdd(MON, new MomentumTickerContext { Ticker = MON, Lot = 1 });                                   
 
             var equitySeries = new DiagramSeries
             {
@@ -149,13 +147,13 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 void SetStops()
                 {
                     foreach (var ticker in context.GetPortfolioNoMonTickers())
-                        stops[ticker] = MomentumHelper.GetStopPrice(candleData[ticker], context[ticker].Candle.Close, date, momentumSettings.PeriodInDays);
+                        context[ticker].Stop = MomentumHelper.GetStopPrice(candleData[ticker], context[ticker].Candle.Close, date, momentumSettings.PeriodInDays);
                 }
 
                 void CheckStops()
                 {
                     foreach (var ticker in context.GetPortfolioNoMonTickers())
-                        if (context[ticker].Candle.Low < stops[ticker])
+                        if (context[ticker].Candle.Low < context[ticker].Stop)
                             ClosePosition(ticker);
                 }
 
@@ -311,7 +309,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         Weight = context[ticker].Weight,
                         Size = Convert.ToInt32(tickerSize),
                         Cost = tickerCost.RoundTo(2),
-                        StopPrice = ticker == MON ? 0.0 : stops[ticker].RoundTo(4)
+                        StopPrice = ticker == MON ? 0.0 : context[ticker].Stop.RoundTo(4)
                     });
             }
 
