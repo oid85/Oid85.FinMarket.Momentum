@@ -46,24 +46,10 @@ namespace Oid85.FinMarket.Momentum.Application.Extensions
             return tickers;
         }
 
-        public static double GetWeightSum(this Dictionary<string, MomentumTickerContext> context)
-        {
-            double sum = 0.0;
+        public static double GetWeightSum(this Dictionary<string, MomentumTickerContext> context) => 
+            context.Values.Sum(x => x.Weight);
 
-            foreach (var (ticker, item) in context)
-                sum += item.Weight;
-
-            return sum;
-        }
-
-        public static double GetCostSum(this Dictionary<string, MomentumTickerContext> context)
-        {
-            double sum = 0.0;
-
-            foreach (var (ticker, item) in context)
-                sum += item.Cost;
-
-            return sum;
-        }
+        public static double GetCostSum(this Dictionary<string, MomentumTickerContext> context) =>
+            context.Values.Sum(x => x.Cost);
     }
 }
