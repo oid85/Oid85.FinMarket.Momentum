@@ -10,5 +10,6 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         public int Lot { get; set; } = 1;
         public double Weight { get; set; } = 0.0;
         public double Cost { get; set; } = 0.0;
+        public double Size { get; set; } = 0.0;
     }
 }
