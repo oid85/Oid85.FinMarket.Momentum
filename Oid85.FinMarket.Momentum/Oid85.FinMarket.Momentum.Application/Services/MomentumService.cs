@@ -77,7 +77,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             foreach (var date in dates)
             {
                 // Устанавливаем текущую дату для контекста
-                context.Data.SetDate(date);
+                context.SetDate(date);
 
                 if (momentumSettings.RebalanceDays.Contains(date.Day))
                 {
@@ -94,7 +94,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
                     
 
-                    foreach (var ticker in context.Data.GetPortfolioNoMonTickers())
+                    foreach (var ticker in context.GetPortfolioNoMonTickers())
                         AddMessage(date, ticker, $"Ребалансировка моментума. Позиция {ticker}", KnownColors.LightGreen);
                 }
 
@@ -107,7 +107,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 }
 
                 if (CurrentDrawdown() >= 15.0)
-                    foreach (var ticker in context.Data.GetPortfolioNoMonTickers())
+                    foreach (var ticker in context.GetPortfolioNoMonTickers())
                         ClosePosition(ticker);
 
                 equitySeries.Data.Add(
@@ -149,13 +149,13 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
                 void SetStops()
                 {
-                    foreach (var ticker in context.Data.GetPortfolioNoMonTickers())
+                    foreach (var ticker in context.GetPortfolioNoMonTickers())
                         context.Data[ticker].Stop = MomentumHelper.GetStopPrice(candleData[ticker], context.Data[ticker].Candle.Close, date, momentumSettings.PeriodInDays);
                 }
 
                 void CheckStops()
                 {
-                    foreach (var ticker in context.Data.GetPortfolioNoMonTickers())
+                    foreach (var ticker in context.GetPortfolioNoMonTickers())
                         if (context.Data[ticker].Candle.Low < context.Data[ticker].Stop)
                             ClosePosition(ticker);
                 }
