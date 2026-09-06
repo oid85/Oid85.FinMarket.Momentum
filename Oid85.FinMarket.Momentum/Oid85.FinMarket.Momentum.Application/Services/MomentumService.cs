@@ -91,9 +91,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     UpdateCosts();
                     UpdateMoney();
                     UpdateTotalSum();
-
                     
-
                     foreach (var ticker in context.GetPortfolioNoMonTickers())
                         AddMessage(date, ticker, $"Ребалансировка моментума. Позиция {ticker}", KnownColors.LightGreen);
                 }
@@ -132,7 +130,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
                 void SetWeight()
                 {
-                    foreach (var ticker in context.Data.GetTickers())
+                    foreach (var ticker in context.GetTickers())
                         context.Data[ticker].Weight = 0.0;
 
                     foreach (var ticker in tickers)
@@ -143,7 +141,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
                 void UpdateCandles()
                 {
-                    foreach (var ticker in context.Data.GetPortfolioTickers())
+                    foreach (var ticker in context.GetPortfolioTickers())
                         context.Data[ticker].Candle = dataService.GetCandle(ticker, date) ?? new Candle();
                 }
 
@@ -184,7 +182,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 void ChangePosition(string ticker)
                 {
                     string tickerForRemove = ticker;
-                    var currentTickers = context.Data.GetPortfolioTickers();
+                    var currentTickers = context.GetPortfolioTickers();
 
                     // Продаем актив
                     context.Data[tickerForRemove].Weight = 0.0;
@@ -234,9 +232,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 {
                     ClearSizes();
 
-                    double baseUnit = totalSum / context.Data.GetWeightSum();
+                    double baseUnit = totalSum / context.GetWeightSum();
 
-                    foreach (var ticker in context.Data.GetPortfolioTickers())
+                    foreach (var ticker in context.GetPortfolioTickers())
                     {
                         if (context.Data[ticker].Candle.Close == 0.0)
                         {
@@ -258,7 +256,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 {
                     ClearCosts();
 
-                    foreach (var ticker in context.Data.GetPortfolioTickers())
+                    foreach (var ticker in context.GetPortfolioTickers())
                         context.Data[ticker].Cost = context.Data[ticker].Candle.Close * context.Data[ticker].Size;
                 }
 
@@ -270,12 +268,12 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
                 void UpdateTotalSum()
                 {
-                    totalSum = context.Data.GetCostSum() + money;
+                    totalSum = context.GetCostSum() + money;
                 }
 
                 void UpdateMoney()
                 {
-                    money = totalSum - context.Data.GetCostSum();
+                    money = totalSum - context.GetCostSum();
                 }
 
                 void AddMessage(DateOnly date, string ticker, string message, string colorFill) => 
@@ -293,12 +291,12 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var currentPositions = new List<PortfolioPosition>();
             
-            foreach (var ticker in context.Data.GetPortfolioTickers())
+            foreach (var ticker in context.GetPortfolioTickers())
             {
                 var candle = dataService.GetCandle(ticker, dates.Last());
                 var lot = context.Data[ticker].Lot;
 
-                double baseUnit = totalSumLife / context.Data.GetWeightSum();
+                double baseUnit = totalSumLife / context.GetWeightSum();
                 double tickerCost = baseUnit * context.Data[ticker].Weight;
                 double tickerSize = tickerCost / candle!.Close;
                 tickerSize /= lot;
@@ -337,7 +335,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 var candlesByDates = candleList.Where(x => x.Date >= from && x.Date <= to).ToList();
                 double firstPrice = candlesByDates.First().Close;
 
-                string color = context.Data.GetPortfolioTickers().Contains(ticker)
+                string color = context.GetPortfolioTickers().Contains(ticker)
                     ? KnownColors.Green 
                     : KnownColors.LightBlue;
 
