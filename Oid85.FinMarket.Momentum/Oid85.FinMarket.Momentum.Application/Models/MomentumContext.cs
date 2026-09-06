@@ -1,7 +1,9 @@
 ﻿using Oid85.FinMarket.Momentum.Application.Helpers;
+using Oid85.FinMarket.Momentum.Application.Services;
 using Oid85.FinMarket.Momentum.Common.KnownConstants;
 using Oid85.FinMarket.Momentum.Core.Configuration;
 using Oid85.FinMarket.Momentum.Core.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Oid85.FinMarket.Momentum.Application.Models
 {
@@ -56,15 +58,8 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 TickerData[ticker].Candle = GetCandle(ticker, date) ?? new Candle();
         }
 
-        public Candle? GetCandle(string ticker, DateOnly date)
-        {
-            if (CandleData is null) return null;
-            var candles = CandleData[ticker];
-            if (candles is null) return null;
-            var candle = candles.FindLast(x => x.Date <= date);
-            if (candle is null) return null;
-            return candle;
-        }
+        public Candle? GetCandle(string ticker, DateOnly date) => 
+            CandleData[ticker].FindLast(x => x.Date <= date);
 
         public void SetStops(DateOnly date, int period)
         {
@@ -90,10 +85,59 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             }
         }
 
-        void ClearSizes()
+        public void ClearSizes()
         {
             foreach (var (ticker, _) in TickerData)
                 TickerData[ticker].Size = 0.0;
+        }
+
+        public void ChangePosition(string ticker, DateOnly date, int period, int count)
+        {
+            string tickerForRemove = ticker;
+            var currentTickers = GetPortfolioTickers();
+
+            // Продаем актив
+            TickerData[tickerForRemove].Weight = 0.0;
+            TickerData[tickerForRemove].Size = 0.0;
+            Money += TickerData[tickerForRemove].Cost;
+            TickerData[tickerForRemove].Cost = 0.0;
+
+            // Определяем новых лидеров
+            var newTopTickers = MomentumHelper.GetMomentumTopTickers(CandleData, date, period, count)
+                .Where(x => !currentTickers.Contains(x)).Where(x => x != KnownTickers.MON).ToList();
+
+            var tickerForAdd = newTopTickers.Count == 0
+                ? KnownTickers.MON
+                : newTopTickers.First();
+
+            AddMessage(date, ticker, $"Стоп-лосс. Удален {ticker}", KnownColors.LightRed);
+
+            if (tickerForAdd == KnownTickers.MON)
+            {
+                // Покупаем фонд ликвидности
+                TickerData[KnownTickers.MON].Weight += 1.0;
+                double monSize = Math.Truncate(Money / TickerData[KnownTickers.MON].Candle.Close);
+                double monCost = monSize * TickerData[KnownTickers.MON].Candle.Close;
+                Money -= monCost;
+
+                TickerData[KnownTickers.MON].Size += monSize;
+                TickerData[KnownTickers.MON].Cost += monCost;
+
+                AddMessage(date, KnownTickers.MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
+            }
+
+            else
+            {
+                // Покупаем другой актив
+                TickerData[tickerForAdd].Weight = 1.0;
+                TickerData[tickerForAdd].Candle = GetCandle(tickerForAdd, date) ?? new Candle();
+                TickerData[tickerForAdd].Size = Math.Truncate(Money / TickerData[tickerForAdd].Candle.Close / TickerData[tickerForAdd].Lot) * TickerData[tickerForAdd].Lot;
+                TickerData[tickerForAdd].Cost = TickerData[tickerForAdd].Candle.Close * TickerData[tickerForAdd].Size;
+
+                Money -= TickerData[tickerForAdd].Cost;
+
+                AddMessage(date, tickerForAdd, $"Замена актива. Добавлен {tickerForAdd}", KnownColors.LightGreen);
+            }
         }
     }
 }

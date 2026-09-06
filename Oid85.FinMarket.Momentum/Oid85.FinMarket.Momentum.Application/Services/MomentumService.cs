@@ -148,55 +148,6 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     context.AddMessage(date, MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
                 }
 
-                void ChangePosition(string ticker)
-                {
-                    string tickerForRemove = ticker;
-                    var currentTickers = context.GetPortfolioTickers();
-
-                    // Продаем актив
-                    context.TickerData[tickerForRemove].Weight = 0.0;
-                    context.TickerData[tickerForRemove].Size = 0.0;
-                    context.Money += context.TickerData[tickerForRemove].Cost;
-                    context.TickerData[tickerForRemove].Cost = 0.0;
-
-                    // Определяем новых лидеров
-                    var newTopTickers = MomentumHelper.GetMomentumTopTickers(candleData, date, momentumSettings.PeriodInDays, momentumSettings.CountBestTickers)
-                        .Where(x => !currentTickers.Contains(x)).Where(x => x != MON).ToList();
-
-                    var tickerForAdd = newTopTickers.Count == 0 
-                        ? MON 
-                        : newTopTickers.First();
-
-                    context.AddMessage(date, ticker, $"Стоп-лосс. Удален {ticker}", KnownColors.LightRed);
-
-                    if (tickerForAdd == MON)
-                    {
-                        // Покупаем фонд ликвидности
-                        context.TickerData[MON].Weight += 1.0;
-                        double monSize = Math.Truncate(context.Money / context.TickerData[MON].Candle.Close);
-                        double monCost = monSize * context.TickerData[MON].Candle.Close;
-                        context.Money -= monCost;
-
-                        context.TickerData[MON].Size += monSize;
-                        context.TickerData[MON].Cost += monCost;
-
-                        context.AddMessage(date, MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
-                    }
-
-                    else
-                    {
-                        // Покупаем другой актив
-                        context.TickerData[tickerForAdd].Weight = 1.0;
-                        context.TickerData[tickerForAdd].Candle = dataService.GetCandle(tickerForAdd, date) ?? new Candle();
-                        context.TickerData[tickerForAdd].Size = Math.Truncate(context.Money / context.TickerData[tickerForAdd].Candle.Close / context.TickerData[tickerForAdd].Lot) * context.TickerData[tickerForAdd].Lot;
-                        context.TickerData[tickerForAdd].Cost = context.TickerData[tickerForAdd].Candle.Close * context.TickerData[tickerForAdd].Size;
-
-                        context.Money -= context.TickerData[tickerForAdd].Cost;
-
-                        context.AddMessage(date, tickerForAdd, $"Замена актива. Добавлен {tickerForAdd}", KnownColors.LightGreen);
-                    }
-                }
-
                 void UpdateCosts()
                 {
                     ClearCosts();
