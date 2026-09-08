@@ -65,6 +65,12 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public void AddMessage(string ticker, string message, string colorFill) => ProtocolMessages.Add(new() { Date = CurrentDate, Ticker = ticker, Message = message, ColorFill = colorFill });
 
+        public void AddRebalanceMessage()
+        {
+            foreach (var ticker in PortfolioWithoutMonTickers)
+                AddMessage(ticker, $"Ребалансировка моментума. Позиция {ticker}", KnownColors.LightGreen);
+        }
+
         public Candle? GetCandle(string ticker) => CandleData[ticker].FindLast(x => x.Date <= CurrentDate);
 
         public void ClearSizes()

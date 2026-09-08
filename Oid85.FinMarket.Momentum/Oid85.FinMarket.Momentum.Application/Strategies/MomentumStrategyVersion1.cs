@@ -24,9 +24,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                     UpdateCosts();
                     UpdateMoney();
                     UpdateTotalSum();
-
-                    foreach (var ticker in PortfolioWithoutMonTickers)
-                        AddMessage(ticker, $"Ребалансировка моментума. Позиция {ticker}", KnownColors.LightGreen);
+                    AddRebalanceMessage();
                 }
 
                 else
