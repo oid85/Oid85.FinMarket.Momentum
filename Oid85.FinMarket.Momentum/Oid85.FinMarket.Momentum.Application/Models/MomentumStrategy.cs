@@ -56,16 +56,16 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public double CostSum => TickerData.Values.Sum(x => x.Cost);
 
-        public DateOnly Date { get; set; } = DateOnly.MinValue;
+        public DateOnly CurrentDate { get; set; } = DateOnly.MinValue;
 
         public virtual void Execute()
         {
 
         }
 
-        public void AddMessage(string ticker, string message, string colorFill) => ProtocolMessages.Add(new() { Date = Date, Ticker = ticker, Message = message, ColorFill = colorFill });
+        public void AddMessage(string ticker, string message, string colorFill) => ProtocolMessages.Add(new() { Date = CurrentDate, Ticker = ticker, Message = message, ColorFill = colorFill });
 
-        public Candle? GetCandle(string ticker) => CandleData[ticker].FindLast(x => x.Date <= Date);
+        public Candle? GetCandle(string ticker) => CandleData[ticker].FindLast(x => x.Date <= CurrentDate);
 
         public void ClearSizes()
         {
@@ -81,7 +81,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public void SetTopTickers()
         {
-            TopTickers = MomentumHelper.GetMomentumTopTickers(CandleData, Date, Period, CountTopTickers);
+            TopTickers = MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate, Period, CountTopTickers);
             TopTickers.Add(KnownTickers.MON);
         }
 
@@ -101,7 +101,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         public void SetStops()
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
-                TickerData[ticker].Stop = MomentumHelper.GetStopPrice(CandleData[ticker], TickerData[ticker].Candle.Close, Date, Period);
+                TickerData[ticker].Stop = MomentumHelper.GetStopPrice(CandleData[ticker], TickerData[ticker].Candle.Close, CurrentDate, Period);
         }
 
         public void SetSizes()
@@ -187,7 +187,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             TickerData[tickerForRemove].Cost = 0.0;
 
             // Определяем новых лидеров
-            var newTopTickers = MomentumHelper.GetMomentumTopTickers(CandleData, Date, Period, CountTopTickers)
+            var newTopTickers = MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate, Period, CountTopTickers)
                 .Where(x => !currentTickers.Contains(x)).Where(x => x != KnownTickers.MON).ToList();
 
             var tickerForAdd = newTopTickers.Count == 0
