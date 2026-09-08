@@ -2,7 +2,7 @@
 
 namespace Oid85.FinMarket.Momentum.Application.Models
 {
-    public class MomentumTickerData
+    public class PositionData
     {
         public string Ticker { get; set; } = string.Empty;
         public Candle Candle { get; set; } = new Candle();

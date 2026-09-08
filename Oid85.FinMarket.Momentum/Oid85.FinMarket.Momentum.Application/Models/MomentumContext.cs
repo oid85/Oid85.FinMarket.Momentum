@@ -10,7 +10,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public int CountBestTickers { get; set; }
 
-        public Dictionary<string, MomentumTickerData> TickerData { get; set; } = [];
+        public Dictionary<string, PositionData> TickerData { get; set; } = [];
 
         public Dictionary<string, List<Candle>> CandleData { get; set; } = [];
 

@@ -1,10 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Oid85.FinMarket.Momentum.Application.Extensions;
 using Oid85.FinMarket.Momentum.Application.Helpers;
 using Oid85.FinMarket.Momentum.Application.Interfaces.Repositories;
 using Oid85.FinMarket.Momentum.Application.Interfaces.Services;
-using Oid85.FinMarket.Momentum.Application.Mapping;
 using Oid85.FinMarket.Momentum.Application.Models;
 using Oid85.FinMarket.Momentum.Common.Extensions;
 using Oid85.FinMarket.Momentum.Common.KnownConstants;
@@ -44,8 +42,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             strategy.CandleData = candleData;
             
             var instrumentData = await dataService.GetInstrumentDataAsync(tickers);
-            strategy.TickerData = tickers.ToDictionary(k => k, v => new MomentumTickerData { Ticker = v, Lot = instrumentData[v].Lot ?? 1 });
-            strategy.TickerData.TryAdd(MON, new MomentumTickerData { Ticker = MON, Lot = 1 });
+            strategy.PositionData = tickers.ToDictionary(k => k, v => new PositionData { Ticker = v, Lot = instrumentData[v].Lot ?? 1 });
+            strategy.PositionData.TryAdd(MON, new PositionData { Ticker = MON, Lot = 1 });
 
             return Map(strategy);
         }
@@ -71,9 +69,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 Money = momentumSettings.StartMoneySum,
                 TotalSum = momentumSettings.StartMoneySum,
                 CandleData = candleData,
-                TickerData = tickers.ToDictionary(k => k, v => new MomentumTickerData { Ticker = v, Lot = instrumentData[v].Lot ?? 1 })
+                TickerData = tickers.ToDictionary(k => k, v => new PositionData { Ticker = v, Lot = instrumentData[v].Lot ?? 1 })
             };
-            context.TickerData.TryAdd(MON, new MomentumTickerData { Ticker = MON, Lot = 1 });                                   
+            context.TickerData.TryAdd(MON, new PositionData { Ticker = MON, Lot = 1 });                                   
 
             var equitySeries = new DiagramSeries
             {

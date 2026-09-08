@@ -31,7 +31,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                 {
                     UpdateCandles();
                     UpdateCosts();
-                    CheckStopsVersion1();
+                    CheckStopsWithClosePosition();
                     UpdateTotalSum();
                 }
 
@@ -50,7 +50,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                     new()
                     {
                         Date = date,
-                        Value = ((Money + TickerData[KnownTickers.MON].Cost) / 1000.0).RoundTo(2)
+                        Value = ((Money + PositionData[KnownTickers.MON].Cost) / 1000.0).RoundTo(2)
                     });
             }
         }
