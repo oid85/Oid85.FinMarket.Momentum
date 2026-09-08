@@ -224,6 +224,23 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             }
         }
 
+        public async Task<BacktestResponse> BacktestAsync(BacktestRequest request)
+        {
+            var momentumSettings = options.Value;
+
+            var from = new DateOnly(2021, 1, 1);
+            var to = DateOnly.FromDateTime(DateTime.Today);
+
+
+
+            var response = new BacktestResponse();
+
+
+
+            return response;
+        }
+
+
         public async Task<EditPortfolioTotalSumResponse> EditPortfolioTotalSumAsync(EditPortfolioTotalSumRequest request)
         {
             await parameterRepository.SetParameterValueAsync($"TotalSum:Momentum", request.TotalSum.ToString("N0"));
