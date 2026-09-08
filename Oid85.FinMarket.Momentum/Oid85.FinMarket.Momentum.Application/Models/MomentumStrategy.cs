@@ -73,28 +73,16 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public Candle? GetCandle(string ticker) => CandleData[ticker].FindLast(x => x.Date <= CurrentDate);
 
-        public void ClearSizes()
-        {
-            foreach (var (ticker, _) in TickerData)
-                TickerData[ticker].Size = 0.0;
-        }
-
-        public void ClearCosts()
-        {
-            foreach (var (ticker, _) in TickerData)
-                TickerData[ticker].Cost = 0.0;
-        }
-
-        public void SetTopTickers()
-        {
-            TopTickers = MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate, Period, CountTopTickers);
-            TopTickers.Add(KnownTickers.MON);
-        }
+        public void SetTopTickers() => TopTickers = [.. MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate, Period, CountTopTickers), KnownTickers.MON];
 
         public void SetWeights()
         {
-            foreach (var ticker in Tickers) TickerData[ticker].Weight = 0.0;
-            foreach (var ticker in TopTickers) TickerData[ticker].Weight = 1.0;
+            foreach (var ticker in Tickers) 
+                TickerData[ticker].Weight = 0.0;
+
+            foreach (var ticker in TopTickers) 
+                TickerData[ticker].Weight = 1.0;
+
             TickerData[KnownTickers.MON].Weight = CountTopTickers - TopTickers.Count(x => x != KnownTickers.MON);
         }
 
@@ -112,7 +100,8 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public void SetSizes()
         {
-            ClearSizes();
+            foreach (var ticker in Tickers)
+                TickerData[ticker].Size = 0.0;
 
             double baseUnit = TotalSum / WeightSum;
 
@@ -130,9 +119,10 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public void UpdateCosts()
         {
-            ClearCosts();
+            foreach (var ticker in Tickers) 
+                TickerData[ticker].Cost = 0.0;
 
-            foreach (var ticker in PortfolioTickers)
+            foreach (var ticker in PortfolioTickers) 
                 TickerData[ticker].Cost = TickerData[ticker].Candle.Close * TickerData[ticker].Size;
         }
 
