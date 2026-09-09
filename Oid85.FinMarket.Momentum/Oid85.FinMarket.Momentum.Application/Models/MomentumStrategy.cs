@@ -3,6 +3,7 @@ using Oid85.FinMarket.Momentum.Common.Extensions;
 using Oid85.FinMarket.Momentum.Common.KnownConstants;
 using Oid85.FinMarket.Momentum.Common.Utils;
 using Oid85.FinMarket.Momentum.Core.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Oid85.FinMarket.Momentum.Application.Models
 {
@@ -56,6 +57,8 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public double CostSum => PositionData.Values.Sum(x => x.Cost);
 
+        public bool IsRebalance => RebalanceDays.Contains(CurrentDate.Day);
+
         public DateOnly CurrentDate { get; set; } = DateOnly.MinValue;
 
         public virtual void Execute()
@@ -70,6 +73,8 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             foreach (var ticker in PortfolioWithoutMonTickers)
                 AddMessage(ticker, $"Ребалансировка моментума. Позиция {ticker}", KnownColors.LightGreen);
         }
+
+        public void ClearMessages() => ProtocolMessages.Clear();
 
         public Candle? GetCandle(string ticker) => CandleData[ticker].FindLast(x => x.Date <= CurrentDate);
 
@@ -218,6 +223,26 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
                 AddMessage(tickerForAdd, $"Замена актива. Добавлен {tickerForAdd}", KnownColors.LightGreen);
             }
+        }
+
+        public void UpdateEquitySeries()
+        {
+            EquitySeries.Data.Add(
+                new()
+                {
+                    Date = CurrentDate,
+                    Value = (TotalSum / 1000.0).RoundTo(2)
+                });
+        }
+
+        public void UpdateMoneySeries()
+        {
+            MoneySeries.Data.Add(
+                new()
+                {
+                    Date = CurrentDate,
+                    Value = ((Money + PositionData[KnownTickers.MON].Cost) / 1000.0).RoundTo(2)
+                });
         }
     }
 }

@@ -2,6 +2,6 @@
 {
     public class MonitorRequest
     {
-
+        public string MomentumVersion { get; set; } = string.Empty;
     }
 }

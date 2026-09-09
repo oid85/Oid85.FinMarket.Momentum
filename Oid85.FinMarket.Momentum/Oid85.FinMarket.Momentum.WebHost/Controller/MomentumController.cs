@@ -30,6 +30,19 @@ public class MomentumController(
             result => new BaseResponse<MonitorResponse> { Result = result });
 
     /// <summary>
+    /// Мониторинг версии
+    /// </summary>
+    [HttpPost("monitor/version")]
+    [ProducesResponseType(typeof(BaseResponse<MonitorResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BaseResponse<MonitorResponse>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(BaseResponse<MonitorResponse>), StatusCodes.Status500InternalServerError)]
+    public Task<IActionResult> MonitorVersion(
+        [FromBody] MonitorRequest request) =>
+        GetResponseAsync(
+            () => momentumService.MonitorVersionAsync(request),
+            result => new BaseResponse<MonitorResponse> { Result = result });
+
+    /// <summary>
     /// Редактировать сумму портфеля
     /// </summary>
     [HttpPost("portfolio/total-sum/edit")]

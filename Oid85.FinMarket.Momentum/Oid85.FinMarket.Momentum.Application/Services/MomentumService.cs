@@ -23,13 +23,13 @@ namespace Oid85.FinMarket.Momentum.Application.Services
         IServiceProvider serviceProvider)
         : IMomentumService
     {
-        public async Task<MonitorResponse> MonitorAsync(MonitorRequest request, string version)
+        public async Task<MonitorResponse> MonitorVersionAsync(MonitorRequest request)
         {
             var momentumSettings = options.Value;
 
             var tickers = momentumSettings.Tickers;
 
-            var strategy = serviceProvider.GetRequiredKeyedService<MomentumStrategy>($"MomentumStrategyVersion{version}");
+            var strategy = serviceProvider.GetRequiredKeyedService<MomentumStrategy>($"MomentumStrategyVersion{request.MomentumVersion}");
 
             var from = new DateOnly(2021, 1, 1);
             var to = DateOnly.FromDateTime(DateTime.Today);
