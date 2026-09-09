@@ -226,25 +226,21 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             }
         }
 
-        public void UpdateEquitySeries()
-        {
+        public void UpdateEquitySeries() => 
             EquitySeries.Data.Add(
                 new()
                 {
                     Date = CurrentDate,
                     Value = (TotalSum / 1000.0).RoundTo(2)
                 });
-        }
 
-        public void UpdateMoneySeries()
-        {
+        public void UpdateMoneySeries() => 
             MoneySeries.Data.Add(
                 new()
                 {
                     Date = CurrentDate,
                     Value = ((Money + PositionData[KnownTickers.MON].Cost) / 1000.0).RoundTo(2)
                 });
-        }
 
         public List<PortfolioPosition> GetCurrentPositions()
         {
@@ -278,7 +274,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             foreach (var currentPosition in orderedCurrentPositions)
                 currentPosition.Number = number++;
 
-            return currentPositions;
+            return orderedCurrentPositions;
         }
 
         public List<DiagramSeries> GetPriceDynamicSeries()
