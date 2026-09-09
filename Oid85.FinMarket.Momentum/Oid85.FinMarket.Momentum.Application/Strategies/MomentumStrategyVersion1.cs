@@ -37,7 +37,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                 UpdateEquitySeries();
                 UpdateMoneySeries();
 
-                if (CurrentDrawdown >= DrawdownLimitPercent)
+                if (Math.Abs(GetCurrentDrawdown()) >= DrawdownLimitPercent)
                     foreach (var ticker in PortfolioWithoutMonTickers)
                         ClosePosition(ticker);
             }

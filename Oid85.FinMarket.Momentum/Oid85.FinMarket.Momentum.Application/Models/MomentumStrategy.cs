@@ -44,8 +44,6 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public double MaxDrawdown => DrawdownSeriesPercent.Data.Where(x => x.Value.HasValue).Min(x => x.Value!.Value).RoundTo(1);
 
-        public double CurrentDrawdown => DrawdownSeriesPercent.Data.Last(x => x.Value.HasValue).Value!.Value.RoundTo(1);
-
         public List<string> Tickers => [.. PositionData.Keys];
 
         public List<string> TopTickers { get; set; } = [];
@@ -241,6 +239,20 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                     Date = CurrentDate,
                     Value = ((Money + PositionData[KnownTickers.MON].Cost) / 1000.0).RoundTo(2)
                 });
+
+        public double GetCurrentDrawdown()
+        {
+            var equityValues = EquitySeries.Data.Select(x => x.Value ?? 0.0).ToList();
+
+            if (equityValues.Count == 0) return 0.0;
+
+            double lastEquity = equityValues.Last();
+            double maxEquity = equityValues.Max();
+
+            if (maxEquity == 0.0) return 0.0;
+
+            return Math.Abs((maxEquity - lastEquity) / maxEquity * 100.0);
+        }
 
         public List<PortfolioPosition> GetCurrentPositions()
         {
