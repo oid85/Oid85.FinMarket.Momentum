@@ -251,7 +251,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
             if (maxEquity == 0.0) return 0.0;
 
-            return Math.Abs((maxEquity - lastEquity) / maxEquity * 100.0).RoundTo(1);
+            return -1 * Math.Abs((maxEquity - lastEquity) / maxEquity * 100.0).RoundTo(1);
         }
 
         public List<PortfolioPosition> GetCurrentPositions()
