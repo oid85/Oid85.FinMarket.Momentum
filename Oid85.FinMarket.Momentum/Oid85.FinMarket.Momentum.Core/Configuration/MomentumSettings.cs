@@ -4,8 +4,8 @@
     {
         public int CheckStopsVersion { get; set; }
         public double StartMoneySum { get; set; }
-        public int PeriodInDays { get; set; }
-        public int CountBestTickers { get; set; }
+        public int Period { get; set; }
+        public int CountTopTickers { get; set; }
         public List<string> Tickers { get; set; }
         public List<int> RebalanceDays { get; set; }
     }

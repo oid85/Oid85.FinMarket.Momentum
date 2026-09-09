@@ -1,12 +1,10 @@
 ﻿using Oid85.FinMarket.Momentum.Application.Models;
-using Oid85.FinMarket.Momentum.Common.Extensions;
-using Oid85.FinMarket.Momentum.Common.KnownConstants;
 
 namespace Oid85.FinMarket.Momentum.Application.Strategies
 {
     public class MomentumStrategyVersion1 : MomentumStrategy
     {
-        private readonly double DrawdownLimit = 15.0;
+        private readonly double DrawdownLimitPercent = 15.0;
 
         public override void Execute()
         {
@@ -36,12 +34,12 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                     UpdateTotalSum();
                 }
 
-                if (CurrentDrawdown >= DrawdownLimit)
-                    foreach (var ticker in PortfolioWithoutMonTickers)
-                        ClosePosition(ticker);
-
                 UpdateEquitySeries();
                 UpdateMoneySeries();
+
+                if (CurrentDrawdown >= DrawdownLimitPercent)
+                    foreach (var ticker in PortfolioWithoutMonTickers)
+                        ClosePosition(ticker);
             }
         }
     }

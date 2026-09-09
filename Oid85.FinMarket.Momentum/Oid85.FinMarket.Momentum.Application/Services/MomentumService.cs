@@ -31,6 +31,13 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var strategy = serviceProvider.GetRequiredKeyedService<MomentumStrategy>($"MomentumStrategyVersion{request.MomentumVersion}");
 
+            strategy.StartMoneySum = momentumSettings.StartMoneySum;
+            strategy.Money = momentumSettings.StartMoneySum;
+            strategy.TotalSum = momentumSettings.StartMoneySum;
+            strategy.Period = momentumSettings.Period;
+            strategy.CounTopTickers = momentumSettings.CountTopTickers;
+            strategy.RebalanceDays = momentumSettings.RebalanceDays;
+
             var from = new DateOnly(2021, 1, 1);
             var to = DateOnly.FromDateTime(DateTime.Today);
 
@@ -44,6 +51,10 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             var instrumentData = await dataService.GetInstrumentDataAsync(tickers);
             strategy.PositionData = tickers.ToDictionary(k => k, v => new PositionData { Ticker = v, Lot = instrumentData[v].Lot ?? 1 });
             strategy.PositionData.TryAdd(MON, new PositionData { Ticker = MON, Lot = 1 });
+
+            strategy.TotalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum:Momentum")) ?? "0").Replace(" ", "").Trim());
+
+            strategy.Execute();
 
             return Map(strategy);
         }
@@ -64,8 +75,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var context = new MomentumContext
             {
-                PeriodInDays = momentumSettings.PeriodInDays,
-                CountBestTickers = momentumSettings.CountBestTickers,
+                PeriodInDays = momentumSettings.Period,
+                CountBestTickers = momentumSettings.CountTopTickers,
                 Money = momentumSettings.StartMoneySum,
                 TotalSum = momentumSettings.StartMoneySum,
                 CandleData = candleData,
@@ -176,11 +187,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             #endregion
 
-            #region PriceDynamicSeries
+            #region PriceDynamicSeries            
 
-            var currentTopTickers = MomentumHelper.GetMomentumTopTickers(candleData, DateOnly.FromDateTime(DateTime.Today), momentumSettings.PeriodInDays, momentumSettings.CountBestTickers);
-
-            from = DateOnly.FromDateTime(DateTime.Today).AddDays(-1 * momentumSettings.PeriodInDays);
+            from = DateOnly.FromDateTime(DateTime.Today).AddDays(-1 * momentumSettings.Period);
             to = DateOnly.FromDateTime(DateTime.Today);
 
             var priceDynamicSeries = new List<DiagramSeries>();

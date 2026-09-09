@@ -3,7 +3,6 @@ using Oid85.FinMarket.Momentum.Common.Extensions;
 using Oid85.FinMarket.Momentum.Common.KnownConstants;
 using Oid85.FinMarket.Momentum.Common.Utils;
 using Oid85.FinMarket.Momentum.Core.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Oid85.FinMarket.Momentum.Application.Models
 {
@@ -17,7 +16,9 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public int Period { get; set; }
 
-        public int CountTopTickers { get; set; }
+        public int CounTopTickers { get; set; }
+
+        public double TotalSumLife { get; set; } = 0.0;
 
         public double TotalSum { get; set; } = 0.0;
 
@@ -78,7 +79,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public Candle? GetCandle(string ticker) => CandleData[ticker].FindLast(x => x.Date <= CurrentDate);
 
-        public void SetTopTickers() => TopTickers = [.. MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate, Period, CountTopTickers), KnownTickers.MON];
+        public void SetTopTickers() => TopTickers = [.. MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate, Period, CounTopTickers), KnownTickers.MON];
 
         public void SetWeights()
         {
@@ -88,7 +89,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             foreach (var ticker in TopTickers) 
                 PositionData[ticker].Weight = 1.0;
 
-            PositionData[KnownTickers.MON].Weight = CountTopTickers - TopTickers.Count(x => x != KnownTickers.MON);
+            PositionData[KnownTickers.MON].Weight = CounTopTickers - TopTickers.Count(x => x != KnownTickers.MON);
         }
 
         public void UpdateCandles()
@@ -188,7 +189,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             PositionData[tickerForRemove].Cost = 0.0;
 
             // Определяем новых лидеров
-            var newTopTickers = MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate, Period, CountTopTickers)
+            var newTopTickers = MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate, Period, CounTopTickers)
                 .Where(x => !currentTickers.Contains(x)).Where(x => x != KnownTickers.MON).ToList();
 
             var tickerForAdd = newTopTickers.Count == 0
@@ -243,6 +244,76 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                     Date = CurrentDate,
                     Value = ((Money + PositionData[KnownTickers.MON].Cost) / 1000.0).RoundTo(2)
                 });
+        }
+
+        public List<PortfolioPosition> GetCurrentPositions()
+        {
+            var currentPositions = new List<PortfolioPosition>();
+
+            foreach (var ticker in PortfolioTickers)
+            {
+                var candle = CandleData[ticker].FindLast(x => x.Date <= Dates.Last());
+                var lot = PositionData[ticker].Lot;
+                double baseUnit = TotalSumLife / WeightSum;
+                double tickerCost = baseUnit * PositionData[ticker].Weight;
+                int tickerSize = Convert.ToInt32(Math.Truncate(tickerCost / candle!.Close / lot) * lot);
+
+                currentPositions.Add(
+                    new PortfolioPosition
+                    {
+                        Ticker = ticker,
+                        Weight = PositionData[ticker].Weight,
+                        Size = tickerSize,
+                        Cost = tickerCost.RoundTo(2),
+                        StopPrice = ticker == KnownTickers.MON ? 0.0 : PositionData[ticker].Stop.RoundTo(4)
+                    });
+            }
+
+            List<PortfolioPosition> orderedCurrentPositions = [
+                    .. currentPositions.Where(x => x.Ticker != KnownTickers.MON).OrderBy(x => x.Ticker),
+                    .. currentPositions.Where(x => x.Ticker == KnownTickers.MON)
+                    ];
+
+            int number = 1;
+            foreach (var currentPosition in orderedCurrentPositions)
+                currentPosition.Number = number++;
+
+            return currentPositions;
+        }
+
+        public List<DiagramSeries> GetPriceDynamicSeries()
+        {
+            var priceDynamicSeries = new List<DiagramSeries>();            
+
+            var from = DateOnly.FromDateTime(DateTime.Today).AddDays(-1 * Period);
+            var to = DateOnly.FromDateTime(DateTime.Today);
+
+            foreach (var (ticker, candleList) in CandleData.Where(x => x.Key != KnownTickers.MON))
+            {
+                var candlesByDates = candleList.Where(x => x.Date >= from && x.Date <= to).ToList();
+                double firstPrice = candlesByDates.First().Close;
+
+                string color = PortfolioTickers.Contains(ticker)
+                    ? KnownColors.Green
+                    : KnownColors.LightBlue;
+
+                priceDynamicSeries.Add(
+                    new DiagramSeries
+                    {
+                        Name = ticker,
+                        Color = color,
+                        ColorFill = color,
+                        Data = [.. candlesByDates
+                        .Select(x =>
+                        new DateValue<double?>
+                        {
+                            Date = x.Date,
+                            Value = (x.Close / firstPrice).RoundTo(4)
+                        })]
+                    });
+            }
+
+            return priceDynamicSeries;
         }
     }
 }
