@@ -1,6 +1,4 @@
-﻿using Oid85.FinMarket.Momentum.Core.Models;
-
-namespace Oid85.FinMarket.Momentum.Application.Models
+﻿namespace Oid85.FinMarket.Momentum.Core.Models
 {
     public class PositionData
     {

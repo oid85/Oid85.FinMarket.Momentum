@@ -17,19 +17,6 @@ public class MomentumController(
     : BaseController
 {
     /// <summary>
-    /// Мониторинг
-    /// </summary>
-    [HttpPost("monitor")]
-    [ProducesResponseType(typeof(BaseResponse<MonitorResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(BaseResponse<MonitorResponse>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(BaseResponse<MonitorResponse>), StatusCodes.Status500InternalServerError)]
-    public Task<IActionResult> MonitorAsync(
-        [FromBody] MonitorRequest request) =>
-        GetResponseAsync(
-            () => momentumService.MonitorAsync(request),
-            result => new BaseResponse<MonitorResponse> { Result = result });
-
-    /// <summary>
     /// Мониторинг версии
     /// </summary>
     [HttpPost("monitor/version")]
