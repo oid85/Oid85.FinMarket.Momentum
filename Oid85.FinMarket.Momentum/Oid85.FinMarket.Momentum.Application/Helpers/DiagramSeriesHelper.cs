@@ -68,7 +68,7 @@ namespace Oid85.FinMarket.Momentum.Application.Helpers
 
         public static DiagramSeries GetShortEquitySeries(DiagramSeries equitySeries)
         {
-            var from = DateOnly.FromDateTime(DateTime.Today.AddMonths(-1));
+            var from = DateOnly.FromDateTime(DateTime.Today.AddMonths(-3));
             var to = DateOnly.FromDateTime(DateTime.Today);
 
             return new DiagramSeries()

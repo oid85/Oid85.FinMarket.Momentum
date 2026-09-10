@@ -338,7 +338,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         {
             var priceSeries = new List<DiagramSeries>();
 
-            var from = DateOnly.FromDateTime(DateTime.Today.AddMonths(-1));
+            var from = DateOnly.FromDateTime(DateTime.Today.AddMonths(-3));
             var to = DateOnly.FromDateTime(DateTime.Today);
 
             List<string> tickers = [
