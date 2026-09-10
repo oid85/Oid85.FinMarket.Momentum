@@ -346,7 +346,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 .. PortfolioTickers.Where(x => x == KnownTickers.MON)
                 ];
 
-            foreach (var ticker in PortfolioTickers)
+            foreach (var ticker in tickers)
             {
                 var candlesByDates = CandleData[ticker].Where(x => x.Date >= from && x.Date <= to).ToList();
                 double firstPrice = candlesByDates.First().Close;
