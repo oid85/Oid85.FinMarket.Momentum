@@ -118,6 +118,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 }
 
                 PositionData[ticker].Size = Math.Truncate(baseUnit * PositionData[ticker].Weight / PositionData[ticker].Candle.Close / PositionData[ticker].Lot) * PositionData[ticker].Lot;
+                PositionData[ticker].CountBuy++;
             }
         }
 
@@ -144,14 +145,20 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
                 if (PositionData[ticker].Candle.Low < PositionData[ticker].Stop)
+                {
+                    PositionData[ticker].CountTriggerStop++;
                     ClosePosition(ticker);
+                }
         }
 
         public void CheckStopsChangePosition()
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
                 if (PositionData[ticker].Candle.Low < PositionData[ticker].Stop)
+                {
+                    PositionData[ticker].CountTriggerStop++;
                     ChangePosition(ticker);
+                }
         }
 
         public void ClosePosition(string ticker)
@@ -161,7 +168,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             PositionData[ticker].Size = 0.0;
             Money += PositionData[ticker].Cost;
             PositionData[ticker].Cost = 0.0;
-
+            
             // Покупаем фонд ликвидности
             PositionData[KnownTickers.MON].Weight += 1.0;
             double monSize = Math.Truncate(Money / PositionData[KnownTickers.MON].Candle.Close);
@@ -171,7 +178,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             PositionData[KnownTickers.MON].Size += monSize;
             PositionData[KnownTickers.MON].Cost += monCost;
 
-            AddMessage(ticker, $"Стоп-лосс. Удален {ticker}", KnownColors.LightRed);
+            AddMessage(ticker, $"Стоп-лосс. Закрыта позиция по {ticker}", KnownColors.LightRed);
             AddMessage(KnownTickers.MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
         }
 
@@ -194,7 +201,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 ? KnownTickers.MON
                 : newTopTickers.First();
 
-            AddMessage(ticker, $"Стоп-лосс. Удален {ticker}", KnownColors.LightRed);
+            AddMessage(ticker, $"Стоп-лосс. Закрыта позиция по {ticker}", KnownColors.LightRed);
 
             if (tickerForAdd == KnownTickers.MON)
             {
@@ -217,6 +224,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 PositionData[tickerForAdd].Candle = GetCandle(tickerForAdd) ?? new Candle();
                 PositionData[tickerForAdd].Size = Math.Truncate(Money / PositionData[tickerForAdd].Candle.Close / PositionData[tickerForAdd].Lot) * PositionData[tickerForAdd].Lot;
                 PositionData[tickerForAdd].Cost = PositionData[tickerForAdd].Candle.Close * PositionData[tickerForAdd].Size;
+                PositionData[tickerForAdd].CountBuy++;
 
                 Money -= PositionData[tickerForAdd].Cost;
 
@@ -323,5 +331,15 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
             return priceDynamicSeries;
         }
+
+        public List<TickerStatistic> GetTickerStatistic() =>
+            [.. PositionData.Select(x =>
+                new TickerStatistic
+                {
+                    Ticker = x.Key,
+                    CountBuy = x.Value.CountBuy,
+                    CountTriggerStop = x.Value.CountTriggerStop,
+                    CountTriggerStopPercent = x.Value.CountTriggerStop == 0 ? 0.0 : (Convert.ToDouble(x.Value.CountTriggerStop) / Convert.ToDouble(x.Value.CountBuy) * 100.0).RoundTo(1)
+                })];
     }
 }

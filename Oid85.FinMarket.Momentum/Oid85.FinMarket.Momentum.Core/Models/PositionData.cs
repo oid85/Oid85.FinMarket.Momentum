@@ -9,5 +9,7 @@
         public double Cost { get; set; } = 0.0;
         public double Size { get; set; } = 0.0;
         public double Stop { get; set; } = 0.0;
+        public int CountBuy { get; set; } = 0;
+        public int CountTriggerStop { get; set; } = 0;
     }
 }

@@ -22,6 +22,7 @@ public static class ApplicationMapper
             Yield2025 = DiagramSeriesHelper.GetAnnualPercentageYield(strategy.EquitySeries, 2025),
             Yield2026 = DiagramSeriesHelper.GetAnnualPercentageYield(strategy.EquitySeries, 2026),
             MaxDrawdown = strategy.MaxDrawdown,
-            CurrentDrawdown = strategy.GetCurrentDrawdown()
+            CurrentDrawdown = strategy.GetCurrentDrawdown(),
+            TickerStatistic = strategy.GetTickerStatistic()
         };
 }
