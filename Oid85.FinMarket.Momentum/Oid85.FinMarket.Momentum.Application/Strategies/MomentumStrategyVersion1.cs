@@ -6,6 +6,16 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
     {
         private readonly double DrawdownLimitPercent = 15.0;
 
+        public override List<string> GetDescription()
+        {
+            return [
+                "Версия 1",
+                $"Дни ребалансировки: {string.Join(',', RebalanceDays)}",
+                $"Период {Period} дней",
+                "При срабатывании стопа закрывать позицию и покупать фонд ликвидности"
+                ];
+        }
+
         public override void Execute()
         {
             foreach (var date in Dates)

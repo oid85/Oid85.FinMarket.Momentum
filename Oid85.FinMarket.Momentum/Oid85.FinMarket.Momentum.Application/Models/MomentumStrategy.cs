@@ -8,6 +8,8 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 {
     public class MomentumStrategy
     {
+        public virtual List<string> GetDescription() => [];
+
         public DateOnly From { get; set; } = new DateOnly(2021, 1, 1);
 
         public DateOnly To { get; set; } = DateOnly.FromDateTime(DateTime.Today);

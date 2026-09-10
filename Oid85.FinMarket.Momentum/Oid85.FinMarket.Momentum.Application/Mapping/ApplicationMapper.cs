@@ -1,4 +1,5 @@
-﻿using Oid85.FinMarket.Momentum.Application.Helpers;
+﻿using System.ComponentModel;
+using Oid85.FinMarket.Momentum.Application.Helpers;
 using Oid85.FinMarket.Momentum.Application.Models;
 using Oid85.FinMarket.Momentum.Core.Responses;
 
@@ -9,6 +10,7 @@ public static class ApplicationMapper
     public static MonitorResponse Map(MomentumStrategy strategy) => 
         new ()
         {
+            Description = strategy.GetDescription(),
             ProtocolMessages = [.. strategy.ProtocolMessages.OrderByDescending(x => x.Date)],
             TotalSumLife = strategy.TotalSumLife,
             BacktestSeries = [strategy.EquitySeries, strategy.MoneySeries, strategy.DrawdownSeries],

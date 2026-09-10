@@ -4,6 +4,7 @@ namespace Oid85.FinMarket.Momentum.Core.Responses
 {
     public class MonitorResponse
     {
+        public List<string> Description { get; set; } = [];
         public List<DiagramSeries> BacktestSeries { get; set; } = [];
         public List<DiagramSeries> ShortBacktestSeries { get; set; } = [];
         public List<DiagramSeries> PriceDynamicSeries { get; set; } = [];
