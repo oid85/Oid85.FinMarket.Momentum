@@ -65,5 +65,19 @@ namespace Oid85.FinMarket.Momentum.Application.Helpers
 
             return drawdownSeries;
         }
+
+        public static DiagramSeries GetShortEquitySeries(DiagramSeries equitySeries)
+        {
+            var from = DateOnly.FromDateTime(DateTime.Today.AddMonths(-1));
+            var to = DateOnly.FromDateTime(DateTime.Today);
+
+            return new DiagramSeries()
+            {
+                Name = "Капитал",
+                Color = KnownColors.DarkGreen,
+                ColorFill = KnownColors.Green,
+                Data = [.. equitySeries.Data.Where(x => x.Date >= from && x.Date <= to)],
+            };
+        }
     }
 }

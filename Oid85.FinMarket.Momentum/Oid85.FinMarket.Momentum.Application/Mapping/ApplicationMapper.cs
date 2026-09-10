@@ -12,6 +12,7 @@ public static class ApplicationMapper
             ProtocolMessages = [.. strategy.ProtocolMessages.OrderByDescending(x => x.Date)],
             TotalSumLife = strategy.TotalSumLife,
             BacktestSeries = [strategy.EquitySeries, strategy.MoneySeries, strategy.DrawdownSeries],
+            ShortBacktestSeries = [strategy.ShortEquitySeries],
             PriceDynamicSeries = strategy.GetPriceDynamicSeries(),
             CurrentPositions = strategy.GetCurrentPositions(),
             Yield = DiagramSeriesHelper.GetAnnualPercentageYield(strategy.EquitySeries),
