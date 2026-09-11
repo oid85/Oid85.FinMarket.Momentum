@@ -1,12 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Oid85.FinMarket.Momentum.Application.Helpers;
 using Oid85.FinMarket.Momentum.Application.Interfaces.Repositories;
 using Oid85.FinMarket.Momentum.Application.Interfaces.Services;
 using Oid85.FinMarket.Momentum.Application.Models;
-using Oid85.FinMarket.Momentum.Common.Extensions;
-using Oid85.FinMarket.Momentum.Common.KnownConstants;
-using Oid85.FinMarket.Momentum.Common.Utils;
 using Oid85.FinMarket.Momentum.Core.Configuration;
 using Oid85.FinMarket.Momentum.Core.Models;
 using Oid85.FinMarket.Momentum.Core.Requests;
@@ -57,22 +53,6 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             strategy.Execute();
 
             return Map(strategy);
-        }
-
-        public async Task<BacktestResponse> BacktestAsync(BacktestRequest request)
-        {
-            var momentumSettings = options.Value;
-
-            var from = new DateOnly(2021, 1, 1);
-            var to = DateOnly.FromDateTime(DateTime.Today);
-
-
-
-            var response = new BacktestResponse();
-
-
-
-            return response;
         }
 
         public async Task<EditPortfolioTotalSumResponse> EditPortfolioTotalSumAsync(EditPortfolioTotalSumRequest request)

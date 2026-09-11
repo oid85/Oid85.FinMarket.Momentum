@@ -13,7 +13,8 @@ namespace Oid85.FinMarket.Momentum.WebHost.Controller;
 [Route("api/momentum")]
 [ApiController]
 public class MomentumController(
-    IMomentumService momentumService)
+    IMomentumService momentumService,
+    IBacktestService backtestService)
     : BaseController
 {
     /// <summary>
@@ -28,6 +29,19 @@ public class MomentumController(
         GetResponseAsync(
             () => momentumService.MonitorVersionAsync(request),
             result => new BaseResponse<MonitorResponse> { Result = result });
+
+    /// <summary>
+    /// Выполнить бэктест
+    /// </summary>
+    [HttpPost("backtest")]
+    [ProducesResponseType(typeof(BaseResponse<BacktestResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BaseResponse<BacktestResponse>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(BaseResponse<BacktestResponse>), StatusCodes.Status500InternalServerError)]
+    public Task<IActionResult> BacktestVersion(
+        [FromBody] BacktestRequest request) =>
+        GetResponseAsync(
+            () => backtestService.BacktestAsync(request),
+            result => new BaseResponse<BacktestResponse> { Result = result });
 
     /// <summary>
     /// Редактировать сумму портфеля

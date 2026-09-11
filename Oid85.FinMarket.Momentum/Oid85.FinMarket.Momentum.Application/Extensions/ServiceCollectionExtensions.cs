@@ -13,6 +13,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IDataService, DataService>();
         services.AddScoped<IMomentumService, MomentumService>();
+        services.AddScoped<IBacktestService, BacktestService>();
 
         services.AddKeyedTransient<MomentumStrategy, MomentumStrategyVersion1>(nameof(MomentumStrategyVersion1));
     }
