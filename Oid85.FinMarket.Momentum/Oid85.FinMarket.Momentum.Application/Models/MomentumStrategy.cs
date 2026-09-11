@@ -358,16 +358,15 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
             foreach (var ticker in tickers)
             {
-                var candlesByDates = CandleData[ticker].Where(x => x.Date >= from && x.Date <= to).ToList();
-                double stop = PositionData[ticker].Stop;
-
+                var candles = CandleData[ticker].Where(x => x.Date >= from && x.Date <= to).ToList();
+                
                 series.Add(
                     new DiagramSeries
                     {
                         Name = ticker,
                         Color = KnownColors.Blue,
                         ColorFill = KnownColors.LightBlue,
-                        Data = [.. candlesByDates
+                        Data = [.. candles
                         .Select(x =>
                         new DateValue<double?>
                         {
@@ -394,7 +393,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
             foreach (var ticker in tickers)
             {
-                var candlesByDates = CandleData[ticker].Where(x => x.Date >= from && x.Date <= to).ToList();
+                var candles = CandleData[ticker].Where(x => x.Date >= from && x.Date <= to).ToList();
                 double stop = PositionData[ticker].Stop;
 
                 series.Add([
@@ -403,7 +402,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                         Name = $"Цена '{ticker}'",
                         Color = KnownColors.Blue,
                         ColorFill = KnownColors.LightBlue,
-                        Data = [.. candlesByDates
+                        Data = [.. candles
                         .Select(x =>
                         new DateValue<double?>
                         {
@@ -416,7 +415,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                         Name = $" SL '{ticker}'",
                         Color = KnownColors.Red,
                         ColorFill = KnownColors.Red,
-                        Data = [.. candlesByDates
+                        Data = [.. candles
                         .Select(x =>
                         new DateValue<double?>
                         {
