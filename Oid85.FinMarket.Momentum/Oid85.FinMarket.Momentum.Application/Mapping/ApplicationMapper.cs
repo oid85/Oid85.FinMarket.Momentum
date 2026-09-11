@@ -16,6 +16,7 @@ public static class ApplicationMapper
             ShortBacktestSeries = [strategy.ShortEquitySeries],
             PriceDynamicSeries = strategy.GetPriceDynamicSeries(),
             PriceSeries = strategy.GetPriceSeries(),
+            PriceWithStopSeries = strategy.GetPriceWithStopSeries(),
             CurrentPositions = strategy.GetCurrentPositions(),
             Yield = DiagramSeriesHelper.GetAnnualPercentageYield(strategy.EquitySeries),
             Yield2021 = DiagramSeriesHelper.GetAnnualPercentageYield(strategy.EquitySeries, 2021),
