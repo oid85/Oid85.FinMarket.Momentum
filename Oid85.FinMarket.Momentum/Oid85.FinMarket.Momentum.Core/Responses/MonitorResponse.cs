@@ -19,8 +19,11 @@ namespace Oid85.FinMarket.Momentum.Core.Responses
         public double Yield2024 { get; set; }
         public double Yield2025 { get; set; }
         public double Yield2026 { get; set; }
+        public double YieldQuarter { get; set; }
+        public double YieldMonth { get; set; }
+        public double YieldPeriod { get; set; }
         public double MaxDrawdown { get; set; }
         public double CurrentDrawdown { get; set; }
-        public double TotalSumLife { get; set; }        
+        public double TotalSumLife { get; set; }
     }
 }

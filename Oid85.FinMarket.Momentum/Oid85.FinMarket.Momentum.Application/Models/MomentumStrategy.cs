@@ -282,6 +282,8 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 double baseUnit = TotalSumLife / WeightSum;
                 double tickerCost = baseUnit * PositionData[ticker].Weight;
                 int tickerSize = Convert.ToInt32(Math.Truncate(tickerCost / candle!.Close / lot) * lot);
+                double stop = ticker == KnownTickers.MON ? 0.0 : PositionData[ticker].Stop.RoundTo(4);
+                double stopPercent = candle.Close == 0.0 || stop == 0.0 ? 0.0 : Math.Abs((candle.Close - stop) / candle.Close * 100.0).RoundTo(1);
 
                 currentPositions.Add(
                     new PortfolioPosition
@@ -290,7 +292,8 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                         Weight = PositionData[ticker].Weight,
                         Size = tickerSize,
                         Cost = tickerCost.RoundTo(2),
-                        StopPrice = ticker == KnownTickers.MON ? 0.0 : PositionData[ticker].Stop.RoundTo(4)
+                        StopPrice = stop,
+                        StopPercent = stopPercent
                     });
             }
 

@@ -8,5 +8,6 @@
         public int Size { get; set; }
         public double Cost { get; set; }
         public double StopPrice { get; set; }
+        public double StopPercent { get; set; }
     }
 }

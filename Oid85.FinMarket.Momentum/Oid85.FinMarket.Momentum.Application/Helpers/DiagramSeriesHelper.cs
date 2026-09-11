@@ -6,11 +6,9 @@ namespace Oid85.FinMarket.Momentum.Application.Helpers
 {
     public class DiagramSeriesHelper
     {
-        public static double GetAnnualPercentageYield(DiagramSeries equitySeries, int year = 0)
+        public static double GetAnnualPercentageYield(DiagramSeries equitySeries)
         {
-            var dataValues = year != 0
-                ? equitySeries.Data.Where(x => x.Date.Year == year)
-                : equitySeries.Data;
+            var dataValues = equitySeries.Data;
 
             double firstValue = dataValues.First().Value ?? 0.0;
             double lastValue = dataValues.Last().Value ?? 0.0;
@@ -18,11 +16,38 @@ namespace Oid85.FinMarket.Momentum.Application.Helpers
             var firstDate = dataValues.First().Date.ToDateTime(TimeOnly.MinValue);
             var lastDate = dataValues.Last().Date.ToDateTime(TimeOnly.MaxValue);
 
-            if (lastValue == 0.0) return 0.0;
+            if (firstValue == 0.0) return 0.0;
 
             var years = (lastDate - firstDate).TotalDays / 365.0;
 
             return ((lastValue - firstValue) / firstValue * 100.0 / years).RoundTo(1);
+        }
+
+        public static double GetAnnualPercentageYield(DiagramSeries equitySeries, int year = 0)
+        {
+            var dataValues = equitySeries.Data.Where(x => x.Date.Year == year);
+
+            double firstValue = dataValues.First().Value ?? 0.0;
+            double lastValue = dataValues.Last().Value ?? 0.0;
+
+            if (firstValue == 0.0) return 0.0;
+
+            return ((lastValue - firstValue) / firstValue * 100.0).RoundTo(1);
+        }
+
+        public static double GetPercentageYield(DiagramSeries equitySeries, int days)
+        {
+            var from = DateOnly.FromDateTime(DateTime.Today).AddDays(-1 * days);
+            var to = DateOnly.FromDateTime(DateTime.Today);
+
+            var dataValues = equitySeries.Data.Where(x => x.Date >= from && x.Date <= to);
+
+            double firstValue = dataValues.First().Value ?? 0.0;
+            double lastValue = dataValues.Last().Value ?? 0.0;
+
+            if (firstValue == 0.0) return 0.0;
+
+            return ((lastValue - firstValue) / firstValue * 100.0).RoundTo(1);
         }
 
         public static DiagramSeries GetDrawdownSeries(DiagramSeries equitySeries, bool inPercent = false)
