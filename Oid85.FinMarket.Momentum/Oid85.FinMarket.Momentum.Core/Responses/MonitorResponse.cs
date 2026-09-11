@@ -20,6 +20,7 @@ namespace Oid85.FinMarket.Momentum.Core.Responses
         public double Yield2024 { get; set; }
         public double Yield2025 { get; set; }
         public double Yield2026 { get; set; }
+        public double YieldYear { get; set; }
         public double YieldQuarter { get; set; }
         public double YieldMonth { get; set; }
         public double YieldPeriod { get; set; }

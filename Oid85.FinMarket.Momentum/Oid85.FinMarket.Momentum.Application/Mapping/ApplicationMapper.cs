@@ -25,6 +25,7 @@ public static class ApplicationMapper
             Yield2024 = DiagramSeriesHelper.GetAnnualPercentageYield(strategy.EquitySeries, 2024),
             Yield2025 = DiagramSeriesHelper.GetAnnualPercentageYield(strategy.EquitySeries, 2025),
             Yield2026 = DiagramSeriesHelper.GetAnnualPercentageYield(strategy.EquitySeries, 2026),
+            YieldYear = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, 365),
             YieldQuarter = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, 90),
             YieldMonth = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, 30),
             YieldPeriod = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, strategy.Period),

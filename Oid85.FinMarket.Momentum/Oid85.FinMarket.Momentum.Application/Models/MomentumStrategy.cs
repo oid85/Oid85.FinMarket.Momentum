@@ -27,6 +27,8 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public double StartMoneySum { get; set; } = 0.0;
 
+        public double EndMoneySum => EquitySeries.Data is [] ? StartMoneySum : EquitySeries.Data.Last().Value ?? StartMoneySum;
+
         public double Money { get; set; } = 0.0;
 
         public List<int> RebalanceDays { get; set; } = [];
