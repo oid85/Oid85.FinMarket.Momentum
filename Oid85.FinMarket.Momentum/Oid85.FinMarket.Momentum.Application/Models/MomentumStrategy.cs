@@ -1,4 +1,5 @@
-﻿using Oid85.FinMarket.Momentum.Application.Helpers;
+﻿using System.Globalization;
+using Oid85.FinMarket.Momentum.Application.Helpers;
 using Oid85.FinMarket.Momentum.Common.Extensions;
 using Oid85.FinMarket.Momentum.Common.KnownConstants;
 using Oid85.FinMarket.Momentum.Common.Utils;
@@ -73,8 +74,12 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public void AddRebalanceMessage()
         {
+            var nfi = new NumberFormatInfo();
+            nfi.NumberDecimalSeparator = ",";
+            nfi.NumberGroupSeparator = " ";
+
             foreach (var ticker in PortfolioWithoutMonTickers)
-                AddMessage(ticker, $"Ребалансировка моментума. Позиция {ticker}", KnownColors.LightGreen);
+                AddMessage(ticker, $"Ребалансировка моментума. Позиция {ticker}, {PositionData[ticker].Size.ToString("N0", nfi)} шт., {PositionData[ticker].Cost.RoundTo(2).ToString("N", nfi)} руб., СЛ {PositionData[ticker].Stop.RoundTo(2).ToString("N", nfi)} руб.", KnownColors.LightGreen);
         }
 
         public void ClearMessages() => ProtocolMessages.Clear();
@@ -357,8 +362,8 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                     new DiagramSeries
                     {
                         Name = ticker,
-                        Color = KnownColors.DarkBlue,
-                        ColorFill = KnownColors.DarkBlue,
+                        Color = KnownColors.Blue,
+                        ColorFill = KnownColors.LightBlue,
                         Data = [.. candlesByDates
                         .Select(x =>
                         new DateValue<double?>
@@ -373,13 +378,15 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         }
 
         public List<TickerStatistic> GetTickerStatistic() =>
-            [.. PositionData.Select(x =>
-                new TickerStatistic
-                {
-                    Ticker = x.Key,
-                    CountBuy = x.Value.CountBuy,
-                    CountTriggerStop = x.Value.CountTriggerStop,
-                    CountTriggerStopPercent = x.Value.CountTriggerStop == 0 ? 0.0 : (Convert.ToDouble(x.Value.CountTriggerStop) / Convert.ToDouble(x.Value.CountBuy) * 100.0).RoundTo(1)
-                })];
+            [.. PositionData
+                .Select(x =>
+                    new TickerStatistic
+                    {
+                        Ticker = x.Key,
+                        CountBuy = x.Value.CountBuy,
+                        CountTriggerStop = x.Value.CountTriggerStop,
+                        CountTriggerStopPercent = x.Value.CountTriggerStop == 0 ? 0.0 : (Convert.ToDouble(x.Value.CountTriggerStop) / Convert.ToDouble(x.Value.CountBuy) * 100.0).RoundTo(1)
+                    })
+                .Where(x => x.Ticker != KnownTickers.MON)];
     }
 }
