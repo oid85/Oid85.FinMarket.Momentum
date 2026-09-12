@@ -6,8 +6,8 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
     {
         private readonly double DrawdownLimitPercent = 15.0;
 
-        public override int Period => 10;
-        public override int CounTopTickers => 10;
+        public override int Period => 15;
+        public override int CounTopTickers => 8;
         public override List<int> RebalanceDays => [1, 11, 21];
 
         public override List<string> GetDescription()
