@@ -35,13 +35,11 @@ namespace Oid85.FinMarket.Momentum.Infrastructure.Database.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task<List<StrategyExecuteResult>> GetAsync(string strategyName)
+        public async Task<List<StrategyExecuteResult>> GetAsync()
         {
             await using var context = await contextFactory.CreateDbContextAsync();
 
-            var queryableEntities = context.StrategyExecuteResultEntities.AsQueryable();
-
-            queryableEntities = queryableEntities.Where(x => x.StrategyName == strategyName);
+            var queryableEntities = context.StrategyExecuteResultEntities.AsQueryable();            
 
             var entities = await queryableEntities.AsNoTracking().ToListAsync();
 
@@ -72,6 +70,7 @@ namespace Oid85.FinMarket.Momentum.Infrastructure.Database.Repositories
         private static StrategyExecuteResult Map(StrategyExecuteResultEntity entity) => 
             new()
             {
+                Id = entity.Id,
                 StartDate = entity.StartDate,
                 EndDate = entity.EndDate,
                 Tickers = JsonSerializer.Deserialize<List<string>>(entity.Tickers)!,

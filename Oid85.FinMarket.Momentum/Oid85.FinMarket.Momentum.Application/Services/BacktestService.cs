@@ -112,5 +112,37 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         }
                     }
         }
+
+        public async Task<BacktestResultResponse> BacktestResultAsync(BacktestResultRequest request)
+        {
+            var strategyExecuteResults = await strategyExecuteResultRepository.GetAsync();
+
+            return new BacktestResultResponse
+            {
+                BacktestResults = [.. strategyExecuteResults
+                    .Select(x =>
+                    new BacktestResult
+                    {
+                        Id = x.Id,
+                        StrategyName = x.StrategyName,
+                        StrategyParams = x.StrategyParams,
+                        RecoveryFactor = x.RecoveryFactor,
+                        NetProfit = x.NetProfit,
+                        AnnualYieldReturn = x.AnnualYieldReturn,
+                    })
+                    .OrderByDescending(x => x.AnnualYieldReturn)],
+                /*
+                EquitySeries = [.. strategyExecuteResults
+                    .Select(x =>
+                    new DiagramSeries
+                    {
+                        Name = $"{x.StrategyName} {x.StrategyParams}",
+                        Color = KnownColors.DarkBlue,
+                        ColorFill = KnownColors.DarkBlue,
+                        Data = x.EquityCurve
+                    })]
+                */
+            };
+        }
     }
 }

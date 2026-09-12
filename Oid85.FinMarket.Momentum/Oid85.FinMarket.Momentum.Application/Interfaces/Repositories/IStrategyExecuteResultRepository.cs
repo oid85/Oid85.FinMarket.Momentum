@@ -6,7 +6,7 @@ namespace Oid85.FinMarket.Momentum.Application.Interfaces.Repositories
     {
         Task AddAsync(List<StrategyExecuteResult> strategyExecuteResults);
         Task<List<StrategyExecuteResult>> GetFilteredAsync();
-        Task<List<StrategyExecuteResult>> GetAsync(string strategyName);
+        Task<List<StrategyExecuteResult>> GetAsync();
         Task DeleteAsync();
     }
 }

@@ -37,11 +37,24 @@ public class MomentumController(
     [ProducesResponseType(typeof(BaseResponse<BacktestResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BaseResponse<BacktestResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(BaseResponse<BacktestResponse>), StatusCodes.Status500InternalServerError)]
-    public Task<IActionResult> BacktestVersion(
+    public Task<IActionResult> Backtest(
         [FromBody] BacktestRequest request) =>
         GetResponseAsync(
             () => backtestService.BacktestAsync(request),
             result => new BaseResponse<BacktestResponse> { Result = result });
+
+    /// <summary>
+    /// Результаты бектеста
+    /// </summary>
+    [HttpPost("backtest/result")]
+    [ProducesResponseType(typeof(BaseResponse<BacktestResultResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BaseResponse<BacktestResultResponse>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(BaseResponse<BacktestResultResponse>), StatusCodes.Status500InternalServerError)]
+    public Task<IActionResult> BacktestResult(
+        [FromBody] BacktestResultRequest request) =>
+        GetResponseAsync(
+            () => backtestService.BacktestResultAsync(request),
+            result => new BaseResponse<BacktestResultResponse> { Result = result });
 
     /// <summary>
     /// Редактировать сумму портфеля
