@@ -115,11 +115,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
         public async Task<BacktestResultResponse> BacktestResultAsync(BacktestResultRequest request)
         {
-            var strategyExecuteResults = await strategyExecuteResultRepository.GetAsync();
+            var strategyExecuteResults = await strategyExecuteResultRepository.GetFilteredAsync();
 
-            return new BacktestResultResponse
-            {
-                BacktestResults = [.. strategyExecuteResults
+            var orderedBacktestResults = strategyExecuteResults
                     .Select(x =>
                     new BacktestResult
                     {
@@ -130,8 +128,17 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         NetProfit = x.NetProfit,
                         AnnualYieldReturn = x.AnnualYieldReturn,
                     })
-                    .OrderByDescending(x => x.AnnualYieldReturn)],
-                /*
+                    .OrderByDescending(x => x.AnnualYieldReturn)
+                    .ToList();
+
+            int number = 1;
+            foreach (var orderedBacktestResult in orderedBacktestResults)
+                orderedBacktestResult.Number = number++;
+
+            return new BacktestResultResponse
+            {
+                BacktestResults = orderedBacktestResults,
+
                 EquitySeries = [.. strategyExecuteResults
                     .Select(x =>
                     new DiagramSeries
@@ -140,8 +147,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         Color = KnownColors.DarkBlue,
                         ColorFill = KnownColors.DarkBlue,
                         Data = x.EquityCurve
-                    })]
-                */
+                    })
+                    .Take(20)]
             };
         }
     }
