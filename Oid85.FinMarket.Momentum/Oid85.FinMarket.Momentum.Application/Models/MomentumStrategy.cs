@@ -441,16 +441,32 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             return series;
         }
 
-        public List<TickerStatistic> GetTickerStatistic() =>
-            [.. PositionData
-                .Select(x =>
+        public List<TickerStatistic> GetTickerStatistic()
+        {
+            var tickerStatistics = new List<TickerStatistic>();
+
+            foreach (var (ticker, data) in PositionData)
+            {
+                tickerStatistics.Add(
                     new TickerStatistic
                     {
-                        Ticker = x.Key,
-                        CountBuy = x.Value.CountBuy,
-                        CountTriggerStop = x.Value.CountTriggerStop,
-                        CountTriggerStopPercent = x.Value.CountTriggerStop == 0 ? 0.0 : (Convert.ToDouble(x.Value.CountTriggerStop) / Convert.ToDouble(x.Value.CountBuy) * 100.0).RoundTo(1)
-                    })
-                .Where(x => x.Ticker != KnownTickers.MON)];
+                        Ticker = ticker,
+                        CountBuy = data.CountBuy,
+                        CountTriggerStop = data.CountTriggerStop,
+                        CountTriggerStopPercent = data.CountTriggerStop == 0 ? 0.0 : (Convert.ToDouble(data.CountTriggerStop) / Convert.ToDouble(data.CountBuy) * 100.0).RoundTo(1)
+                    });
+            }
+
+            var orderedTickerStatistics = tickerStatistics
+                .OrderBy(x => x.Ticker)
+                .Where(x => x.Ticker != KnownTickers.MON)
+                .ToList();
+
+            int number = 1;
+            foreach (var orderedTickerStatistic in orderedTickerStatistics)
+                orderedTickerStatistic.Number = number++;
+
+            return orderedTickerStatistics;
+        }
     }
 }

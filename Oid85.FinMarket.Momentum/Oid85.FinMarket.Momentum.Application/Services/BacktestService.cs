@@ -18,7 +18,6 @@ namespace Oid85.FinMarket.Momentum.Application.Services
     public class BacktestService(
         IOptions<MomentumSettings> options,
         IDataService dataService,
-        IParameterRepository parameterRepository,
         IStrategyExecuteResultRepository strategyExecuteResultRepository,
         IServiceProvider serviceProvider) 
         : IBacktestService
@@ -54,8 +53,6 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             strategy.From = _from;
             strategy.To = _to;
-            
-            // strategy.TotalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum:Momentum")) ?? "0").Replace(" ", "").Trim());
 
             strategy.CandleData = _candleData;            
             strategy.PositionData = _tickers.ToDictionary(k => k, v => new PositionData { Ticker = v, Lot = _instrumentData[v].Lot ?? 1 });
