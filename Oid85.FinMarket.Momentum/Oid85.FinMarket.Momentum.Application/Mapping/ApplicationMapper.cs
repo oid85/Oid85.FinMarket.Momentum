@@ -1,12 +1,13 @@
 ﻿using Oid85.FinMarket.Momentum.Application.Helpers;
 using Oid85.FinMarket.Momentum.Application.Models;
+using Oid85.FinMarket.Momentum.Core.Models;
 using Oid85.FinMarket.Momentum.Core.Responses;
 
 namespace Oid85.FinMarket.Momentum.Application.Mapping;
 
 public static class ApplicationMapper
 {
-    public static MonitorResponse Map(MomentumStrategy strategy) => 
+    public static MonitorResponse ToMonitorResponse(MomentumStrategy strategy) => 
         new ()
         {
             Description = strategy.GetDescription(),
@@ -28,9 +29,25 @@ public static class ApplicationMapper
             YieldYear = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, 365),
             YieldQuarter = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, 90),
             YieldMonth = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, 30),
-            YieldPeriod = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, strategy.ParameterPeriod),
+            YieldPeriod = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, strategy.Period),
             MaxDrawdownPercent = strategy.MaxDrawdownPercent,
             CurrentDrawdownPercent = strategy.GetCurrentDrawdown(),
             TickerStatistic = strategy.GetTickerStatistic()
+        };
+
+    public static StrategyExecuteResult ToStrategyExecuteResult(MomentumStrategy strategy) =>
+        new()
+        {
+            StartDate = strategy.From,
+            EndDate = strategy.To,
+            Tickers = strategy.Tickers,
+            RecoveryFactor = strategy.RecoveryFactor,
+            NetProfit = strategy.NetProfit,
+            MaxDrawdownPercent = strategy.MaxDrawdownPercent,
+            StartMoney = strategy.StartMoneySum,
+            EndMoney = strategy.EndMoneySum,
+            TotalReturn = strategy.TotalReturn,
+            AnnualYieldReturn = strategy.AnnualYieldReturn,
+            EquityCurve = strategy.EquitySeries.Data
         };
 }
