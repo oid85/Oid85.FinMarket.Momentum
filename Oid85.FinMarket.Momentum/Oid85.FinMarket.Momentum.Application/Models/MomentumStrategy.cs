@@ -51,10 +51,16 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public double MaxDrawdownPercent => DrawdownSeriesPercent.Data.Where(x => x.Value.HasValue).Min(x => x.Value!.Value).RoundTo(1);
 
-        public double RecoveryFactor { get; set; } = 0.0;
-        public double NetProfit { get; set; } = 0.0;
-        public double TotalReturn { get; set; } = 0.0;
-        public double AnnualYieldReturn => DiagramSeriesHelper.GetAnnualPercentageYield(EquitySeries);
+        public double MaxDrawdown => DrawdownSeries.Data.Where(x => x.Value.HasValue).Min(x => x.Value!.Value).RoundTo(1);
+
+        public double RecoveryFactor => MaxDrawdown == 0.0 ? double.PositiveInfinity : Math.Abs(NetProfit / MaxDrawdown).RoundTo(1);
+
+        public double NetProfit => EndMoneySum > StartMoneySum ? (EndMoneySum - StartMoneySum).RoundTo(1) : 0.0;
+        
+        public double TotalReturn => EndMoneySum > StartMoneySum ? ((EndMoneySum - StartMoneySum) / StartMoneySum * 100.0).RoundTo(1) : 0.0;
+
+        public double AnnualYieldReturn => EndMoneySum > StartMoneySum ? (TotalReturn / ((To.DayNumber - From.DayNumber) / 365.0)).RoundTo(1) : 0.0;
+
         public List<string> Tickers => [.. PositionData.Keys];
 
         public List<string> TopTickers { get; set; } = [];
