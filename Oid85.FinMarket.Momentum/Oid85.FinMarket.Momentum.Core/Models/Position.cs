@@ -1,6 +1,6 @@
 ﻿namespace Oid85.FinMarket.Momentum.Core.Models
 {
-    public class PortfolioPosition
+    public class Position
     {
         public int Number { get; set; }
         public string Ticker { get; set; } = string.Empty;

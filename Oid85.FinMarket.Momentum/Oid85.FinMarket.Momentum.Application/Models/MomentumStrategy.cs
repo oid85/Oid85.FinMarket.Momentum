@@ -9,6 +9,12 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 {
     public class MomentumStrategy
     {
+        public int ParameterPeriod { get; set; }
+
+        public int ParameterCounTopTickers { get; set; }
+
+        public List<int> ParameterRebalanceDays { get; set; } = [];
+
         public virtual List<string> GetDescription() => [];
 
         public DateOnly From { get; set; } = new DateOnly(2021, 1, 1);
@@ -16,10 +22,6 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         public DateOnly To { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
         public List<DateOnly> Dates => DateUtils.GetDates(From, To);
-
-        public int Period { get; set; }
-
-        public int CounTopTickers { get; set; }
 
         public double TotalSumLife { get; set; } = 0.0;
 
@@ -29,15 +31,13 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public double EndMoneySum => EquitySeries.Data is [] ? StartMoneySum : EquitySeries.Data.Last().Value ?? StartMoneySum;
 
-        public double Money { get; set; } = 0.0;
-
-        public List<int> RebalanceDays { get; set; } = [];
+        public double Money { get; set; } = 0.0;        
 
         public Dictionary<string, PositionData> PositionData { get; set; } = [];
 
         public Dictionary<string, List<Candle>> CandleData { get; set; } = [];
 
-        public List<ProtocolMessage> ProtocolMessages { get; set; } = [];
+        public List<MomentumMessage> Messages { get; set; } = [];
 
         public DiagramSeries EquitySeries { get; set; } = new() { Name = "Капитал", Color = KnownColors.Green, ColorFill = KnownColors.Green };
 
@@ -49,7 +49,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public DiagramSeries DrawdownSeriesPercent => DiagramSeriesHelper.GetDrawdownSeries(EquitySeries, true);
 
-        public double MaxDrawdown => DrawdownSeriesPercent.Data.Where(x => x.Value.HasValue).Min(x => x.Value!.Value).RoundTo(1);
+        public double MaxDrawdownPercent => DrawdownSeriesPercent.Data.Where(x => x.Value.HasValue).Min(x => x.Value!.Value).RoundTo(1);
 
         public List<string> Tickers => [.. PositionData.Keys];
 
@@ -63,7 +63,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public double CostSum => PositionData.Values.Sum(x => x.Cost);
 
-        public bool IsRebalance => RebalanceDays.Contains(CurrentDate.Day);
+        public bool IsRebalance => ParameterRebalanceDays.Contains(CurrentDate.Day);
 
         public DateOnly CurrentDate { get; set; } = DateOnly.MinValue;
 
@@ -72,7 +72,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         }
 
-        public void AddMessage(string ticker, string message, string colorFill) => ProtocolMessages.Add(new() { Date = CurrentDate, Ticker = ticker, Message = message, ColorFill = colorFill });
+        public void AddMessage(string ticker, string message, string colorFill) => Messages.Add(new() { Date = CurrentDate, Ticker = ticker, Message = message, ColorFill = colorFill });
 
         public void AddRebalanceMessage()
         {
@@ -84,11 +84,11 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 AddMessage(ticker, $"Ребалансировка моментума. Позиция {ticker}, {PositionData[ticker].Size.ToString("N0", nfi)} шт., {PositionData[ticker].Cost.RoundTo(2).ToString("N", nfi)} руб., СЛ {PositionData[ticker].Stop.RoundTo(2).ToString("N", nfi)} руб.", KnownColors.LightGreen);
         }
 
-        public void ClearMessages() => ProtocolMessages.Clear();
+        public void ClearMessages() => Messages.Clear();
 
         public Candle? GetCandle(string ticker) => CandleData[ticker].FindLast(x => x.Date <= CurrentDate);
 
-        public void SetTopTickers() => TopTickers = [.. MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate, Period, CounTopTickers), KnownTickers.MON];
+        public void SetTopTickers() => TopTickers = [.. MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate, ParameterPeriod, ParameterCounTopTickers), KnownTickers.MON];
 
         public void SetWeights()
         {
@@ -98,7 +98,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             foreach (var ticker in TopTickers) 
                 PositionData[ticker].Weight = 1.0;
 
-            PositionData[KnownTickers.MON].Weight = CounTopTickers - TopTickers.Count(x => x != KnownTickers.MON);
+            PositionData[KnownTickers.MON].Weight = ParameterCounTopTickers - TopTickers.Count(x => x != KnownTickers.MON);
         }
 
         public void UpdateCandles()
@@ -110,7 +110,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         public void SetStops()
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
-                PositionData[ticker].Stop = MomentumHelper.GetStopPrice(CandleData[ticker], PositionData[ticker].Candle.Close, CurrentDate, Period);
+                PositionData[ticker].Stop = MomentumHelper.GetStopPrice(CandleData[ticker], PositionData[ticker].Candle.Close, CurrentDate, ParameterPeriod);
         }
 
         public void SetSizes()
@@ -205,7 +205,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             PositionData[tickerForRemove].Cost = 0.0;
 
             // Определяем новых лидеров
-            var newTopTickers = MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate, Period, CounTopTickers)
+            var newTopTickers = MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate, ParameterPeriod, ParameterCounTopTickers)
                 .Where(x => !currentTickers.Contains(x)).Where(x => x != KnownTickers.MON).ToList();
 
             var tickerForAdd = newTopTickers.Count == 0
@@ -273,9 +273,9 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             return -1 * Math.Abs((maxEquity - lastEquity) / maxEquity * 100.0).RoundTo(1);
         }
 
-        public List<PortfolioPosition> GetCurrentPositions()
+        public List<Position> GetCurrentPositions()
         {
-            var currentPositions = new List<PortfolioPosition>();
+            var currentPositions = new List<Position>();
 
             foreach (var ticker in PortfolioTickers)
             {
@@ -288,7 +288,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 double stopPercent = candle.Close == 0.0 || stop == 0.0 ? 0.0 : Math.Abs((candle.Close - stop) / candle.Close * 100.0).RoundTo(1);
 
                 currentPositions.Add(
-                    new PortfolioPosition
+                    new Position
                     {
                         Ticker = ticker,
                         Weight = PositionData[ticker].Weight,
@@ -299,7 +299,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                     });
             }
 
-            List<PortfolioPosition> orderedCurrentPositions = [
+            List<Position> orderedCurrentPositions = [
                     .. currentPositions.Where(x => x.Ticker != KnownTickers.MON).OrderBy(x => x.Ticker),
                     .. currentPositions.Where(x => x.Ticker == KnownTickers.MON)
                     ];
@@ -315,7 +315,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         {
             var priceDynamicSeries = new List<DiagramSeries>();            
 
-            var from = DateOnly.FromDateTime(DateTime.Today).AddDays(-1 * Period);
+            var from = DateOnly.FromDateTime(DateTime.Today).AddDays(-1 * ParameterPeriod);
             var to = DateOnly.FromDateTime(DateTime.Today);
 
             foreach (var (ticker, candleList) in CandleData.Where(x => x.Key != KnownTickers.MON))
@@ -385,7 +385,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         {
             var series = new List<List<DiagramSeries>>();
 
-            var from = DateOnly.FromDateTime(DateTime.Today.AddMonths(-1));
+            var from = DateOnly.FromDateTime(DateTime.Today.AddDays(-15));
             var to = DateOnly.FromDateTime(DateTime.Today);
 
             List<string> tickers = [

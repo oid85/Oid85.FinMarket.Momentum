@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Oid85.FinMarket.Momentum.Infrastructure.Database;
@@ -11,9 +12,11 @@ using Oid85.FinMarket.Momentum.Infrastructure.Database;
 namespace Oid85.FinMarket.Momentum.Infrastructure.Migrations
 {
     [DbContext(typeof(MomentumContext))]
-    partial class AlgoContextModelSnapshot : ModelSnapshot
+    [Migration("20260912072933_12092026_1")]
+    partial class _12092026_1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,6 +66,9 @@ namespace Oid85.FinMarket.Momentum.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<double>("MaxDrawdown")
+                        .HasColumnType("double precision");
+
                     b.Property<double>("MaxDrawdownPercent")
                         .HasColumnType("double precision");
 
@@ -82,6 +88,10 @@ namespace Oid85.FinMarket.Momentum.Infrastructure.Migrations
                     b.Property<double>("StartMoney")
                         .HasColumnType("double precision");
 
+                    b.Property<string>("StrategyDescription")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("StrategyName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -90,7 +100,7 @@ namespace Oid85.FinMarket.Momentum.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Tickers")
+                    b.Property<string>("Ticker")
                         .IsRequired()
                         .HasColumnType("text");
 

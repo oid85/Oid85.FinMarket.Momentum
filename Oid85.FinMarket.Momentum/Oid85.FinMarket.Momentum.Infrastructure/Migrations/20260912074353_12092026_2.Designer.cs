@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Oid85.FinMarket.Momentum.Infrastructure.Database;
@@ -11,9 +12,11 @@ using Oid85.FinMarket.Momentum.Infrastructure.Database;
 namespace Oid85.FinMarket.Momentum.Infrastructure.Migrations
 {
     [DbContext(typeof(MomentumContext))]
-    partial class AlgoContextModelSnapshot : ModelSnapshot
+    [Migration("20260912074353_12092026_2")]
+    partial class _12092026_2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,6 +65,9 @@ namespace Oid85.FinMarket.Momentum.Infrastructure.Migrations
                     b.Property<string>("EquityCurve")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<double>("MaxDrawdown")
+                        .HasColumnType("double precision");
 
                     b.Property<double>("MaxDrawdownPercent")
                         .HasColumnType("double precision");

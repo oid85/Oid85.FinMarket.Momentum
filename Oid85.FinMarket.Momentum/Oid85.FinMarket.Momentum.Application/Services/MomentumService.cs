@@ -30,9 +30,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             strategy.StartMoneySum = momentumSettings.StartMoneySum;
             strategy.Money = momentumSettings.StartMoneySum;
             strategy.TotalSum = momentumSettings.StartMoneySum;
-            strategy.Period = momentumSettings.Period;
-            strategy.CounTopTickers = momentumSettings.CountTopTickers;
-            strategy.RebalanceDays = momentumSettings.RebalanceDays;
+            strategy.ParameterPeriod = momentumSettings.Period;
+            strategy.ParameterCounTopTickers = momentumSettings.CountTopTickers;
+            strategy.ParameterRebalanceDays = momentumSettings.RebalanceDays;
 
             var from = new DateOnly(2021, 1, 1);
             var to = DateOnly.FromDateTime(DateTime.Today);

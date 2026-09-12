@@ -8,6 +8,7 @@ namespace Oid85.FinMarket.Momentum.Infrastructure.Database;
 public class MomentumContext(DbContextOptions<MomentumContext> options) : DbContext(options)
 {
     public DbSet<ParameterEntity> ParameterEntities { get; set; }
+    public DbSet<StrategyExecuteResultEntity> StrategyExecuteResultEntities { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

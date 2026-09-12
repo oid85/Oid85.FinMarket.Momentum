@@ -10,7 +10,7 @@ public static class ApplicationMapper
         new ()
         {
             Description = strategy.GetDescription(),
-            ProtocolMessages = [.. strategy.ProtocolMessages.OrderByDescending(x => x.Date)],
+            Messages = [.. strategy.Messages.OrderByDescending(x => x.Date)],
             TotalSumLife = strategy.TotalSumLife,
             BacktestSeries = [strategy.EquitySeries, strategy.MoneySeries, strategy.DrawdownSeries],
             ShortBacktestSeries = [strategy.ShortEquitySeries],
@@ -28,9 +28,9 @@ public static class ApplicationMapper
             YieldYear = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, 365),
             YieldQuarter = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, 90),
             YieldMonth = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, 30),
-            YieldPeriod = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, strategy.Period),
-            MaxDrawdown = strategy.MaxDrawdown,
-            CurrentDrawdown = strategy.GetCurrentDrawdown(),
+            YieldPeriod = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, strategy.ParameterPeriod),
+            MaxDrawdownPercent = strategy.MaxDrawdownPercent,
+            CurrentDrawdownPercent = strategy.GetCurrentDrawdown(),
             TickerStatistic = strategy.GetTickerStatistic()
         };
 }
