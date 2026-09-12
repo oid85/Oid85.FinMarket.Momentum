@@ -22,6 +22,10 @@ namespace Oid85.FinMarket.Momentum.Application.Services
         IServiceProvider serviceProvider) 
         : IBacktestService
     {
+        private List<int> _parameterListPeriod = [10, 15, 30];
+        private List<int> _parameterListCounTopTickers = [8, 10];
+        private List<List<int>> _parameterListRebalanceDays = [[1], [1, 16], [1, 11, 21]];
+
         private readonly DateOnly _from = new DateOnly(2021, 1, 1);
         private readonly DateOnly _to = DateOnly.FromDateTime(DateTime.Today);
         private List<string> _tickers = [];
@@ -45,11 +49,15 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             return new ();
         }
 
-        public async Task BacktestVersion1()
+        private async Task BacktestVersion1()
         {
             var momentumSettings = options.Value;
 
             var strategy = serviceProvider.GetRequiredKeyedService<MomentumStrategy>(nameof(MomentumStrategyVersion1));
+
+            List<int> ParameterListPeriod = _parameterListPeriod;
+            List<int> ParameterListCounTopTickers = _parameterListCounTopTickers;
+            List<List<int>> ParameterListRebalanceDays = _parameterListRebalanceDays;
 
             strategy.From = _from;
             strategy.To = _to;
@@ -58,9 +66,73 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             strategy.PositionData = _tickers.ToDictionary(k => k, v => new PositionData { Ticker = v, Lot = _instrumentData[v].Lot ?? 1 });
             strategy.PositionData.TryAdd(KnownTickers.MON, new PositionData { Ticker = KnownTickers.MON, Lot = 1 });
 
-            List<int> ParameterListPeriod = [10, 15, 30];
-            List<int> ParameterListCounTopTickers = [8, 10];
-            List<List<int>> ParameterListRebalanceDays = [[1], [1, 16], [1, 11, 21]];
+            foreach (var period in ParameterListPeriod)
+                foreach (var counTopTickers in ParameterListCounTopTickers)
+                    foreach (var rebalanceDays in ParameterListRebalanceDays)
+                    {
+                        var strategyParams =
+                                $"Period = {JsonSerializer.Serialize(period)}; " +
+                                $"CounTopTickers = {JsonSerializer.Serialize(counTopTickers)}; " +
+                                $"RebalanceDays = {JsonSerializer.Serialize(rebalanceDays)};"
+                                ;
+
+                        string strategyName = nameof(MomentumStrategyVersion1);
+
+                        try
+                        {
+                            strategy.Period = period;
+                            strategy.CounTopTickers = counTopTickers;
+                            strategy.RebalanceDays = rebalanceDays;
+
+                            strategy.StartMoneySum = momentumSettings.StartMoneySum;
+                            strategy.Money = momentumSettings.StartMoneySum;
+                            strategy.TotalSum = momentumSettings.StartMoneySum;
+
+                            strategy.EquitySeries.Data.Clear();
+                            strategy.DrawdownSeries.Data.Clear();
+                            strategy.MoneySeries.Data.Clear();
+
+                            strategy.Execute();
+
+                            var strategyExecuteResult = ToStrategyExecuteResult(strategy);
+
+                            strategyExecuteResult.StrategyName = strategyName;
+                            strategyExecuteResult.StrategyParams = strategyParams;
+                            strategyExecuteResult.ResultMessage = "OK";
+
+                            await strategyExecuteResultRepository.AddAsync([strategyExecuteResult]);
+                        }
+
+                        catch (Exception ex)
+                        {
+                            var strategyExecuteResult = new StrategyExecuteResult
+                            {
+                                StrategyName = strategyName,
+                                StrategyParams = strategyParams,
+                                ResultMessage = $"Error. {ex.Message}"
+                            };
+
+                            await strategyExecuteResultRepository.AddAsync([strategyExecuteResult]);
+                        }
+                    }
+        }
+
+        private async Task BacktestVersion2()
+        {
+            var momentumSettings = options.Value;
+
+            var strategy = serviceProvider.GetRequiredKeyedService<MomentumStrategy>(nameof(MomentumStrategyVersion2));
+
+            List<int> ParameterListPeriod = _parameterListPeriod;
+            List<int> ParameterListCounTopTickers = _parameterListCounTopTickers;
+            List<List<int>> ParameterListRebalanceDays = _parameterListRebalanceDays;
+
+            strategy.From = _from;
+            strategy.To = _to;
+
+            strategy.CandleData = _candleData;
+            strategy.PositionData = _tickers.ToDictionary(k => k, v => new PositionData { Ticker = v, Lot = _instrumentData[v].Lot ?? 1 });
+            strategy.PositionData.TryAdd(KnownTickers.MON, new PositionData { Ticker = KnownTickers.MON, Lot = 1 });
 
             foreach (var period in ParameterListPeriod)
                 foreach (var counTopTickers in ParameterListCounTopTickers)

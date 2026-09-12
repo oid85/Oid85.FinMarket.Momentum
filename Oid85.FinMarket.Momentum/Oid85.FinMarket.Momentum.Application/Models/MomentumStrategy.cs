@@ -9,11 +9,11 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 {
     public class MomentumStrategy
     {
-        public int Period { get; set; }
+        public virtual int Period { get; set; }
 
-        public int CounTopTickers { get; set; }
+        public virtual int CounTopTickers { get; set; }
 
-        public List<int> RebalanceDays { get; set; } = [];
+        public virtual List<int> RebalanceDays { get; set; } = [];
 
         public virtual List<string> GetDescription() => [];
 

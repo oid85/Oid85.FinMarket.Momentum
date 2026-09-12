@@ -2,7 +2,7 @@
 
 namespace Oid85.FinMarket.Momentum.Application.Strategies
 {
-    public class MomentumStrategyVersion1 : MomentumStrategy
+    public class MomentumStrategyVersion2 : MomentumStrategy
     {
         private readonly double DrawdownLimitPercent = 15.0;
 
