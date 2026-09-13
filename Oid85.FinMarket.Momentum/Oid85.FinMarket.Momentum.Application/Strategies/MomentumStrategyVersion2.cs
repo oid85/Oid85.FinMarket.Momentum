@@ -52,7 +52,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                 {
                     UpdateCandles();
                     UpdateCosts();
-                    TryMoveStopsToBreakEven();
+                    MoveStopsToBreakEven();
                     CheckStopsWithClosePosition();
                     UpdateTotalSum();
                 }

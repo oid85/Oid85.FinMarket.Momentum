@@ -121,7 +121,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         }
 
         public void UpdateCandles()
-        {
+        {            
             foreach (var ticker in PortfolioTickers)
                 PositionData[ticker].Candle = GetCandle(ticker) ?? new Candle();
         }
@@ -186,7 +186,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             Money = TotalSum - CostSum;
         }
 
-        public void TryMoveStopsToBreakEven()
+        public void MoveStopsToBreakEven()
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
                 if (!PositionData[ticker].IsBreakEvenStop)
@@ -197,7 +197,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                     }
         }
 
-        public void TryTrailStops()
+        public void TrailStops()
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
                 if (PositionData[ticker].Candle.Close >= PositionData[ticker].StopPrice + 2.0 * PositionData[ticker].AverageCandleBody)
