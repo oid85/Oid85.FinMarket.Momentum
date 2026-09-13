@@ -6,10 +6,6 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
     {
         private readonly double DrawdownLimitPercent = 15.0;
 
-        public override int Period => 10;
-        public override int CounTopTickers => 10;
-        public override List<int> RebalanceDays => [1, 11, 21];
-
         public override List<string> GetDescription()
         {
             return [
@@ -20,6 +16,13 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                 $"Стоп-лосс расчитывается как двойной средний размер тела свечи за {Period} дней",
                 "При срабатывании стопа закрывать позицию и покупать фонд ликвидности"
                 ];
+        }
+
+        public override void InitMonitorParameters()
+        {
+            Period = 10;
+            CounTopTickers = 10;
+            RebalanceDays = [1, 11, 21];
         }
 
         public override void Execute()
@@ -35,6 +38,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                     SetWeights();
                     UpdateCandles();
                     SetEntryPrices();
+                    SetAverageCandleBody();
                     SetStops();
                     SetSizes();
                     UpdateCosts();

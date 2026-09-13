@@ -22,9 +22,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
         IServiceProvider serviceProvider) 
         : IBacktestService
     {
-        private List<int> _parameterListPeriod = [10, 15, 30];
-        private List<int> _parameterListCounTopTickers = [8, 10];
-        private List<List<int>> _parameterListRebalanceDays = [[1], [1, 16], [1, 11, 21]];
+        private readonly List<int> PARAMETER_LIST_PERIOD = [10, 15, 30];
+        private readonly List<int> PARAMETER_LIST_COUNT_TOP_TICKRES = [8, 10];
+        private readonly List<List<int>> PARAMETER_LIST_REBALANCE_DAYS = [[1], [1, 16], [1, 11, 21]];
 
         private readonly DateOnly _from = new DateOnly(2021, 1, 1);
         private readonly DateOnly _to = DateOnly.FromDateTime(DateTime.Today);
@@ -45,6 +45,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             await strategyExecuteResultRepository.DeleteAsync();
 
             await BacktestVersion1();
+            await BacktestVersion2();
 
             return new ();
         }
@@ -55,9 +56,11 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var strategy = serviceProvider.GetRequiredKeyedService<MomentumStrategy>(nameof(MomentumStrategyVersion1));
 
-            List<int> ParameterListPeriod = _parameterListPeriod;
-            List<int> ParameterListCounTopTickers = _parameterListCounTopTickers;
-            List<List<int>> ParameterListRebalanceDays = _parameterListRebalanceDays;
+            strategy.Name = nameof(MomentumStrategyVersion1);
+
+            List<int> ParameterListPeriod = PARAMETER_LIST_PERIOD;
+            List<int> ParameterListCounTopTickers = PARAMETER_LIST_COUNT_TOP_TICKRES;
+            List<List<int>> ParameterListRebalanceDays = PARAMETER_LIST_REBALANCE_DAYS;            
 
             strategy.From = _from;
             strategy.To = _to;
@@ -74,9 +77,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                                 $"Period = {JsonSerializer.Serialize(period)}; " +
                                 $"CounTopTickers = {JsonSerializer.Serialize(counTopTickers)}; " +
                                 $"RebalanceDays = {JsonSerializer.Serialize(rebalanceDays)};"
-                                ;
-
-                        string strategyName = nameof(MomentumStrategyVersion1);
+                                ;                        
 
                         try
                         {
@@ -96,7 +97,6 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
                             var strategyExecuteResult = ToStrategyExecuteResult(strategy);
 
-                            strategyExecuteResult.StrategyName = strategyName;
                             strategyExecuteResult.StrategyParams = strategyParams;
                             strategyExecuteResult.ResultMessage = "OK";
 
@@ -107,7 +107,6 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         {
                             var strategyExecuteResult = new StrategyExecuteResult
                             {
-                                StrategyName = strategyName,
                                 StrategyParams = strategyParams,
                                 ResultMessage = $"Error. {ex.Message}"
                             };
@@ -123,9 +122,11 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var strategy = serviceProvider.GetRequiredKeyedService<MomentumStrategy>(nameof(MomentumStrategyVersion2));
 
-            List<int> ParameterListPeriod = _parameterListPeriod;
-            List<int> ParameterListCounTopTickers = _parameterListCounTopTickers;
-            List<List<int>> ParameterListRebalanceDays = _parameterListRebalanceDays;
+            strategy.Name = nameof(MomentumStrategyVersion2);
+
+            List<int> ParameterListPeriod = PARAMETER_LIST_PERIOD;
+            List<int> ParameterListCounTopTickers = PARAMETER_LIST_COUNT_TOP_TICKRES;
+            List<List<int>> ParameterListRebalanceDays = PARAMETER_LIST_REBALANCE_DAYS;            
 
             strategy.From = _from;
             strategy.To = _to;
@@ -144,8 +145,6 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                                 $"RebalanceDays = {JsonSerializer.Serialize(rebalanceDays)};"
                                 ;
 
-                        string strategyName = nameof(MomentumStrategyVersion1);
-
                         try
                         {
                             strategy.Period = period;
@@ -164,7 +163,6 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
                             var strategyExecuteResult = ToStrategyExecuteResult(strategy);
 
-                            strategyExecuteResult.StrategyName = strategyName;
                             strategyExecuteResult.StrategyParams = strategyParams;
                             strategyExecuteResult.ResultMessage = "OK";
 
@@ -175,7 +173,6 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         {
                             var strategyExecuteResult = new StrategyExecuteResult
                             {
-                                StrategyName = strategyName,
                                 StrategyParams = strategyParams,
                                 ResultMessage = $"Error. {ex.Message}"
                             };

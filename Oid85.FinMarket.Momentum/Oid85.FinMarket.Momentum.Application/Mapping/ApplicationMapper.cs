@@ -38,6 +38,7 @@ public static class ApplicationMapper
     public static StrategyExecuteResult ToStrategyExecuteResult(MomentumStrategy strategy) =>
         new()
         {
+            StrategyName = strategy.Name,
             StartDate = strategy.From,
             EndDate = strategy.To,
             Tickers = strategy.Tickers,

@@ -27,9 +27,11 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var strategy = serviceProvider.GetRequiredKeyedService<MomentumStrategy>($"MomentumStrategyVersion{request.MomentumVersion}");
 
+            strategy.InitMonitorParameters();
+
             strategy.StartMoneySum = momentumSettings.StartMoneySum;
             strategy.Money = momentumSettings.StartMoneySum;
-            strategy.TotalSum = momentumSettings.StartMoneySum;
+            strategy.TotalSum = momentumSettings.StartMoneySum;            
 
             var from = new DateOnly(2021, 1, 1);
             var to = DateOnly.FromDateTime(DateTime.Today);

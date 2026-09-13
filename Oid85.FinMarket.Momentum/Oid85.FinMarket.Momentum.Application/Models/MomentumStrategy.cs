@@ -1,19 +1,23 @@
 ﻿using System.Globalization;
+using System.Reflection.Metadata;
 using Oid85.FinMarket.Momentum.Application.Helpers;
 using Oid85.FinMarket.Momentum.Common.Extensions;
 using Oid85.FinMarket.Momentum.Common.KnownConstants;
 using Oid85.FinMarket.Momentum.Common.Utils;
 using Oid85.FinMarket.Momentum.Core.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Oid85.FinMarket.Momentum.Application.Models
 {
     public class MomentumStrategy
     {
-        public virtual int Period { get; set; }
+        public virtual string Name { get; set; } = string.Empty;
 
-        public virtual int CounTopTickers { get; set; }
+        public int Period { get; set; }
 
-        public virtual List<int> RebalanceDays { get; set; } = [];
+        public int CounTopTickers { get; set; }
+
+        public List<int> RebalanceDays { get; set; } = [];
 
         public virtual List<string> GetDescription() => [];
 
@@ -82,6 +86,11 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         }
 
+        public virtual void InitMonitorParameters()
+        {
+
+        }
+
         public void AddMessage(string ticker, string message, string colorFill) => Messages.Add(new() { Date = CurrentDate, Ticker = ticker, Message = message, ColorFill = colorFill });
 
         public void AddRebalanceMessage()
@@ -117,11 +126,17 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 PositionData[ticker].Candle = GetCandle(ticker) ?? new Candle();
         }
 
+        public void SetAverageCandleBody()
+        {
+            foreach (var ticker in PortfolioWithoutMonTickers)            
+                PositionData[ticker].AverageCandleBody = CandleData[ticker].Where(x => x.Date >= CurrentDate.AddDays(-1 * Period) && x.Date <= CurrentDate).Average(x => Math.Abs(x.Close - x.Open));
+        }
+
         public void SetStops()
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
             {
-                PositionData[ticker].StopPrice = MomentumHelper.GetStopPrice(CandleData[ticker], PositionData[ticker].Candle.Close, CurrentDate, Period);
+                PositionData[ticker].StopPrice = PositionData[ticker].Candle.Close - 2.0 * PositionData[ticker].AverageCandleBody;
                 PositionData[ticker].IsBreakEvenStop = false;
             }
         }
@@ -169,6 +184,17 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         public void UpdateMoney()
         {
             Money = TotalSum - CostSum;
+        }
+
+        public void TryMoveStopsToBreakEven()
+        {
+            foreach (var ticker in PortfolioWithoutMonTickers)
+                if (!PositionData[ticker].IsBreakEvenStop)
+                    if (PositionData[ticker].Candle.Close >= PositionData[ticker].EntryPrice + 4.0 * PositionData[ticker].AverageCandleBody)
+                    {
+                        PositionData[ticker].StopPrice = PositionData[ticker].Candle.Close - 2.0 * PositionData[ticker].AverageCandleBody;
+                        PositionData[ticker].IsBreakEvenStop = true;
+                    }
         }
 
         public void CheckStopsWithClosePosition()
@@ -259,7 +285,8 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 PositionData[tickerForAdd].Size = Math.Truncate(Money / PositionData[tickerForAdd].Candle.Close / PositionData[tickerForAdd].Lot) * PositionData[tickerForAdd].Lot;
                 PositionData[tickerForAdd].Cost = PositionData[tickerForAdd].Candle.Close * PositionData[tickerForAdd].Size;
                 PositionData[tickerForAdd].EntryPrice = PositionData[tickerForAdd].Candle.Close;
-                PositionData[tickerForAdd].StopPrice = MomentumHelper.GetStopPrice(CandleData[tickerForAdd], PositionData[tickerForAdd].Candle.Close, CurrentDate, Period);
+                PositionData[tickerForAdd].AverageCandleBody = CandleData[tickerForAdd].Where(x => x.Date >= CurrentDate.AddDays(-1 * Period) && x.Date <= CurrentDate).Average(x => Math.Abs(x.Close - x.Open));
+                PositionData[tickerForAdd].StopPrice = PositionData[tickerForAdd].Candle.Close - 2.0 * PositionData[tickerForAdd].AverageCandleBody;
                 PositionData[tickerForAdd].CountBuy++;
 
                 Money -= PositionData[tickerForAdd].Cost;
