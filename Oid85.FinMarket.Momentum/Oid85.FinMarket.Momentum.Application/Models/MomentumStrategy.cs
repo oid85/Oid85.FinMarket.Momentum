@@ -35,7 +35,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public double Money { get; set; } = 0.0;
 
-        public Dictionary<string, PositionData> PositionData { get; set; } = [];
+        public Dictionary<string, PositionData> Data { get; set; } = [];
 
         public Dictionary<string, List<Candle>> CandleData { get; set; } = [];
 
@@ -63,17 +63,17 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public double AnnualYieldReturn => EndMoneySum > StartMoneySum ? (TotalReturn / ((To.DayNumber - From.DayNumber) / 365.0)).RoundTo(1) : 0.0;
 
-        public List<string> Tickers => [.. PositionData.Keys];
+        public List<string> Tickers => [.. Data.Keys];
 
         public List<string> TopTickers { get; set; } = [];
 
-        public List<string> PortfolioTickers => [.. PositionData.Values.Where(x => x.Weight > 0.0).Select(x => x.Ticker)];
+        public List<string> PortfolioTickers => [.. Data.Values.Where(x => x.Weight > 0.0).Select(x => x.Ticker)];
 
-        public List<string> PortfolioWithoutMonTickers => [.. PositionData.Values.Where(x => x.Ticker != KnownTickers.MON).Where(x => x.Weight > 0.0).Select(x => x.Ticker)];
+        public List<string> PortfolioWithoutMonTickers => [.. Data.Values.Where(x => x.Ticker != KnownTickers.MON).Where(x => x.Weight > 0.0).Select(x => x.Ticker)];
 
-        public double WeightSum => PositionData.Values.Sum(x => x.Weight);
+        public double WeightSum => Data.Values.Sum(x => x.Weight);
 
-        public double CostSum => PositionData.Values.Sum(x => x.Cost);
+        public double CostSum => Data.Values.Sum(x => x.Cost);
 
         public bool IsRebalance => RebalanceDays.Contains(CurrentDate.Day);
 
@@ -100,7 +100,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             };
 
             foreach (var ticker in PortfolioWithoutMonTickers)
-                AddMessage(ticker, $"Ребалансировка моментума. Позиция {ticker}, {PositionData[ticker].Size.ToString("N0", nfi)} шт., {PositionData[ticker].Cost.RoundTo(2).ToString("N", nfi)} руб., СЛ {PositionData[ticker].StopPrice.RoundTo(2).ToString("N", nfi)} руб.", KnownColors.LightGreen);
+                AddMessage(ticker, $"Ребалансировка моментума. Позиция {ticker}, {Data[ticker].Size.ToString("N0", nfi)} шт., {Data[ticker].Cost.RoundTo(2).ToString("N", nfi)} руб., СЛ {Data[ticker].StopPrice.RoundTo(2).ToString("N", nfi)} руб.", KnownColors.LightGreen);
         }
 
         public void ClearMessages() => Messages.Clear();
@@ -112,68 +112,68 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         public void SetWeights()
         {
             foreach (var ticker in Tickers) 
-                PositionData[ticker].Weight = 0.0;
+                Data[ticker].Weight = 0.0;
 
             foreach (var ticker in TopTickers) 
-                PositionData[ticker].Weight = 1.0;
+                Data[ticker].Weight = 1.0;
 
-            PositionData[KnownTickers.MON].Weight = CounTopTickers - TopTickers.Count(x => x != KnownTickers.MON);
+            Data[KnownTickers.MON].Weight = CounTopTickers - TopTickers.Count(x => x != KnownTickers.MON);
         }
 
         public void UpdateCandles()
         {            
             foreach (var ticker in PortfolioTickers)
-                PositionData[ticker].Candle = GetCandle(ticker) ?? new Candle();
+                Data[ticker].Candle = GetCandle(ticker) ?? new Candle();
         }
 
         public void SetAverageCandleBody()
         {
             foreach (var ticker in PortfolioWithoutMonTickers)            
-                PositionData[ticker].AverageCandleBody = CandleData[ticker].Where(x => x.Date >= CurrentDate.AddDays(-1 * Period) && x.Date <= CurrentDate).Average(x => Math.Abs(x.Close - x.Open));
+                Data[ticker].AverageCandleBody = CandleData[ticker].Where(x => x.Date >= CurrentDate.AddDays(-1 * Period) && x.Date <= CurrentDate).Average(x => Math.Abs(x.Close - x.Open));
         }
 
         public void SetStops()
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
             {
-                PositionData[ticker].StopPrice = PositionData[ticker].Candle.Close - 2.0 * PositionData[ticker].AverageCandleBody;
-                PositionData[ticker].IsBreakEvenStop = false;
+                Data[ticker].StopPrice = Data[ticker].Candle.Close - 2.0 * Data[ticker].AverageCandleBody;
+                Data[ticker].IsBreakEvenStop = false;
             }
         }
 
         public void SetEntryPrices()
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
-                PositionData[ticker].EntryPrice = PositionData[ticker].Candle.Close;
+                Data[ticker].EntryPrice = Data[ticker].Candle.Close;
         }
 
         public void SetSizes()
         {
             foreach (var ticker in Tickers)
-                PositionData[ticker].Size = 0.0;
+                Data[ticker].Size = 0.0;
 
             double baseUnit = TotalSum / WeightSum;
 
             foreach (var ticker in PortfolioTickers)
             {
-                if (PositionData[ticker].Candle.Close == 0.0)
+                if (Data[ticker].Candle.Close == 0.0)
                 {
-                    PositionData[ticker].Cost = 0.0;
+                    Data[ticker].Cost = 0.0;
                     continue;
                 }
 
-                PositionData[ticker].Size = Math.Truncate(baseUnit * PositionData[ticker].Weight / PositionData[ticker].Candle.Close / PositionData[ticker].Lot) * PositionData[ticker].Lot;
-                PositionData[ticker].CountBuy++;
+                Data[ticker].Size = Math.Truncate(baseUnit * Data[ticker].Weight / Data[ticker].Candle.Close / Data[ticker].Lot) * Data[ticker].Lot;
+                Data[ticker].CountBuy++;
             }
         }
 
         public void UpdateCosts()
         {
             foreach (var ticker in Tickers) 
-                PositionData[ticker].Cost = 0.0;
+                Data[ticker].Cost = 0.0;
 
             foreach (var ticker in PortfolioTickers) 
-                PositionData[ticker].Cost = PositionData[ticker].Candle.Close * PositionData[ticker].Size;
+                Data[ticker].Cost = Data[ticker].Candle.Close * Data[ticker].Size;
         }
 
         public void UpdateTotalSum()
@@ -189,27 +189,27 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         public void MoveStopsToBreakEven()
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
-                if (!PositionData[ticker].IsBreakEvenStop)
-                    if (PositionData[ticker].Candle.Close >= PositionData[ticker].EntryPrice + 4.0 * PositionData[ticker].AverageCandleBody)
+                if (!Data[ticker].IsBreakEvenStop)
+                    if (Data[ticker].Candle.Close >= Data[ticker].EntryPrice + 4.0 * Data[ticker].AverageCandleBody)
                     {
-                        PositionData[ticker].StopPrice = PositionData[ticker].Candle.Close - 2.0 * PositionData[ticker].AverageCandleBody;
-                        PositionData[ticker].IsBreakEvenStop = true;
+                        Data[ticker].StopPrice = Data[ticker].Candle.Close - 2.0 * Data[ticker].AverageCandleBody;
+                        Data[ticker].IsBreakEvenStop = true;
                     }
         }
 
         public void TrailStops()
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
-                if (PositionData[ticker].Candle.Close >= PositionData[ticker].StopPrice + 2.0 * PositionData[ticker].AverageCandleBody)
-                    PositionData[ticker].StopPrice = PositionData[ticker].Candle.Close - 2.0 * PositionData[ticker].AverageCandleBody;
+                if (Data[ticker].Candle.Close >= Data[ticker].StopPrice + 2.0 * Data[ticker].AverageCandleBody)
+                    Data[ticker].StopPrice = Data[ticker].Candle.Close - 2.0 * Data[ticker].AverageCandleBody;
         }
 
         public void CheckStopsWithClosePosition()
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
-                if (PositionData[ticker].Candle.Low < PositionData[ticker].StopPrice)
+                if (Data[ticker].Candle.Low < Data[ticker].StopPrice)
                 {
-                    PositionData[ticker].CountTriggerStop++;
+                    Data[ticker].CountTriggerStop++;
                     ClosePosition(ticker);
                 }
         }
@@ -217,31 +217,41 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         public void CheckStopsChangePosition()
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
-                if (PositionData[ticker].Candle.Low < PositionData[ticker].StopPrice)
+                if (Data[ticker].Candle.Low < Data[ticker].StopPrice)
                 {
-                    PositionData[ticker].CountTriggerStop++;
+                    Data[ticker].CountTriggerStop++;
                     ChangePosition(ticker);
+                }
+        }
+
+        public void CheckStopsWithDistributePosition()
+        {
+            foreach (var ticker in PortfolioWithoutMonTickers)
+                if (Data[ticker].Candle.Low < Data[ticker].StopPrice)
+                {
+                    Data[ticker].CountTriggerStop++;
+                    DistributePosition(ticker);
                 }
         }
 
         public void ClosePosition(string ticker)
         {
             // Продаем актив
-            PositionData[ticker].Weight = 0.0;
-            PositionData[ticker].Size = 0.0;
-            Money += PositionData[ticker].Cost;
-            PositionData[ticker].Cost = 0.0;
-            PositionData[ticker].EntryPrice = 0.0;
-            PositionData[ticker].StopPrice = 0.0;
+            Data[ticker].Weight = 0.0;
+            Data[ticker].Size = 0.0;
+            Money += Data[ticker].Cost;
+            Data[ticker].Cost = 0.0;
+            Data[ticker].EntryPrice = 0.0;
+            Data[ticker].StopPrice = 0.0;
 
             // Покупаем фонд ликвидности
-            PositionData[KnownTickers.MON].Weight += 1.0;
-            double monSize = Math.Truncate(Money / PositionData[KnownTickers.MON].Candle.Close);
-            double monCost = monSize * PositionData[KnownTickers.MON].Candle.Close;
+            Data[KnownTickers.MON].Weight += 1.0;
+            double monSize = Math.Truncate(Money / Data[KnownTickers.MON].Candle.Close);
+            double monCost = monSize * Data[KnownTickers.MON].Candle.Close;
             Money -= monCost;
 
-            PositionData[KnownTickers.MON].Size += monSize;
-            PositionData[KnownTickers.MON].Cost += monCost;
+            Data[KnownTickers.MON].Size += monSize;
+            Data[KnownTickers.MON].Cost += monCost;
 
             AddMessage(ticker, $"Стоп-лосс. Закрыта позиция по {ticker}", KnownColors.LightRed);
             AddMessage(KnownTickers.MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
@@ -253,12 +263,12 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             var currentTickers = PortfolioTickers;
 
             // Продаем актив
-            PositionData[tickerForRemove].Weight = 0.0;
-            PositionData[tickerForRemove].Size = 0.0;
-            Money += PositionData[tickerForRemove].Cost;
-            PositionData[tickerForRemove].Cost = 0.0;
-            PositionData[ticker].EntryPrice = 0.0;
-            PositionData[ticker].StopPrice = 0.0;
+            Data[tickerForRemove].Weight = 0.0;
+            Data[tickerForRemove].Size = 0.0;
+            Money += Data[tickerForRemove].Cost;
+            Data[tickerForRemove].Cost = 0.0;
+            Data[ticker].EntryPrice = 0.0;
+            Data[ticker].StopPrice = 0.0;
 
             // Определяем новых лидеров
             var newTopTickers = MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate, Period, CounTopTickers)
@@ -273,13 +283,13 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             if (tickerForAdd == KnownTickers.MON)
             {
                 // Покупаем фонд ликвидности
-                PositionData[KnownTickers.MON].Weight += 1.0;
-                double monSize = Math.Truncate(Money / PositionData[KnownTickers.MON].Candle.Close);
-                double monCost = monSize * PositionData[KnownTickers.MON].Candle.Close;
+                Data[KnownTickers.MON].Weight += 1.0;
+                double monSize = Math.Truncate(Money / Data[KnownTickers.MON].Candle.Close);
+                double monCost = monSize * Data[KnownTickers.MON].Candle.Close;
                 Money -= monCost;
 
-                PositionData[KnownTickers.MON].Size += monSize;
-                PositionData[KnownTickers.MON].Cost += monCost;
+                Data[KnownTickers.MON].Size += monSize;
+                Data[KnownTickers.MON].Cost += monCost;
 
                 AddMessage(KnownTickers.MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
             }
@@ -287,18 +297,72 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             else
             {
                 // Покупаем другой актив
-                PositionData[tickerForAdd].Weight = 1.0;
-                PositionData[tickerForAdd].Candle = GetCandle(tickerForAdd) ?? new Candle();
-                PositionData[tickerForAdd].Size = Math.Truncate(Money / PositionData[tickerForAdd].Candle.Close / PositionData[tickerForAdd].Lot) * PositionData[tickerForAdd].Lot;
-                PositionData[tickerForAdd].Cost = PositionData[tickerForAdd].Candle.Close * PositionData[tickerForAdd].Size;
-                PositionData[tickerForAdd].EntryPrice = PositionData[tickerForAdd].Candle.Close;
-                PositionData[tickerForAdd].AverageCandleBody = CandleData[tickerForAdd].Where(x => x.Date >= CurrentDate.AddDays(-1 * Period) && x.Date <= CurrentDate).Average(x => Math.Abs(x.Close - x.Open));
-                PositionData[tickerForAdd].StopPrice = PositionData[tickerForAdd].Candle.Close - 2.0 * PositionData[tickerForAdd].AverageCandleBody;
-                PositionData[tickerForAdd].CountBuy++;
+                Data[tickerForAdd].Weight = 1.0;
+                Data[tickerForAdd].Candle = GetCandle(tickerForAdd) ?? new Candle();
+                Data[tickerForAdd].Size = Math.Truncate(Money / Data[tickerForAdd].Candle.Close / Data[tickerForAdd].Lot) * Data[tickerForAdd].Lot;
+                Data[tickerForAdd].Cost = Data[tickerForAdd].Candle.Close * Data[tickerForAdd].Size;
+                Data[tickerForAdd].EntryPrice = Data[tickerForAdd].Candle.Close;
+                Data[tickerForAdd].AverageCandleBody = CandleData[tickerForAdd].Where(x => x.Date >= CurrentDate.AddDays(-1 * Period) && x.Date <= CurrentDate).Average(x => Math.Abs(x.Close - x.Open));
+                Data[tickerForAdd].StopPrice = Data[tickerForAdd].Candle.Close - 2.0 * Data[tickerForAdd].AverageCandleBody;
+                Data[tickerForAdd].CountBuy++;
 
-                Money -= PositionData[tickerForAdd].Cost;
+                Money -= Data[tickerForAdd].Cost;
 
                 AddMessage(tickerForAdd, $"Замена актива. Добавлен {tickerForAdd}", KnownColors.LightGreen);
+            }
+        }
+
+        public void DistributePosition(string ticker)
+        {
+            var nfi = new NumberFormatInfo
+            {
+                NumberDecimalSeparator = ".",
+                NumberGroupSeparator = " "
+            };
+
+            // Продаем актив
+            double tickerWeight = Data[ticker].Weight;
+            Data[ticker].Weight = 0.0;
+            Data[ticker].Size = 0.0;
+            Money += Data[ticker].Cost;
+            Data[ticker].Cost = 0.0;
+            Data[ticker].EntryPrice = 0.0;
+            Data[ticker].StopPrice = 0.0;
+
+            AddMessage(ticker, $"Стоп-лосс. Закрыта позиция по {ticker}", KnownColors.LightRed);
+
+            // Распределяем долю проданного актива по остальным
+            if (PortfolioWithoutMonTickers.Count > 0)
+            {
+                foreach (var rebalanceTicker in PortfolioWithoutMonTickers)
+                {
+                    double multiplier = 1.0 / PortfolioWithoutMonTickers.Count;
+
+                    double deltaWeight = Data[rebalanceTicker].Weight * multiplier;
+                    double deltaCost = Data[rebalanceTicker].Cost * multiplier;
+                    
+                    Data[rebalanceTicker].Weight += deltaWeight;
+                    Data[rebalanceTicker].Cost += deltaCost;
+                    Data[rebalanceTicker].Size = Math.Truncate(Data[rebalanceTicker].Cost / Data[rebalanceTicker].Candle.Close / Data[rebalanceTicker].Lot) * Data[rebalanceTicker].Lot;
+                    Money -= deltaCost;
+                    Data[rebalanceTicker].EntryPrice = Data[rebalanceTicker].Candle.Close;
+                    Data[rebalanceTicker].AverageCandleBody = CandleData[rebalanceTicker].Where(x => x.Date >= CurrentDate.AddDays(-1 * Period) && x.Date <= CurrentDate).Average(x => Math.Abs(x.Close - x.Open));
+                    Data[rebalanceTicker].StopPrice = Data[rebalanceTicker].Candle.Close - 2.0 * Data[rebalanceTicker].AverageCandleBody;
+                    Data[rebalanceTicker].IsBreakEvenStop = false;
+
+                    AddMessage(ticker, $"Увеличена доля. Позиция {rebalanceTicker}, {Data[rebalanceTicker].Size.ToString("N0", nfi)} шт., {Data[rebalanceTicker].Cost.RoundTo(2).ToString("N", nfi)} руб., СЛ {Data[rebalanceTicker].StopPrice.RoundTo(2).ToString("N", nfi)} руб.", KnownColors.LightGreen);
+                }
+            }
+
+            // Покупаем фонд ликвидности            
+            else
+            {
+                Data[KnownTickers.MON].Weight += tickerWeight;
+                Data[KnownTickers.MON].Cost = TotalSum;
+                Data[KnownTickers.MON].Size = Math.Truncate(Data[KnownTickers.MON].Cost / Data[KnownTickers.MON].Candle.Close);
+                Money = 0.0;
+
+                AddMessage(KnownTickers.MON, $"Покупка фонда ликвидности на весь портфель", KnownColors.LightGreen);
             }
         }
 
@@ -315,7 +379,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 new()
                 {
                     Date = CurrentDate,
-                    Value = (Money + PositionData[KnownTickers.MON].Cost).RoundTo(2)
+                    Value = (Money + Data[KnownTickers.MON].Cost).RoundTo(2)
                 });
 
         public double GetCurrentDrawdown()
@@ -339,17 +403,17 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             foreach (var ticker in PortfolioTickers)
             {
                 var candle = CandleData[ticker].FindLast(x => x.Date <= Dates.Last());
-                double tickerCost = TotalSumLife / WeightSum * PositionData[ticker].Weight.RoundTo(2);
-                int tickerSize = Convert.ToInt32(Math.Truncate(tickerCost / candle!.Close / PositionData[ticker].Lot) * PositionData[ticker].Lot);
-                double stopPrice = ticker == KnownTickers.MON ? 0.0 : PositionData[ticker].StopPrice;
-                double currentStopSizePercent = ticker == KnownTickers.MON ? 0.0 : PositionData[ticker].CurrentStopSizePercent;
-                double profitPercent = ticker == KnownTickers.MON ? 0.0 : PositionData[ticker].ProfitPercent;
+                double tickerCost = TotalSumLife / WeightSum * Data[ticker].Weight.RoundTo(2);
+                int tickerSize = Convert.ToInt32(Math.Truncate(tickerCost / candle!.Close / Data[ticker].Lot) * Data[ticker].Lot);
+                double stopPrice = ticker == KnownTickers.MON ? 0.0 : Data[ticker].StopPrice;
+                double currentStopSizePercent = ticker == KnownTickers.MON ? 0.0 : Data[ticker].CurrentStopSizePercent;
+                double profitPercent = ticker == KnownTickers.MON ? 0.0 : Data[ticker].ProfitPercent;
 
                 currentPositions.Add(
                     new Position
                     {
                         Ticker = ticker,
-                        Weight = PositionData[ticker].Weight,
+                        Weight = Data[ticker].Weight,
                         Size = tickerSize,
                         Cost = tickerCost,
                         StopPrice = stopPrice,
@@ -455,7 +519,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             foreach (var ticker in tickers)
             {
                 var candles = CandleData[ticker].Where(x => x.Date >= from && x.Date <= to).ToList();
-                double stop = PositionData[ticker].StopPrice;
+                double stop = Data[ticker].StopPrice;
 
                 series.Add([
                     new DiagramSeries
@@ -494,7 +558,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         {
             var tickerStatistics = new List<TickerStatistic>();
 
-            foreach (var (ticker, data) in PositionData)
+            foreach (var (ticker, data) in Data)
             {
                 tickerStatistics.Add(
                     new TickerStatistic
