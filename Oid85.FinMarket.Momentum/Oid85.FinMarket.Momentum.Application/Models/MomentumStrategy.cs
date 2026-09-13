@@ -1,11 +1,9 @@
 ﻿using System.Globalization;
-using System.Reflection.Metadata;
 using Oid85.FinMarket.Momentum.Application.Helpers;
 using Oid85.FinMarket.Momentum.Common.Extensions;
 using Oid85.FinMarket.Momentum.Common.KnownConstants;
 using Oid85.FinMarket.Momentum.Common.Utils;
 using Oid85.FinMarket.Momentum.Core.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Oid85.FinMarket.Momentum.Application.Models
 {
@@ -95,9 +93,11 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public void AddRebalanceMessage()
         {
-            var nfi = new NumberFormatInfo();
-            nfi.NumberDecimalSeparator = ",";
-            nfi.NumberGroupSeparator = " ";
+            var nfi = new NumberFormatInfo
+            {
+                NumberDecimalSeparator = ".",
+                NumberGroupSeparator = " "
+            };
 
             foreach (var ticker in PortfolioWithoutMonTickers)
                 AddMessage(ticker, $"Ребалансировка моментума. Позиция {ticker}, {PositionData[ticker].Size.ToString("N0", nfi)} шт., {PositionData[ticker].Cost.RoundTo(2).ToString("N", nfi)} руб., СЛ {PositionData[ticker].StopPrice.RoundTo(2).ToString("N", nfi)} руб.", KnownColors.LightGreen);
@@ -195,6 +195,13 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                         PositionData[ticker].StopPrice = PositionData[ticker].Candle.Close - 2.0 * PositionData[ticker].AverageCandleBody;
                         PositionData[ticker].IsBreakEvenStop = true;
                     }
+        }
+
+        public void TryTrailStops()
+        {
+            foreach (var ticker in PortfolioWithoutMonTickers)
+                if (PositionData[ticker].Candle.Close >= PositionData[ticker].StopPrice + 2.0 * PositionData[ticker].AverageCandleBody)
+                    PositionData[ticker].StopPrice = PositionData[ticker].Candle.Close - 2.0 * PositionData[ticker].AverageCandleBody;
         }
 
         public void CheckStopsWithClosePosition()

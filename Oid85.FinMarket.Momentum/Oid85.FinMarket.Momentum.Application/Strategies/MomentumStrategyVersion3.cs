@@ -2,18 +2,21 @@
 
 namespace Oid85.FinMarket.Momentum.Application.Strategies
 {
-    public class MomentumStrategyVersion1 : MomentumStrategy
+    public class MomentumStrategyVersion3 : MomentumStrategy
     {
         private readonly double DrawdownLimitPercent = 15.0;
 
         public override List<string> GetDescription()
         {
             return [
-                "Версия 1",
+                "Версия 3",
                 $"Период моментума: {Period} дней",
                 $"Количество отбираемых тикеров для моментума: {CounTopTickers} шт.",
                 $"Дни ребалансировки: {string.Join(", ", RebalanceDays).Trim()} каждого месяца",
                 $"Стоп расчитывается как двойной средний размер тела свечи за {Period} дней",
+                $"Стоп пересчитывается на каждой свече" +
+                $"Если текущая цена отстоит от цены стопа больше, чем на двойной средний размер тела свечи за {Period} дней,",
+                $"то новая цена стопа равна текущая цена минус двойной средний размер тела свечи за {Period} дней" +
                 "При срабатывании стопа закрывать позицию и покупать фонд ликвидности"
                 ];
         }
@@ -51,6 +54,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                 {
                     UpdateCandles();
                     UpdateCosts();
+                    TryTrailStops();
                     CheckStopsWithClosePosition();
                     UpdateTotalSum();
                 }

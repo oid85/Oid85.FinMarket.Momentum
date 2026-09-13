@@ -17,5 +17,6 @@ public static class ServiceCollectionExtensions
 
         services.AddKeyedTransient<MomentumStrategy, MomentumStrategyVersion1>(nameof(MomentumStrategyVersion1));
         services.AddKeyedTransient<MomentumStrategy, MomentumStrategyVersion2>(nameof(MomentumStrategyVersion2));
+        services.AddKeyedTransient<MomentumStrategy, MomentumStrategyVersion2>(nameof(MomentumStrategyVersion3));
     }
 }

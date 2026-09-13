@@ -46,6 +46,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             await BacktestVersion1();
             await BacktestVersion2();
+            await BacktestVersion3();
 
             return new ();
         }
@@ -182,6 +183,72 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                     }
         }
 
+        private async Task BacktestVersion3()
+        {
+            var momentumSettings = options.Value;
+
+            var strategy = serviceProvider.GetRequiredKeyedService<MomentumStrategy>(nameof(MomentumStrategyVersion3));
+
+            strategy.Name = nameof(MomentumStrategyVersion3);
+
+            List<int> ParameterListPeriod = PARAMETER_LIST_PERIOD;
+            List<int> ParameterListCounTopTickers = PARAMETER_LIST_COUNT_TOP_TICKRES;
+            List<List<int>> ParameterListRebalanceDays = PARAMETER_LIST_REBALANCE_DAYS;
+
+            strategy.From = _from;
+            strategy.To = _to;
+
+            strategy.CandleData = _candleData;
+            strategy.PositionData = _tickers.ToDictionary(k => k, v => new PositionData { Ticker = v, Lot = _instrumentData[v].Lot ?? 1 });
+            strategy.PositionData.TryAdd(KnownTickers.MON, new PositionData { Ticker = KnownTickers.MON, Lot = 1 });
+
+            foreach (var period in ParameterListPeriod)
+                foreach (var counTopTickers in ParameterListCounTopTickers)
+                    foreach (var rebalanceDays in ParameterListRebalanceDays)
+                    {
+                        var strategyParams =
+                                $"Period = {JsonSerializer.Serialize(period)}; " +
+                                $"CounTopTickers = {JsonSerializer.Serialize(counTopTickers)}; " +
+                                $"RebalanceDays = {JsonSerializer.Serialize(rebalanceDays)};"
+                                ;
+
+                        try
+                        {
+                            strategy.Period = period;
+                            strategy.CounTopTickers = counTopTickers;
+                            strategy.RebalanceDays = rebalanceDays;
+
+                            strategy.StartMoneySum = momentumSettings.StartMoneySum;
+                            strategy.Money = momentumSettings.StartMoneySum;
+                            strategy.TotalSum = momentumSettings.StartMoneySum;
+
+                            strategy.EquitySeries.Data.Clear();
+                            strategy.DrawdownSeries.Data.Clear();
+                            strategy.MoneySeries.Data.Clear();
+
+                            strategy.Execute();
+
+                            var strategyExecuteResult = ToStrategyExecuteResult(strategy);
+
+                            strategyExecuteResult.StrategyParams = strategyParams;
+                            strategyExecuteResult.ResultMessage = "OK";
+
+                            await strategyExecuteResultRepository.AddAsync([strategyExecuteResult]);
+                        }
+
+                        catch (Exception ex)
+                        {
+                            var strategyExecuteResult = new StrategyExecuteResult
+                            {
+                                StrategyParams = strategyParams,
+                                ResultMessage = $"Error. {ex.Message}"
+                            };
+
+                            await strategyExecuteResultRepository.AddAsync([strategyExecuteResult]);
+                        }
+                    }
+        }
+
         public async Task<BacktestResultResponse> BacktestResultAsync(BacktestResultRequest request)
         {
             const int countLimit = 30;
@@ -211,14 +278,14 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             {
                 BacktestResults = orderedBacktestResults,
 
-                EquitySeries = [.. strategyExecuteResults
+                EquitySeries = [.. orderedBacktestResults
                     .Select(x =>
                     new DiagramSeries
                     {
-                        Name = $"{x.StrategyName} {x.StrategyParams}",
+                        Name = $"{x.Number}. {x.StrategyName}: {x.StrategyParams}",
                         Color = KnownColors.DarkBlue,
                         ColorFill = KnownColors.DarkBlue,
-                        Data = x.EquityCurve
+                        Data = strategyExecuteResults.Find(xx => xx.Id == x.Id)?.EquityCurve ?? []
                     })]
             };
         }
