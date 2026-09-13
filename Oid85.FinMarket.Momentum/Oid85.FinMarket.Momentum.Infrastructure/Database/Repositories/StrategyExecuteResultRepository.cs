@@ -58,7 +58,7 @@ namespace Oid85.FinMarket.Momentum.Infrastructure.Database.Repositories
 
             queryableEntities = queryableEntities.Where(x => x.RecoveryFactor >= momentumSettings.StrategyExecuteResultFilter.MinRecoveryFactor);
             queryableEntities = queryableEntities.Where(x => x.AnnualYieldReturn >= momentumSettings.StrategyExecuteResultFilter.MinAnnualYieldReturn);
-            queryableEntities = queryableEntities.Where(x => x.MaxDrawdownPercent <= momentumSettings.StrategyExecuteResultFilter.MaxDrawdownPercent);
+            queryableEntities = queryableEntities.Where(x => Math.Abs(x.MaxDrawdownPercent) <= momentumSettings.StrategyExecuteResultFilter.MaxDrawdownPercent);
 
             var entities = await queryableEntities.AsNoTracking().ToListAsync();
 

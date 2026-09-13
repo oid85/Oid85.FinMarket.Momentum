@@ -187,6 +187,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
         public async Task<BacktestResultResponse> BacktestResultAsync(BacktestResultRequest request)
         {
+            const int countLimit = 30;
+
             var strategyExecuteResults = await strategyExecuteResultRepository.GetFilteredAsync();
 
             var orderedBacktestResults = strategyExecuteResults
@@ -201,6 +203,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         AnnualYieldReturn = x.AnnualYieldReturn,
                     })
                     .OrderByDescending(x => x.AnnualYieldReturn)
+                    .Take(countLimit)
                     .ToList();
 
             int number = 1;
@@ -219,8 +222,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         Color = KnownColors.DarkBlue,
                         ColorFill = KnownColors.DarkBlue,
                         Data = x.EquityCurve
-                    })
-                    .Take(20)]
+                    })]
             };
         }
     }

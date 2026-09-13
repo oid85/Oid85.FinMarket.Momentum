@@ -36,6 +36,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                     SetTopTickers();
                     SetWeights();
                     UpdateCandles();
+                    SetEntryPrices();
                     SetStops();
                     SetSizes();
                     UpdateCosts();

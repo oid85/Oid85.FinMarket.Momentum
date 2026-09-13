@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Oid85.FinMarket.Momentum.Common\Oid85.FinMarket.Momentum.Common.csproj" />
+  </ItemGroup>
+
 </Project>
