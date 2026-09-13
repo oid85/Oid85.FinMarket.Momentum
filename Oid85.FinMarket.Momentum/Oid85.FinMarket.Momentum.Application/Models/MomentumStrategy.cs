@@ -214,26 +214,6 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 }
         }
 
-        public void CheckStopsChangePosition()
-        {
-            foreach (var ticker in PortfolioWithoutMonTickers)
-                if (Data[ticker].Candle.Low < Data[ticker].StopPrice)
-                {
-                    Data[ticker].CountTriggerStop++;
-                    ChangePosition(ticker);
-                }
-        }
-
-        public void CheckStopsWithDistributePosition()
-        {
-            foreach (var ticker in PortfolioWithoutMonTickers)
-                if (Data[ticker].Candle.Low < Data[ticker].StopPrice)
-                {
-                    Data[ticker].CountTriggerStop++;
-                    DistributePosition(ticker);
-                }
-        }
-
         public void ClosePosition(string ticker)
         {
             // Продаем актив
