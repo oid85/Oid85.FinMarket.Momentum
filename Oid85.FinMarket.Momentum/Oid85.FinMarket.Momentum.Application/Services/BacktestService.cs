@@ -45,8 +45,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             await strategyExecuteResultRepository.DeleteAsync();
 
             await BacktestByStrategyName(nameof(MomentumStrategyVersion1));
-            // await BacktestVersion2();
-            // await BacktestVersion3();
+            await BacktestByStrategyName(nameof(MomentumStrategyVersion2));
+            await BacktestByStrategyName(nameof(MomentumStrategyVersion3));
 
             return new ();
         }
@@ -70,6 +70,14 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             strategy.Data = _tickers.ToDictionary(k => k, v => new PositionData { Ticker = v, Lot = _instrumentData[v].Lot ?? 1 });
             strategy.Data.TryAdd(KnownTickers.MON, new PositionData { Ticker = KnownTickers.MON, Lot = 1 });
 
+            strategy.BalanceProcessor = new BalanceProcessor
+            {
+                CandleData = _candleData,
+                InstrumentData = _instrumentData,
+                Tickers = _tickers,
+                StartMoneySum = momentumSettings.StartMoneySum
+            };
+
             foreach (var period in ParameterListPeriod)
                 foreach (var counTopTickers in ParameterListCounTopTickers)
                     foreach (var rebalanceDays in ParameterListRebalanceDays)
@@ -91,6 +99,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                             strategy.EquitySeries.Data.Clear();
                             strategy.DrawdownSeries.Data.Clear();
                             strategy.MoneySeries.Data.Clear();
+
+                            strategy.BalanceProcessor.Reset();
 
                             strategy.Execute();
 
