@@ -22,7 +22,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
         public override void InitMonitorParameters()
         {
             Period = 10;
-            CounTopTickers = 8;
+            CounTopTickers = 10;
             RebalanceDays = [1, 11, 21];
         }
 
