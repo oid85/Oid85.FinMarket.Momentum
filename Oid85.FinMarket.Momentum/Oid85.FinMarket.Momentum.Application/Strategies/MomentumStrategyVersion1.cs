@@ -30,29 +30,26 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
             foreach (var date in Dates)
             {
                 CurrentDate = date;
+                BalanceProcessor.CurrentDate = date;
+                UpdatePrices();
+                UpdateCandles();
 
                 if (IsRebalance)
                 {
+                    CloseAllPositions();
                     ClearMessages();
                     SetTopTickers();
                     SetWeights();
-                    UpdateCandles();
                     SetEntryPrices();
-                    SetAverageCandleBody();
-                    SetStops();
-                    SetSizes();
-                    UpdateCosts();
-                    UpdateMoney();
-                    UpdateTotalSum();
+                    SetAverageCandleBodies();
+                    SetStops();                    
+                    OpenPositionsByWeights();
                     AddRebalanceMessage();
                 }
 
                 else
-                {
-                    UpdateCandles();
-                    UpdateCosts();
+                {                    
                     CheckStopsWithClosePosition();
-                    UpdateTotalSum();
                 }
 
                 UpdateEquitySeries();

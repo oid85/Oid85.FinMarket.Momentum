@@ -3,4 +3,5 @@
 public static class KnownTickers
 {
     public const string MON = "MON";
+    public const string RUB = "RUB";
 }

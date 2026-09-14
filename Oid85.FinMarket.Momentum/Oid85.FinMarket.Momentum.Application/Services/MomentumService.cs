@@ -29,11 +29,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             strategy.InitMonitorParameters();
 
-            strategy.StartMoneySum = momentumSettings.StartMoneySum;
-            strategy.Money = momentumSettings.StartMoneySum;
-            strategy.TotalSum = momentumSettings.StartMoneySum;            
+            strategy.StartMoneySum = momentumSettings.StartMoneySum;         
 
-            var from = new DateOnly(2021, 1, 1);
+            var from = new DateOnly(2021, 2, 1);
             var to = DateOnly.FromDateTime(DateTime.Today);
 
             strategy.From = from;
@@ -48,6 +46,16 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             strategy.Data.TryAdd(MON, new PositionData { Ticker = MON, Lot = 1 });
 
             strategy.TotalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum:Momentum")) ?? "0").Replace(" ", "").Trim());
+
+            strategy.BalanceProcessor = new BalanceProcessor
+            {
+                CandleData = candleData,
+                InstrumentData = instrumentData,
+                Tickers = tickers,
+                StartMoneySum = momentumSettings.StartMoneySum
+            };
+
+            strategy.BalanceProcessor.Reset();
 
             strategy.Execute();
 
