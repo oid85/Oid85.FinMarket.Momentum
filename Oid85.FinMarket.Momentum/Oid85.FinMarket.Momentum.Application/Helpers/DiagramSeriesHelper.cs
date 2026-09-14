@@ -15,7 +15,7 @@ namespace Oid85.FinMarket.Momentum.Application.Helpers
 
             if (firstValue == 0.0) return 0.0;
 
-            return ((lastValue - firstValue) / firstValue * 100.0).RoundTo(1);
+            return ((lastValue - firstValue) / firstValue * 100.0).RoundTo(2);
         }
 
         public static double GetPercentageYield(DiagramSeries equitySeries, int days)
@@ -30,7 +30,7 @@ namespace Oid85.FinMarket.Momentum.Application.Helpers
 
             if (firstValue == 0.0) return 0.0;
 
-            return ((lastValue - firstValue) / firstValue * 100.0).RoundTo(1);
+            return ((lastValue - firstValue) / firstValue * 100.0).RoundTo(2);
         }
 
         public static DiagramSeries GetDrawdownSeries(DiagramSeries equitySeries, bool inPercent = false)

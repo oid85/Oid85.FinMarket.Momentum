@@ -50,17 +50,17 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public DiagramSeries DrawdownSeriesPercent => DiagramSeriesHelper.GetDrawdownSeries(EquitySeries, true);
 
-        public double MaxDrawdownPercent => DrawdownSeriesPercent.Data.Where(x => x.Value.HasValue).Min(x => x.Value!.Value).RoundTo(1);
+        public double MaxDrawdownPercent => DrawdownSeriesPercent.Data.Where(x => x.Value.HasValue).Min(x => x.Value!.Value).RoundTo(2);
 
-        public double MaxDrawdown => DrawdownSeries.Data.Where(x => x.Value.HasValue).Min(x => x.Value!.Value).RoundTo(1);
+        public double MaxDrawdown => DrawdownSeries.Data.Where(x => x.Value.HasValue).Min(x => x.Value!.Value).RoundTo(2);
 
-        public double RecoveryFactor => MaxDrawdown == 0.0 ? double.PositiveInfinity : Math.Abs(NetProfit / MaxDrawdown).RoundTo(1);
+        public double RecoveryFactor => MaxDrawdown == 0.0 ? double.PositiveInfinity : Math.Abs(NetProfit / MaxDrawdown).RoundTo(2);
 
-        public double NetProfit => EndMoneySum > StartMoneySum ? (EndMoneySum - StartMoneySum).RoundTo(1) : 0.0;
+        public double NetProfit => EndMoneySum > StartMoneySum ? (EndMoneySum - StartMoneySum).RoundTo(2) : 0.0;
         
-        public double TotalReturn => EndMoneySum > StartMoneySum ? ((EndMoneySum - StartMoneySum) / StartMoneySum * 100.0).RoundTo(1) : 0.0;
+        public double TotalReturn => EndMoneySum > StartMoneySum ? ((EndMoneySum - StartMoneySum) / StartMoneySum * 100.0).RoundTo(2) : 0.0;
 
-        public double AnnualYieldReturn => EndMoneySum > StartMoneySum ? (TotalReturn / ((To.DayNumber - From.DayNumber) / 365.0)).RoundTo(1) : 0.0;
+        public double AnnualYieldReturn => EndMoneySum > StartMoneySum ? (TotalReturn / ((To.DayNumber - From.DayNumber) / 365.0)).RoundTo(2) : 0.0;
 
         public List<string> Tickers => [.. Data.Keys];
 
@@ -217,7 +217,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
             if (maxEquity == 0.0) return 0.0;
 
-            return -1 * Math.Abs((maxEquity - lastEquity) / maxEquity * 100.0).RoundTo(1);
+            return -1 * Math.Abs((maxEquity - lastEquity) / maxEquity * 100.0).RoundTo(2);
         }
 
         public List<Position> GetCurrentPositions()
@@ -390,7 +390,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                         Ticker = ticker,
                         CountBuy = data.CountBuy,
                         CountTriggerStop = data.CountTriggerStop,
-                        CountTriggerStopPercent = data.CountTriggerStop == 0 ? 0.0 : (Convert.ToDouble(data.CountTriggerStop) / Convert.ToDouble(data.CountBuy) * 100.0).RoundTo(1)
+                        CountTriggerStopPercent = data.CountTriggerStop == 0 ? 0.0 : (Convert.ToDouble(data.CountTriggerStop) / Convert.ToDouble(data.CountBuy) * 100.0).RoundTo(2)
                     });
             }
 
