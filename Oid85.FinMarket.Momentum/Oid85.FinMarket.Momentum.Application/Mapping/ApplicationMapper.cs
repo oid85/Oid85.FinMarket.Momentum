@@ -29,7 +29,7 @@ public static class ApplicationMapper
             YieldYear = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, 365),
             YieldQuarter = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, 90),
             YieldMonth = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, 30),
-            YieldPeriod = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, strategy.Period),
+            YieldWeek = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, 7),
             MaxDrawdownPercent = strategy.MaxDrawdownPercent,
             CurrentDrawdownPercent = strategy.GetCurrentDrawdown(),
             TickerStatistic = strategy.GetTickerStatistic()

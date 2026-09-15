@@ -23,7 +23,7 @@ namespace Oid85.FinMarket.Momentum.Core.Responses
         public double YieldYear { get; set; }
         public double YieldQuarter { get; set; }
         public double YieldMonth { get; set; }
-        public double YieldPeriod { get; set; }
+        public double YieldWeek { get; set; }
         public double MaxDrawdownPercent { get; set; }
         public double CurrentDrawdownPercent { get; set; }
         public double TotalSumLife { get; set; }
