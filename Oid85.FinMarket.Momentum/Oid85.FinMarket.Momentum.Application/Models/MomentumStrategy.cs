@@ -32,7 +32,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public double EndMoneySum => EquitySeries.Data is [] ? StartMoneySum : EquitySeries.Data.Last().Value ?? StartMoneySum;
 
-        public BalanceProcessor BalanceProcessor { get; set; } = new();
+        public TradingProcessor TradingProcessor { get; set; } = new();
 
         public Dictionary<string, PositionData> Data { get; set; } = [];
 
@@ -97,7 +97,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             };
 
             foreach (var ticker in PortfolioWithoutMonTickers)
-                AddMessage(ticker, $"Ребалансировка моментума. Позиция {ticker}, {BalanceProcessor.BalanceData[ticker].Size.ToString("N0", nfi)} шт., {BalanceProcessor.BalanceData[ticker].Cost.RoundTo(2).ToString("N", nfi)} руб., СЛ {Data[ticker].StopPrice.RoundTo(2).ToString("N", nfi)} руб.", KnownColors.LightGreen);
+                AddMessage(ticker, $"Ребалансировка моментума. Позиция {ticker}, {TradingProcessor.BalanceData[ticker].Size.ToString("N0", nfi)} шт., {TradingProcessor.BalanceData[ticker].Cost.RoundTo(2).ToString("N", nfi)} руб., СЛ {Data[ticker].StopPrice.RoundTo(2).ToString("N", nfi)} руб.", KnownColors.LightGreen);
         }
 
         public void ClearMessages() => Messages.Clear();
@@ -117,7 +117,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             Data[MON].Weight = CounTopTickers - TopTickers.Count(x => x != MON);
         }
 
-        public void UpdatePrices() => BalanceProcessor.UpdatePrices();
+        public void UpdatePrices() => TradingProcessor.UpdatePrices();
 
         public void UpdateCandles()
         {            
@@ -146,14 +146,14 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 Data[ticker].EntryPrice = Data[ticker].Candle.Close;
         }
 
-        public void CloseAllPositions() => BalanceProcessor.CloseAllPositions();
+        public void CloseAllPositions() => TradingProcessor.CloseAllPositions();
 
         public void OpenPositionsByWeights()
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
                 Data[ticker].CountBuy++;
 
-            BalanceProcessor.OpenPositionsByWeights(Data.ToDictionary(x => x.Key, x => x.Value.Weight), true);
+            TradingProcessor.OpenPositionsByWeights(Data.ToDictionary(x => x.Key, x => x.Value.Weight), true);
         }
 
         public void MoveStopsToBreakEven()
@@ -190,7 +190,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             Data[ticker].Weight = 0.0;
             Data[MON].Weight += 1.0;
 
-            BalanceProcessor.ClosePosition(ticker, true);
+            TradingProcessor.ClosePosition(ticker, true);
 
             AddMessage(ticker, $"Стоп-лосс. Закрыта позиция по {ticker}", KnownColors.LightRed);
             AddMessage(MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
@@ -201,7 +201,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 new()
                 {
                     Date = CurrentDate,
-                    Value = BalanceProcessor.TotalSum.RoundTo(2)
+                    Value = TradingProcessor.TotalSum.RoundTo(2)
                 });
 
         public void UpdateMoneySeries() => 
@@ -209,7 +209,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 new()
                 {
                     Date = CurrentDate,
-                    Value = (BalanceProcessor.BalanceData[RUB].Cost + BalanceProcessor.BalanceData[MON].Cost).RoundTo(2)
+                    Value = (TradingProcessor.BalanceData[RUB].Cost + TradingProcessor.BalanceData[MON].Cost).RoundTo(2)
                 });
 
         public double GetCurrentDrawdown()

@@ -47,7 +47,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             strategy.TotalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum:Momentum")) ?? "0").Replace(" ", "").Trim());
 
-            strategy.BalanceProcessor = new BalanceProcessor
+            strategy.TradingProcessor = new TradingProcessor
             {
                 CandleData = candleData,
                 InstrumentData = instrumentData,
@@ -55,7 +55,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 StartMoneySum = momentumSettings.StartMoneySum
             };
 
-            strategy.BalanceProcessor.Reset();
+            strategy.TradingProcessor.Reset();
 
             strategy.Execute();
 

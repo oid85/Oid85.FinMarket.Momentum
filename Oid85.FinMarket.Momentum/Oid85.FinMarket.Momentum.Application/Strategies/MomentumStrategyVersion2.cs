@@ -32,7 +32,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
             foreach (var date in Dates)
             {
                 CurrentDate = date;
-                BalanceProcessor.CurrentDate = date;
+                TradingProcessor.CurrentDate = date;
                 UpdatePrices();
                 UpdateCandles();
 

@@ -4,7 +4,7 @@ using static Oid85.FinMarket.Momentum.Common.KnownConstants.KnownTickers;
 
 namespace Oid85.FinMarket.Momentum.Application.Models
 {
-    public class BalanceProcessor
+    public class TradingProcessor
     {
         public DateOnly CurrentDate { get; set; } = DateOnly.MinValue;
         public double StartMoneySum { get; set; } = 0.0;

@@ -70,7 +70,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             strategy.Data = _tickers.ToDictionary(k => k, v => new PositionData { Ticker = v, Lot = _instrumentData[v].Lot ?? 1 });
             strategy.Data.TryAdd(KnownTickers.MON, new PositionData { Ticker = KnownTickers.MON, Lot = 1 });
 
-            strategy.BalanceProcessor = new BalanceProcessor
+            strategy.TradingProcessor = new TradingProcessor
             {
                 CandleData = _candleData,
                 InstrumentData = _instrumentData,
@@ -100,7 +100,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                             strategy.DrawdownSeries.Data.Clear();
                             strategy.MoneySeries.Data.Clear();
 
-                            strategy.BalanceProcessor.Reset();
+                            strategy.TradingProcessor.Reset();
 
                             strategy.Execute();
 
