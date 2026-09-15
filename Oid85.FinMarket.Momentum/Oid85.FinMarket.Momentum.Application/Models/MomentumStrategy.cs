@@ -148,7 +148,13 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public void CloseAllPositions() => BalanceProcessor.CloseAllPositions();
 
-        public void OpenPositionsByWeights() => BalanceProcessor.OpenPositionsByWeights(Data.ToDictionary(x => x.Key, x => x.Value.Weight), true);
+        public void OpenPositionsByWeights()
+        {
+            foreach (var ticker in PortfolioWithoutMonTickers)
+                Data[ticker].CountBuy++;
+
+            BalanceProcessor.OpenPositionsByWeights(Data.ToDictionary(x => x.Key, x => x.Value.Weight), true);
+        }
 
         public void MoveStopsToBreakEven()
         {
