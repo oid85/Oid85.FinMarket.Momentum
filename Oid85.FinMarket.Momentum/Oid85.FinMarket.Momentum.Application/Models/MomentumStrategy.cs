@@ -226,9 +226,9 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             return -1 * Math.Abs((maxEquity - lastEquity) / maxEquity * 100.0).RoundTo(2);
         }
 
-        public List<Position> GetCurrentPositions()
+        public List<CurrentPosition> GetCurrentPositions()
         {
-            var currentPositions = new List<Position>();
+            var currentPositions = new List<CurrentPosition>();
 
             foreach (var ticker in PortfolioTickers)
             {
@@ -240,7 +240,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 double profitPercent = ticker == MON ? 0.0 : Data[ticker].ProfitPercent;
 
                 currentPositions.Add(
-                    new Position
+                    new CurrentPosition
                     {
                         Ticker = ticker,
                         Weight = Data[ticker].Weight,
@@ -252,7 +252,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                     });
             }
 
-            List<Position> orderedCurrentPositions = [
+            List<CurrentPosition> orderedCurrentPositions = [
                     .. currentPositions.Where(x => x.Ticker != MON).OrderBy(x => x.Ticker),
                     .. currentPositions.Where(x => x.Ticker == MON)
                     ];

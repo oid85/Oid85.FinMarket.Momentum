@@ -2,14 +2,14 @@
 
 namespace Oid85.FinMarket.Momentum.Application.Strategies
 {
-    public class MomentumStrategyVersion1 : MomentumStrategy
+    public class MomentumStrategyClassic : MomentumStrategy
     {
         private readonly double DrawdownLimitPercent = 15.0;
 
         public override List<string> GetDescription()
         {
             return [
-                "Версия 1",
+                "Версия Classic",
                 "Классический",
                 $"Период моментума: {Period} дней",
                 $"Количество отбираемых тикеров для моментума: {CounTopTickers} шт.",

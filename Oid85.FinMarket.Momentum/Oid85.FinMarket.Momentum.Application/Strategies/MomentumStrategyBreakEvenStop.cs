@@ -2,14 +2,14 @@
 
 namespace Oid85.FinMarket.Momentum.Application.Strategies
 {
-    public class MomentumStrategyVersion2 : MomentumStrategy
+    public class MomentumStrategyBreakEvenStop : MomentumStrategy
     {
         private readonly double DrawdownLimitPercent = 15.0;
 
         public override List<string> GetDescription()
         {
             return [
-                "Версия 2",
+                "Версия BreakEvenStop",
                 "С переводом в безубыток",
                 $"Период моментума: {Period} дней",
                 $"Количество отбираемых тикеров для моментума: {CounTopTickers} шт.",

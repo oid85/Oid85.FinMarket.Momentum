@@ -10,7 +10,7 @@ namespace Oid85.FinMarket.Momentum.Core.Responses
         public List<DiagramSeries> PriceDynamicSeries { get; set; } = [];
         public List<DiagramSeries> PriceSeries { get; set; } = [];
         public List<List<DiagramSeries>> PriceWithStopSeries { get; set; } = [];
-        public List<Position> CurrentPositions { get; set; } = [];
+        public List<CurrentPosition> CurrentPositions { get; set; } = [];
         public List<MomentumMessage> Messages { get; set; } = [];
         public List<TickerStatistic> TickerStatistic { get; set; } = [];
         public double Yield { get; set; }

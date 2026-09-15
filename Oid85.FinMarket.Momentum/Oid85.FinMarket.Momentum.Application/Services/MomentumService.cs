@@ -25,7 +25,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var tickers = momentumSettings.Tickers;
 
-            var strategy = serviceProvider.GetRequiredKeyedService<MomentumStrategy>($"MomentumStrategyVersion{request.MomentumVersion}");
+            var strategy = serviceProvider.GetRequiredKeyedService<MomentumStrategy>($"MomentumStrategy{request.MomentumVersion}");
 
             strategy.InitMonitorParameters();
 

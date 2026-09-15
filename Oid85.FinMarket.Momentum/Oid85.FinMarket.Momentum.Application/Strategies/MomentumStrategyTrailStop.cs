@@ -2,14 +2,14 @@
 
 namespace Oid85.FinMarket.Momentum.Application.Strategies
 {
-    public class MomentumStrategyVersion3 : MomentumStrategy
+    public class MomentumStrategyTrailStop : MomentumStrategy
     {
         private readonly double DrawdownLimitPercent = 15.0;
 
         public override List<string> GetDescription()
         {
             return [
-                "Версия 3",
+                "Версия TrailStop",
                 "С трейлинг стопом",
                 $"Период моментума: {Period} дней",
                 $"Количество отбираемых тикеров для моментума: {CounTopTickers} шт.",
