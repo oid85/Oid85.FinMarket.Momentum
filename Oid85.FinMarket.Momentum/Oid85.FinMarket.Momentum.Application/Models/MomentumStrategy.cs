@@ -1,9 +1,11 @@
 ﻿using System.Globalization;
+using System.Timers;
 using Oid85.FinMarket.Momentum.Application.Helpers;
 using Oid85.FinMarket.Momentum.Common.Extensions;
 using Oid85.FinMarket.Momentum.Common.KnownConstants;
 using Oid85.FinMarket.Momentum.Common.Utils;
 using Oid85.FinMarket.Momentum.Core.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using static Oid85.FinMarket.Momentum.Common.KnownConstants.KnownTickers;
 
 namespace Oid85.FinMarket.Momentum.Application.Models
@@ -386,30 +388,24 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public List<TickerStatistic> GetTickerStatistic()
         {
-            var tickerStatistics = new List<TickerStatistic>();
-
-            foreach (var (ticker, data) in Data)
-            {
-                tickerStatistics.Add(
-                    new TickerStatistic
-                    {
-                        Ticker = ticker,
-                        CountBuy = data.CountBuy,
-                        CountTriggerStop = data.CountTriggerStop,
-                        CountTriggerStopPercent = data.CountTriggerStop == 0 ? 0.0 : (Convert.ToDouble(data.CountTriggerStop) / Convert.ToDouble(data.CountBuy) * 100.0).RoundTo(2)
-                    });
-            }
-
-            var orderedTickerStatistics = tickerStatistics
+            var tickerStatistics = Data
+                .Select(x =>
+                new TickerStatistic
+                {
+                    Ticker = x.Key,
+                    CountBuy = x.Value.CountBuy,
+                    CountTriggerStop = x.Value.CountTriggerStop,
+                    CountTriggerStopPercent = x.Value.CountTriggerStop == 0 ? 0.0 : (Convert.ToDouble(x.Value.CountTriggerStop) / Convert.ToDouble(x.Value.CountBuy) * 100.0).RoundTo(2)
+                })
                 .OrderBy(x => x.Ticker)
                 .Where(x => x.Ticker != MON)
                 .ToList();
 
             int number = 1;
-            foreach (var orderedTickerStatistic in orderedTickerStatistics)
-                orderedTickerStatistic.Number = number++;
+            foreach (var tickerStatistic in tickerStatistics)
+                tickerStatistic.Number = number++;
 
-            return orderedTickerStatistics;
+            return tickerStatistics;
         }
     }
 }

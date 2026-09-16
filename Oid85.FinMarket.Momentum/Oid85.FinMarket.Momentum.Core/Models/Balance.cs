@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Oid85.FinMarket.Momentum.Application.Models
+namespace Oid85.FinMarket.Momentum.Core.Models
 {
     [DebuggerDisplay("Price: {Price}, Size: {Size}, Cost: {Cost}")]
     public class Balance
