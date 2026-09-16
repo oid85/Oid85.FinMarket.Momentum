@@ -44,6 +44,19 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStorageApiClient, StorageApiClient>();
     }
 
+    public static void ConfigureAnalyticsApiClient(
+    this IServiceCollection services,
+    IConfiguration configuration)
+    {
+        services.AddHttpClient(KnownHttpClients.FinMarketAnalyticsServiceApiClient, client =>
+        {
+            string baseUrl = configuration.GetValue<string>(KnownSettingsKeys.FinMarketAnalyticsServiceApiClientBaseAddress)!;
+            client.BaseAddress = new Uri(baseUrl);
+        });
+
+        services.AddScoped<IStorageApiClient, StorageApiClient>();
+    }
+
     public static async Task ApplyMigrations(this IHost host)
     {
         var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();

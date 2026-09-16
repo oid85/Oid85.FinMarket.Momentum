@@ -32,6 +32,7 @@ namespace Oid85.FinMarket.Momentum.WebHost
             builder.Services.ConfigureApplicationServices();
             builder.Services.ConfigureInfrastructure(builder.Configuration);
             builder.Services.ConfigureStorageApiClient(builder.Configuration);
+            builder.Services.ConfigureAnalyticsApiClient(builder.Configuration);
 
             builder.Services.AddWindowsService(options =>
             {
