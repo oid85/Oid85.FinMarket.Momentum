@@ -248,6 +248,8 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public List<DiagramSeries> GetPriceDynamicSeries() => DiagramSeriesHelper.GetPriceDynamicSeries(PortfolioTickers, CandleData, Period);
 
+        public List<DiagramSeries> GetPriceSeries() => DiagramSeriesHelper.GetPriceSeries(PortfolioTickers, CandleData);
+
         public List<List<DiagramSeries>> GetPriceWithStopSeries() => DiagramSeriesHelper.GetPriceWithStopSeries(PortfolioTickers, CandleData, PositionData);
 
         public List<TickerStatistic> GetTickerStatistics()
