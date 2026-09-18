@@ -97,12 +97,19 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             };
 
             foreach (var ticker in PortfolioWithoutMonTickers)
-                AddMessage(ticker, $"Ребалансировка моментума. Позиция {ticker}, {TradingProcessor.BalanceData[ticker].Size.ToString("N0", nfi)} шт., {TradingProcessor.BalanceData[ticker].Cost.RoundTo(2).ToString("N", nfi)} руб., СЛ {PositionData[ticker].StopPrice.RoundTo(2).ToString("N", nfi)} руб.", KnownColors.LightGreen);
+                AddMessage(
+                    ticker, 
+                    $"Ребалансировка моментума. " +
+                    $"Позиция {ticker}, {TradingProcessor.BalanceData[ticker].Size.ToString("N0", nfi)} шт., " +
+                    $"Cost {TradingProcessor.BalanceData[ticker].Cost.RoundTo(2).ToString("N", nfi)} руб., " +
+                    $"EntryPrice {PositionData[ticker].EntryPrice.RoundTo(4).ToString("N", nfi)} руб., " +              
+                    $"StopPrice {PositionData[ticker].StopPrice.RoundTo(4).ToString("N", nfi)} руб.", 
+                    KnownColors.LightGreen);
         }
 
         public void ClearMessages() => Messages.Clear();
 
-        public Candle? GetCandle(string ticker) => CandleData[ticker].FindLast(x => x.Date <= CurrentDate);
+        public Candle? GetCandle(string ticker) => CandleData[ticker].FindLast(x => x.Date <= CurrentDate.AddDays(-1));
 
         public void SetTopTickers() => TopTickers = [.. MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate, Period, CounTopTickers), MON];
 
@@ -115,7 +122,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public void UpdatePrices() => TradingProcessor.UpdatePrices();
 
-        public void UpdateCandles() => PortfolioTickers.ForEach(ticker => PositionData[ticker].Candle = GetCandle(ticker) ?? new Candle());
+        public void UpdateCandles() => Tickers.ForEach(ticker => PositionData[ticker].Candle = GetCandle(ticker) ?? new Candle());
 
         public void SetAverageCandleBodies() => PortfolioWithoutMonTickers.ForEach(ticker => PositionData[ticker].AverageCandleBody = CandleData[ticker].Where(x => x.Date >= CurrentDate.AddDays(-1 * Period) && x.Date <= CurrentDate).Average(x => Math.Abs(x.Close - x.Open)));
 
@@ -174,7 +181,21 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
             TradingProcessor.ClosePosition(ticker, true);
 
-            AddMessage(ticker, $"Стоп-лосс. Закрыта позиция по {ticker}", KnownColors.LightRed);
+            var nfi = new NumberFormatInfo
+            {
+                NumberDecimalSeparator = ".",
+                NumberGroupSeparator = " "
+            };
+
+            AddMessage(
+                ticker, 
+                $"Стоп-лосс. " +
+                $"Закрыта позиция по {ticker}, " +
+                $"EntryPrice {PositionData[ticker].EntryPrice.RoundTo(4).ToString("N", nfi)} руб., " +
+                $"LowPrice {PositionData[ticker].Candle.Low.RoundTo(4).ToString("N", nfi)} руб., " +                
+                $"StopPrice {PositionData[ticker].StopPrice.RoundTo(4).ToString("N", nfi)} руб.",
+                KnownColors.LightRed);
+            
             AddMessage(MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
         }
 

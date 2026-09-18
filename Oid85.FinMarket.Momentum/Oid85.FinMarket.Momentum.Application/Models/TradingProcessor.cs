@@ -108,7 +108,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         public void UpdatePrices()
         {
             foreach (var (ticker, _) in BalanceData.Where(x => x.Key != RUB).ToDictionary())
-                BalanceData[ticker].Price = CandleData[ticker].FindLast(x => x.Date <= CurrentDate)?.Close ?? 0.0;
+                BalanceData[ticker].Price = CandleData[ticker].FindLast(x => x.Date <= CurrentDate.AddDays(-1))?.Close ?? 0.0;
         }
     }
 }

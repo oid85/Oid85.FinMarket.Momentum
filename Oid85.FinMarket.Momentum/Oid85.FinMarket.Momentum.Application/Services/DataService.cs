@@ -56,7 +56,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
         public async Task<List<Candle>> GetMoneyEquivalentCandlesAsync(DateOnly from, DateOnly to)
         {
-            var dates = DateUtils.GetDates(from, to);
+            var dates = DateUtils.GetDates(from.AddDays(-10), to);
 
             double price = 100.0;
 
@@ -91,16 +91,6 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             }
 
             return candles;
-        }
-
-        public Candle? GetCandle(string ticker, DateOnly date)
-        {
-            if (_candleData is null) return null;
-            var candles = _candleData[ticker];
-            if (candles is null) return null;
-            var candle = candles.FindLast(x => x.Date <= date);
-            if (candle is null) return null;
-            return candle;
         }
 
         private async Task<List<Candle>> GetCandlesByTickerAsync(string ticker)
