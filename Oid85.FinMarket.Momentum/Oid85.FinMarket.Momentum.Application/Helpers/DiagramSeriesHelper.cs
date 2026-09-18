@@ -87,5 +87,134 @@ namespace Oid85.FinMarket.Momentum.Application.Helpers
                 Data = [.. equitySeries.Data.Where(x => x.Date >= from && x.Date <= to)],
             };
         }
+
+        public static List<DiagramSeries> GetPriceSeries(
+            List<string> portfolioTickers, 
+            Dictionary<string, List<Candle>> candleData)
+        {
+            var series = new List<DiagramSeries>();
+
+            var from = DateOnly.FromDateTime(DateTime.Today.AddMonths(-1));
+            var to = DateOnly.FromDateTime(DateTime.Today);
+
+            List<string> tickers = [
+                .. portfolioTickers.Where(x => x != KnownTickers.MON).OrderBy(x => x),
+                .. portfolioTickers.Where(x => x == KnownTickers.MON)
+                ];
+
+            foreach (var ticker in tickers)
+            {
+                var candles = candleData[ticker].Where(x => x.Date >= from && x.Date <= to).ToList();
+
+                series.Add(
+                    new DiagramSeries
+                    {
+                        Name = ticker,
+                        Color = KnownColors.Blue,
+                        ColorFill = KnownColors.LightBlue,
+                        Data = [.. candles
+                        .Select(x =>
+                        new DateValue<double?>
+                        {
+                            Date = x.Date,
+                            Value = x.Close.RoundTo(4)
+                        })]
+                    });
+            }
+
+            return series;
+        }
+
+        public static List<DiagramSeries> GetPriceDynamicSeries(
+            List<string> portfolioTickers, 
+            Dictionary<string, List<Candle>> candleData, 
+            int period)
+        {
+            var priceDynamicSeries = new List<DiagramSeries>();
+
+            var from = DateOnly.FromDateTime(DateTime.Today).AddDays(-1 * period);
+            var to = DateOnly.FromDateTime(DateTime.Today);
+
+            foreach (var (ticker, candleList) in candleData.Where(x => x.Key != KnownTickers.MON))
+            {
+                var candlesByDates = candleList.Where(x => x.Date >= from && x.Date <= to).ToList();
+                double firstPrice = candlesByDates.First().Close;
+
+                string color = portfolioTickers.Contains(ticker)
+                    ? KnownColors.Green
+                    : KnownColors.LightBlue;
+
+                priceDynamicSeries.Add(
+                    new DiagramSeries
+                    {
+                        Name = ticker,
+                        Color = color,
+                        ColorFill = color,
+                        Data = [.. candlesByDates
+                        .Select(x =>
+                        new DateValue<double?>
+                        {
+                            Date = x.Date,
+                            Value = (x.Close / firstPrice).RoundTo(4)
+                        })]
+                    });
+            }
+
+            return priceDynamicSeries;
+        }
+
+        public static List<List<DiagramSeries>> GetPriceWithStopSeries(
+            List<string> portfolioTickers,
+            Dictionary<string, List<Candle>> candleData,
+            Dictionary<string, PositionData> positionData
+            )
+        {
+            var series = new List<List<DiagramSeries>>();
+
+            var from = DateOnly.FromDateTime(DateTime.Today.AddDays(-15));
+            var to = DateOnly.FromDateTime(DateTime.Today);
+
+            List<string> tickers = [
+                .. portfolioTickers.Where(x => x != KnownTickers.MON).OrderBy(x => x),
+                .. portfolioTickers.Where(x => x == KnownTickers.MON)
+                ];
+
+            foreach (var ticker in tickers)
+            {
+                var candles = candleData[ticker].Where(x => x.Date >= from && x.Date <= to).ToList();
+                double stop = positionData[ticker].StopPrice;
+
+                series.Add([
+                    new DiagramSeries
+                    {
+                        Name = $"Цена '{ticker}'",
+                        Color = KnownColors.Blue,
+                        ColorFill = KnownColors.LightBlue,
+                        Data = [.. candles
+                        .Select(x =>
+                        new DateValue<double?>
+                        {
+                            Date = x.Date,
+                            Value = x.Close.RoundTo(4)
+                        })]
+                    },
+                    new DiagramSeries
+                    {
+                        Name = $" SL '{ticker}'",
+                        Color = KnownColors.Red,
+                        ColorFill = KnownColors.Red,
+                        Data = [.. candles
+                        .Select(x =>
+                        new DateValue<double?>
+                        {
+                            Date = x.Date,
+                            Value = stop.RoundTo(4)
+                        })]
+                    }
+                    ]);
+            }
+
+            return series;
+        }
     }
 }

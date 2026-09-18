@@ -1,5 +1,4 @@
-﻿using System.Timers;
-using Oid85.FinMarket.Momentum.Core.Models;
+﻿using Oid85.FinMarket.Momentum.Core.Models;
 using static Oid85.FinMarket.Momentum.Common.KnownConstants.KnownTickers;
 
 namespace Oid85.FinMarket.Momentum.Application.Models
