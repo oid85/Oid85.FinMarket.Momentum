@@ -67,8 +67,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             strategy.To = _to;
 
             strategy.CandleData = _candleData;            
-            strategy.Data = _tickers.ToDictionary(k => k, v => new PositionData { Ticker = v, Lot = _instrumentData[v].Lot ?? 1 });
-            strategy.Data.TryAdd(KnownTickers.MON, new PositionData { Ticker = KnownTickers.MON, Lot = 1 });
+            strategy.PositionData = _tickers.ToDictionary(k => k, v => new PositionData { Ticker = v, Lot = _instrumentData[v].Lot ?? 1 });
+            strategy.PositionData.TryAdd(KnownTickers.MON, new PositionData { Ticker = KnownTickers.MON, Lot = 1 });
 
             strategy.TradingProcessor = new TradingProcessor
             {

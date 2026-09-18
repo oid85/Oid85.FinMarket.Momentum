@@ -42,8 +42,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             strategy.CandleData = candleData;
             
             var instrumentData = await dataService.GetInstrumentDataAsync(tickers);
-            strategy.Data = tickers.ToDictionary(k => k, v => new PositionData { Ticker = v, Lot = instrumentData[v].Lot ?? 1 });
-            strategy.Data.TryAdd(MON, new PositionData { Ticker = MON, Lot = 1 });
+            strategy.PositionData = tickers.ToDictionary(k => k, v => new PositionData { Ticker = v, Lot = instrumentData[v].Lot ?? 1 });
+            strategy.PositionData.TryAdd(MON, new PositionData { Ticker = MON, Lot = 1 });
 
             strategy.TotalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum:Momentum")) ?? "0").Replace(" ", "").Trim());
 
