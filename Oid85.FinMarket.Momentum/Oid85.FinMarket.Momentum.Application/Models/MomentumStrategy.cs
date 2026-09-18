@@ -108,28 +108,16 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public void SetWeights()
         {
-            foreach (var ticker in Tickers) 
-                PositionData[ticker].Weight = 0.0;
-
-            foreach (var ticker in TopTickers) 
-                PositionData[ticker].Weight = 1.0;
-
+            Tickers.ForEach(ticker => PositionData[ticker].Weight = 0.0);
+            TopTickers.ForEach(ticker => PositionData[ticker].Weight = 1.0);
             PositionData[MON].Weight = CounTopTickers - TopTickers.Count(x => x != MON);
         }
 
         public void UpdatePrices() => TradingProcessor.UpdatePrices();
 
-        public void UpdateCandles()
-        {            
-            foreach (var ticker in PortfolioTickers)
-                PositionData[ticker].Candle = GetCandle(ticker) ?? new Candle();
-        }
+        public void UpdateCandles() => PortfolioTickers.ForEach(ticker => PositionData[ticker].Candle = GetCandle(ticker) ?? new Candle());
 
-        public void SetAverageCandleBodies()
-        {
-            foreach (var ticker in PortfolioWithoutMonTickers)            
-                PositionData[ticker].AverageCandleBody = CandleData[ticker].Where(x => x.Date >= CurrentDate.AddDays(-1 * Period) && x.Date <= CurrentDate).Average(x => Math.Abs(x.Close - x.Open));
-        }
+        public void SetAverageCandleBodies() => PortfolioWithoutMonTickers.ForEach(ticker => PositionData[ticker].AverageCandleBody = CandleData[ticker].Where(x => x.Date >= CurrentDate.AddDays(-1 * Period) && x.Date <= CurrentDate).Average(x => Math.Abs(x.Close - x.Open)));
 
         public void SetClassicStops()
         {
@@ -140,19 +128,13 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             }
         }
 
-        public void SetEntryPrices()
-        {
-            foreach (var ticker in PortfolioWithoutMonTickers)
-                PositionData[ticker].EntryPrice = PositionData[ticker].Candle.Close;
-        }
+        public void SetEntryPrices() => PortfolioWithoutMonTickers.ForEach(ticker => PositionData[ticker].EntryPrice = PositionData[ticker].Candle.Close);
 
         public void CloseAllPositions() => TradingProcessor.CloseAllPositions();
 
         public void OpenPositionsByWeights()
         {
-            foreach (var ticker in PortfolioWithoutMonTickers)
-                PositionData[ticker].CountBuy++;
-
+            PortfolioWithoutMonTickers.ForEach(ticker => PositionData[ticker].CountBuy++);
             TradingProcessor.OpenPositionsByWeights(PositionData.ToDictionary(x => x.Key, x => x.Value.Weight), true);
         }
 
