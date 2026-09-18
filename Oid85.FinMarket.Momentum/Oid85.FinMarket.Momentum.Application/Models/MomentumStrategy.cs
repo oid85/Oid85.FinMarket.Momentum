@@ -250,7 +250,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public List<List<DiagramSeries>> GetPriceWithStopSeries() => DiagramSeriesHelper.GetPriceWithStopSeries(PortfolioTickers, CandleData, PositionData);
 
-        public List<TickerStatistic> GetTickerStatistic()
+        public List<TickerStatistic> GetTickerStatistics()
         {
             var tickerStatistics = PositionData
                 .Select(x =>

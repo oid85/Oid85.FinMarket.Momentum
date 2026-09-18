@@ -32,7 +32,7 @@ public static class ApplicationMapper
             YieldWeek = DiagramSeriesHelper.GetPercentageYield(strategy.EquitySeries, 7),
             MaxDrawdownPercent = strategy.MaxDrawdownPercent,
             CurrentDrawdownPercent = strategy.GetCurrentDrawdown(),
-            TickerStatistic = strategy.GetTickerStatistic()
+            TickerStatistic = strategy.GetTickerStatistics()
         };
 
     public static StrategyExecuteResult ToStrategyExecuteResult(MomentumStrategy strategy) =>
