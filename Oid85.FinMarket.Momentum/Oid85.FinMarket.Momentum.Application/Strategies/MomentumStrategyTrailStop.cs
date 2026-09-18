@@ -46,7 +46,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                     SetWeights();
                     SetEntryPrices();
                     SetAverageCandleBodies();
-                    SetStops();
+                    SetClassicStops();
                     OpenPositionsByWeights();
                     AddRebalanceMessage();
                 }

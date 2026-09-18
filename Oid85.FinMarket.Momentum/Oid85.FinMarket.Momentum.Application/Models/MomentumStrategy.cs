@@ -131,7 +131,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 PositionData[ticker].AverageCandleBody = CandleData[ticker].Where(x => x.Date >= CurrentDate.AddDays(-1 * Period) && x.Date <= CurrentDate).Average(x => Math.Abs(x.Close - x.Open));
         }
 
-        public void SetStops()
+        public void SetClassicStops()
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
             {
