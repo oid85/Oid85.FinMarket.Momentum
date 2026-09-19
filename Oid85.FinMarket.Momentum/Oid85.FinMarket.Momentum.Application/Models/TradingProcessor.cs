@@ -19,6 +19,9 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         
         public double TotalSum => BalanceData.Sum(x => x.Value.Cost);
 
+        /// <summary>
+        /// Сбросить настройки процессора
+        /// </summary>
         public void Reset()
         {
             BalanceData = Tickers.ToDictionary(k => k, v => new Balance());
