@@ -18,6 +18,8 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public List<int> RebalanceDays { get; set; } = [];
 
+        public List<int> UpdateStopDays { get; set; } = [];
+
         public virtual List<string> GetDescription() => [];
 
         public DateOnly From { get; set; } = new DateOnly(2021, 1, 1);
@@ -70,9 +72,11 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public List<string> PortfolioWithoutMonTickers => [.. PositionData.Values.Where(x => x.Ticker != MON).Where(x => x.Weight > 0.0).Select(x => x.Ticker)];
 
-        public double WeightSum => PositionData.Values.Sum(x => x.Weight);        
+        public double WeightSum => PositionData.Values.Sum(x => x.Weight);
 
-        public bool IsRebalance => RebalanceDays.Contains(CurrentDate.Day);
+        public bool IsRebalanceDay => RebalanceDays.Contains(CurrentDate.Day);
+
+        public bool IsUpdateStopDay => UpdateStopDays.Contains(CurrentDate.Day);
 
         public DateOnly CurrentDate { get; set; } = DateOnly.MinValue;
 
@@ -139,11 +143,43 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public void SetAverageCandleBodies() => PortfolioWithoutMonTickers.ForEach(ticker => PositionData[ticker].AverageCandleBody = CandleData[ticker].Where(x => x.Date >= CurrentDate.AddDays(-1 * Period) && x.Date <= CurrentDate).Average(x => Math.Abs(x.Close - x.Open)));
 
+        public void UpdateClassicStops()
+        {
+            var nfi = new NumberFormatInfo
+            {
+                NumberDecimalSeparator = ".",
+                NumberGroupSeparator = " "
+            };
+
+            foreach (var ticker in PortfolioWithoutMonTickers)
+            {
+                double stopSize = 2.0 * PositionData[ticker].AverageCandleBody;
+                double newStopPrice = PositionData[ticker].Candle.Close - stopSize;
+
+                // Подтягиваем стоп
+                if (newStopPrice > PositionData[ticker].StopPrice)
+                {
+                    PositionData[ticker].StopPrice = newStopPrice;
+                    PositionData[ticker].IsBreakEvenStop = false;
+
+                    AddMessage(
+                        ticker,
+                        $"Пересчет стопа. " +
+                        $"{ticker}, " +
+                        $"NewStopPrice {PositionData[ticker].StopPrice.RoundTo(4).ToString("N", nfi)} руб.",
+                        KnownColors.LightGreen);
+                }
+            }
+        }
+
         public void SetClassicStops()
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
             {
-                PositionData[ticker].StopPrice = PositionData[ticker].Candle.Close - 2.0 * PositionData[ticker].AverageCandleBody;
+                double stopSize = 2.0 * PositionData[ticker].AverageCandleBody;
+                double stopPrice = PositionData[ticker].Candle.Close - stopSize;
+
+                PositionData[ticker].StopPrice = stopPrice;
                 PositionData[ticker].IsBreakEvenStop = false;
             }
         }
@@ -162,18 +198,28 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
                 if (!PositionData[ticker].IsBreakEvenStop)
-                    if (PositionData[ticker].Candle.Close >= PositionData[ticker].EntryPrice + 4.0 * PositionData[ticker].AverageCandleBody)
+                {
+                    double stopSize = 2.0 * PositionData[ticker].AverageCandleBody;
+                    double newStopPrice = PositionData[ticker].Candle.Close - stopSize;
+
+                    if (PositionData[ticker].Candle.Close >= PositionData[ticker].EntryPrice + 2.0 * stopSize)
                     {
-                        PositionData[ticker].StopPrice = PositionData[ticker].Candle.Close - 2.0 * PositionData[ticker].AverageCandleBody;
+                        PositionData[ticker].StopPrice = newStopPrice;
                         PositionData[ticker].IsBreakEvenStop = true;
                     }
+                }
         }
 
         public void TrailStops()
         {
             foreach (var ticker in PortfolioWithoutMonTickers)
-                if (PositionData[ticker].Candle.Close >= PositionData[ticker].StopPrice + 2.0 * PositionData[ticker].AverageCandleBody)
-                    PositionData[ticker].StopPrice = PositionData[ticker].Candle.Close - 2.0 * PositionData[ticker].AverageCandleBody;
+            {
+                double stopSize = 2.0 * PositionData[ticker].AverageCandleBody;
+                double newStopPrice = PositionData[ticker].Candle.Close - stopSize;
+
+                if (PositionData[ticker].Candle.Close >= PositionData[ticker].StopPrice + stopSize)
+                    PositionData[ticker].StopPrice = newStopPrice;
+            }
         }
 
         public void CheckStopsWithClosePosition()

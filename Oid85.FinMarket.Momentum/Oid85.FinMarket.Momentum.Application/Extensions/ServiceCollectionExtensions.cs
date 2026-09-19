@@ -18,5 +18,6 @@ public static class ServiceCollectionExtensions
         services.AddKeyedTransient<MomentumStrategy, MomentumStrategyClassic>(nameof(MomentumStrategyClassic));
         services.AddKeyedTransient<MomentumStrategy, MomentumStrategyBreakEvenStop>(nameof(MomentumStrategyBreakEvenStop));
         services.AddKeyedTransient<MomentumStrategy, MomentumStrategyTrailStop>(nameof(MomentumStrategyTrailStop));
+        services.AddKeyedTransient<MomentumStrategy, MomentumStrategyUpdateStop>(nameof(MomentumStrategyUpdateStop));
     }
 }

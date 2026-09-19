@@ -24,7 +24,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
     {
         private readonly List<int> PARAMETER_LIST_PERIOD = [10, 15, 30];
         private readonly List<int> PARAMETER_LIST_COUNT_TOP_TICKRES = [8, 10];
-        private readonly List<List<int>> PARAMETER_LIST_REBALANCE_DAYS = [[1], [1, 16], [1, 11, 21]];
+        private readonly List<List<int>> PARAMETER_LIST_REBALANCE_DAYS = [[1], [1, 16], [1, 11, 21]];        
 
         private readonly DateOnly _from = new DateOnly(2021, 1, 1);
         private readonly DateOnly _to = DateOnly.FromDateTime(DateTime.Today);
@@ -47,6 +47,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             await BacktestByStrategyName(nameof(MomentumStrategyClassic));
             await BacktestByStrategyName(nameof(MomentumStrategyBreakEvenStop));
             await BacktestByStrategyName(nameof(MomentumStrategyTrailStop));
+            await BacktestByStrategyName(nameof(MomentumStrategyUpdateStop));
 
             return new ();
         }

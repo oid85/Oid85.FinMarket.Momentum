@@ -38,7 +38,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                 UpdatePrices();
                 UpdateCandles();
 
-                if (IsRebalance)
+                if (IsRebalanceDay)
                 {
                     CloseAllPositions();
                     ClearMessages();
