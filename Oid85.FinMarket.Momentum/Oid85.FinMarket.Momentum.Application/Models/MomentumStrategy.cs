@@ -104,7 +104,8 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 AddMessage(
                     ticker, 
                     $"Ребалансировка моментума. " +
-                    $"Позиция {ticker}, {TradingProcessor.BalanceData[ticker].Size.ToString("N0", nfi)} шт., " +
+                    $"Позиция {ticker}, " +
+                    $"{TradingProcessor.BalanceData[ticker].Size.ToString("N0", nfi)} шт., " +
                     $"Cost {TradingProcessor.BalanceData[ticker].Cost.RoundTo(2).ToString("N", nfi)} руб., " +
                     $"EntryPrice {PositionData[ticker].EntryPrice.RoundTo(4).ToString("N", nfi)} руб., " +              
                     $"StopPrice {PositionData[ticker].StopPrice.RoundTo(4).ToString("N", nfi)} руб.", 
