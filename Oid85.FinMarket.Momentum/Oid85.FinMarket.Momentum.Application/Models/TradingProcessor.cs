@@ -12,11 +12,11 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         public Dictionary<string, List<Candle>> CandleData { get; set; } = [];
         
         public Dictionary<string, Instrument> InstrumentData { get; set; } = [];
-        
-        public List<string> Tickers { get; set; } = [];
-        
+
         public Dictionary<string, Balance> BalanceData { get; set; } = [];
-        
+
+        public List<string> Tickers { get; set; } = [];
+                       
         public double TotalSum => BalanceData.Sum(x => x.Value.Cost);
 
         /// <summary>
