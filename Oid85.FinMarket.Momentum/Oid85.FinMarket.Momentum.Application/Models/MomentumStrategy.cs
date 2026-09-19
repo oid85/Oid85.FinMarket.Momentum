@@ -122,7 +122,20 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public void UpdatePrices() => TradingProcessor.UpdatePrices();
 
-        public void UpdateCandles() => Tickers.ForEach(ticker => PositionData[ticker].Candle = GetCandle(ticker) ?? new Candle());
+        public void UpdateCandles()
+        {
+            foreach (var ticker in PortfolioWithoutMonTickers)
+            {
+                var candle = GetCandle(ticker) ?? new Candle();
+
+                PositionData[ticker].Candle.Date = candle.Date;
+                PositionData[ticker].Candle.Open = candle.Open;
+                PositionData[ticker].Candle.Close = candle.Close;
+                PositionData[ticker].Candle.High = candle.High;
+                PositionData[ticker].Candle.Low = candle.Low;
+                PositionData[ticker].Candle.Volume = candle.Volume;
+            }                
+        }
 
         public void SetAverageCandleBodies() => PortfolioWithoutMonTickers.ForEach(ticker => PositionData[ticker].AverageCandleBody = CandleData[ticker].Where(x => x.Date >= CurrentDate.AddDays(-1 * Period) && x.Date <= CurrentDate).Average(x => Math.Abs(x.Close - x.Open)));
 
