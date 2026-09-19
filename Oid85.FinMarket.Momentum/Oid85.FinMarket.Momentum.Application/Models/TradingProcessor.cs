@@ -6,11 +6,17 @@ namespace Oid85.FinMarket.Momentum.Application.Models
     public class TradingProcessor
     {
         public DateOnly CurrentDate { get; set; } = DateOnly.MinValue;
+        
         public double StartMoneySum { get; set; } = 0.0;
+        
         public Dictionary<string, List<Candle>> CandleData { get; set; } = [];
+        
         public Dictionary<string, Instrument> InstrumentData { get; set; } = [];
+        
         public List<string> Tickers { get; set; } = [];
+        
         public Dictionary<string, Balance> BalanceData { get; set; } = [];
+        
         public double TotalSum => BalanceData.Sum(x => x.Value.Cost);
 
         public void Reset()
@@ -80,6 +86,8 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             int lot = InstrumentData[ticker].Lot ?? 1;
             double size = Math.Truncate(cost / price / lot) * lot;
             double realCost = size * price;
+
+            // Увеличиваем позицию актива
             BalanceData[ticker].Size += size;
 
             // Списываем деньги
@@ -96,6 +104,8 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             double price = BalanceData[MON].Price;
             double size = Math.Truncate(cost / price);
             double realCost = size * price;
+
+            // Увеличиваем позицию актива
             BalanceData[MON].Size += size;
 
             // Списываем деньги
