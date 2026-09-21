@@ -1,5 +1,8 @@
-﻿namespace Oid85.FinMarket.Momentum.Core.Models;
+﻿using System.Diagnostics;
 
+namespace Oid85.FinMarket.Momentum.Core.Models;
+
+[DebuggerDisplay("Date: {Date}, Close: {Close}")]
 public class Candle
 {
     /// <summary>

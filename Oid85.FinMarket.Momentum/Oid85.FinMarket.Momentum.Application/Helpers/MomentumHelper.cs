@@ -5,20 +5,6 @@ namespace Oid85.FinMarket.Momentum.Application.Helpers
 {
     public class MomentumHelper
     {
-        public static double GetStopPrice(List<Candle> candles, double price, DateOnly date, int period)
-        {
-            if (candles is []) return 0.0;
-
-            DateOnly from = date.AddDays(-1 * period);
-            DateOnly to = date;
-
-            var averageRange = candles
-                .Where(x => x.Date >= from && x.Date <= to)
-                .Average(x => Math.Abs(x.Close - x.Open));
-
-            return price - averageRange * 2.0;
-        }
-
         public static List<string> GetMomentumTopTickers(
             Dictionary<string, List<Candle>> candleData, DateOnly date, int period, int count)
         {

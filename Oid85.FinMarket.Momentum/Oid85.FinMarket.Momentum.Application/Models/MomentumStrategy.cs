@@ -105,8 +105,6 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                     ticker, 
                     $"Ребалансировка моментума. " +
                     $"Позиция {ticker}, " +
-                    $"{TradingProcessor.BalanceData[ticker].Size.ToString("N0", nfi)} шт., " +
-                    $"Cost {TradingProcessor.BalanceData[ticker].Cost.RoundTo(2).ToString("N", nfi)} руб., " +
                     $"EntryPrice {PositionData[ticker].EntryPrice.RoundTo(4).ToString("N", nfi)} руб., " +              
                     $"StopPrice {PositionData[ticker].StopPrice.RoundTo(4).ToString("N", nfi)} руб.", 
                     KnownColors.LightGreen);
@@ -129,7 +127,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public void UpdateCandles()
         {
-            foreach (var ticker in PortfolioWithoutMonTickers)
+            foreach (var ticker in Tickers)
             {
                 var candle = GetCandle(ticker) ?? new Candle();
 
@@ -142,7 +140,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
             }                
         }
 
-        public void SetAverageCandleBodies() => PortfolioWithoutMonTickers.ForEach(ticker => PositionData[ticker].AverageCandleBody = CandleData[ticker].Where(x => x.Date >= CurrentDate.AddDays(-1 * Period) && x.Date <= CurrentDate).Average(x => Math.Abs(x.Close - x.Open)));
+        public void SetAverageCandleBodies() => PortfolioWithoutMonTickers.ForEach(ticker => PositionData[ticker].AverageCandleBody = CandleData[ticker].Where(x => x.Date >= CurrentDate.AddDays(-1).AddDays(-1 * Period) && x.Date <= CurrentDate.AddDays(-1)).Average(x => Math.Abs(x.Close - x.Open)));
 
         public void UpdateClassicStops()
         {

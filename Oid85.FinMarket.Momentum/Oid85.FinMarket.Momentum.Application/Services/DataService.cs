@@ -56,7 +56,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
         public async Task<List<Candle>> GetMoneyEquivalentCandlesAsync(DateOnly from, DateOnly to)
         {
-            var dates = DateUtils.GetDates(from.AddDays(-10), to);
+            var dates = DateUtils.GetDates(from.AddDays(-100), to);
 
             double price = 100.0;
 
