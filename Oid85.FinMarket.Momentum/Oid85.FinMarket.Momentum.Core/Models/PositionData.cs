@@ -3,7 +3,7 @@ using Oid85.FinMarket.Momentum.Common.Extensions;
 
 namespace Oid85.FinMarket.Momentum.Core.Models
 {
-    [DebuggerDisplay("Weight: {Weight}, Lot: {Lot}")]
+    [DebuggerDisplay("Ticker: {Ticker}, Weight: {Weight}")]
     public class PositionData
     {
         public string Ticker { get; set; } = string.Empty;
