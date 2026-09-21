@@ -296,6 +296,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                 var candle = CandleData[ticker].FindLast(x => x.Date <= Dates.Last());
                 double tickerCost = TotalSumLife / WeightSum * PositionData[ticker].Weight.RoundTo(2);
                 int tickerSize = Convert.ToInt32(Math.Truncate(tickerCost / candle!.Close / PositionData[ticker].Lot) * PositionData[ticker].Lot);
+                double entryPrice = ticker == MON ? 0.0 : PositionData[ticker].EntryPrice;
                 double stopPrice = ticker == MON ? 0.0 : PositionData[ticker].StopPrice;
                 double currentStopSizePercent = ticker == MON ? 0.0 : PositionData[ticker].CurrentStopSizePercent;
                 double profitPercent = ticker == MON ? 0.0 : PositionData[ticker].ProfitPercent;
@@ -307,6 +308,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                         Weight = PositionData[ticker].Weight,
                         Size = tickerSize,
                         Cost = tickerCost,
+                        EntryPrice = entryPrice,
                         StopPrice = stopPrice,
                         CurrentStopSizePercent = currentStopSizePercent,
                         ProfitPercent = profitPercent
