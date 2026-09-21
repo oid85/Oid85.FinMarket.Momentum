@@ -116,7 +116,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public Candle? GetCandle(string ticker) => CandleData[ticker].FindLast(x => x.Date <= CurrentDate.AddDays(-1));
 
-        public void SetTopTickers() => TopTickers = [.. MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate, Period, CounTopTickers), MON];
+        public void SetTopTickers() => TopTickers = [.. MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate.AddDays(-1), Period, CounTopTickers), MON];
 
         public void SetWeights()
         {
