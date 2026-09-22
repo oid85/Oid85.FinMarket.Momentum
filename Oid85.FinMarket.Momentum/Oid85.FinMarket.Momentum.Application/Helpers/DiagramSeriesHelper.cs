@@ -183,6 +183,7 @@ namespace Oid85.FinMarket.Momentum.Application.Helpers
             {
                 var candles = candleData[ticker].Where(x => x.Date >= from && x.Date <= to).ToList();
                 double stop = positionData[ticker].StopPrice;
+                double entryPrice = positionData[ticker].EntryPrice;
 
                 series.Add([
                     new DiagramSeries
@@ -209,6 +210,19 @@ namespace Oid85.FinMarket.Momentum.Application.Helpers
                         {
                             Date = x.Date,
                             Value = stop.RoundTo(4)
+                        })]
+                    },
+                    new DiagramSeries
+                    {
+                        Name = $" PEn '{ticker}'",
+                        Color = KnownColors.Blue,
+                        ColorFill = KnownColors.Blue,
+                        Data = [.. candles
+                        .Select(x =>
+                        new DateValue<double?>
+                        {
+                            Date = x.Date,
+                            Value = entryPrice.RoundTo(4)
                         })]
                     }
                     ]);
