@@ -166,8 +166,7 @@ namespace Oid85.FinMarket.Momentum.Application.Helpers
         public static List<List<DiagramSeries>> GetPriceWithStopSeries(
             List<string> portfolioTickers,
             Dictionary<string, List<Candle>> candleData,
-            Dictionary<string, PositionData> positionData
-            )
+            Dictionary<string, PositionData> positionData)
         {
             var series = new List<List<DiagramSeries>>();
 
