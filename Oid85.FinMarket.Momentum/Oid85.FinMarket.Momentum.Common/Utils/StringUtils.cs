@@ -36,4 +36,15 @@ public static class StringUtils
 
         return result;
     }
+
+    public static string ToNumberPrettyString(this double input)
+    {
+        var nfi = new NumberFormatInfo
+        {
+            NumberDecimalSeparator = ".",
+            NumberGroupSeparator = " "
+        };
+
+        return input.ToString("N", nfi);
+    }
 }

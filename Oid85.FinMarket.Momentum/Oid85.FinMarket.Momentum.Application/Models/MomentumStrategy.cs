@@ -94,19 +94,13 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public void AddRebalanceMessage()
         {
-            var nfi = new NumberFormatInfo
-            {
-                NumberDecimalSeparator = ".",
-                NumberGroupSeparator = " "
-            };
-
             foreach (var ticker in PortfolioWithoutMonTickers)
                 AddMessage(
                     ticker, 
                     $"Ребалансировка моментума. " +
                     $"Позиция {ticker}, " +
-                    $"EntryPrice {PositionData[ticker].EntryPrice.RoundTo(4).ToString("N", nfi)} руб., " +              
-                    $"StopPrice {PositionData[ticker].StopPrice.RoundTo(4).ToString("N", nfi)} руб.", 
+                    $"EntryPrice {PositionData[ticker].EntryPrice.RoundTo(4).ToNumberPrettyString()} руб., " +              
+                    $"StopPrice {PositionData[ticker].StopPrice.RoundTo(4).ToNumberPrettyString()} руб.", 
                     KnownColors.LightGreen);
         }
 
@@ -144,12 +138,6 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public void UpdateClassicStops()
         {
-            var nfi = new NumberFormatInfo
-            {
-                NumberDecimalSeparator = ".",
-                NumberGroupSeparator = " "
-            };
-
             foreach (var ticker in PortfolioWithoutMonTickers)
             {
                 double stopSize = 2.0 * PositionData[ticker].AverageCandleBody;
@@ -165,7 +153,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
                         ticker,
                         $"Пересчет стопа. " +
                         $"{ticker}, " +
-                        $"NewStopPrice {PositionData[ticker].StopPrice.RoundTo(4).ToString("N", nfi)} руб.",
+                        $"NewStopPrice {PositionData[ticker].StopPrice.RoundTo(4).ToNumberPrettyString()} руб.",
                         KnownColors.LightGreen);
                 }
             }
@@ -239,19 +227,13 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
             TradingProcessor.ClosePosition(ticker, true);
 
-            var nfi = new NumberFormatInfo
-            {
-                NumberDecimalSeparator = ".",
-                NumberGroupSeparator = " "
-            };
-
             AddMessage(
                 ticker, 
                 $"Стоп-лосс. " +
                 $"Закрыта позиция по {ticker}, " +
-                $"EntryPrice {PositionData[ticker].EntryPrice.RoundTo(4).ToString("N", nfi)} руб., " +
-                $"LowPrice {PositionData[ticker].Candle.Low.RoundTo(4).ToString("N", nfi)} руб., " +                
-                $"StopPrice {PositionData[ticker].StopPrice.RoundTo(4).ToString("N", nfi)} руб.",
+                $"EntryPrice {PositionData[ticker].EntryPrice.RoundTo(4).ToNumberPrettyString()} руб., " +
+                $"LowPrice {PositionData[ticker].Candle.Low.RoundTo(4).ToNumberPrettyString()} руб., " +                
+                $"StopPrice {PositionData[ticker].StopPrice.RoundTo(4).ToNumberPrettyString()} руб.",
                 KnownColors.LightRed);
             
             AddMessage(MON, $"Увеличена доля фонда ликвидности", KnownColors.LightGreen);
