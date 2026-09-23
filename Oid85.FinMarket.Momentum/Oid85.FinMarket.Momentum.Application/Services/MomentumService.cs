@@ -9,6 +9,7 @@ using Oid85.FinMarket.Momentum.Core.Requests;
 using Oid85.FinMarket.Momentum.Core.Responses;
 using static Oid85.FinMarket.Momentum.Common.KnownConstants.KnownTickers;
 using static Oid85.FinMarket.Momentum.Application.Mapping.ApplicationMapper;
+using Oid85.FinMarket.Momentum.Application.Interfaces.ApiClients;
 
 namespace Oid85.FinMarket.Momentum.Application.Services
 {
@@ -16,6 +17,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
         IOptions<MomentumSettings> options,
         IDataService dataService,
         IParameterRepository parameterRepository,
+        ITraderFinamApiClient traderFinamApiClient,
         IServiceProvider serviceProvider)
         : IMomentumService
     {
@@ -45,7 +47,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             strategy.PositionData = tickers.ToDictionary(k => k, v => new PositionData { Ticker = v, Lot = instrumentData[v].Lot ?? 1 });
             strategy.PositionData.TryAdd(MON, new PositionData { Ticker = MON, Lot = 1 });
 
-            strategy.TotalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum:Momentum")) ?? "0").Replace(" ", "").Trim());
+            // strategy.TotalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum:Momentum")) ?? "0").Replace(" ", "").Trim());
+            strategy.TotalSumLife = Convert.ToDouble((await traderFinamApiClient.GetPortfolioInfoAsync(new())).Result.TotalSum);
 
             strategy.TradingProcessor = new TradingProcessor
             {

@@ -33,10 +33,11 @@ namespace Oid85.FinMarket.Momentum.WebHost
             builder.Services.ConfigureInfrastructure(builder.Configuration);
             builder.Services.ConfigureStorageApiClient(builder.Configuration);
             builder.Services.ConfigureAnalyticsApiClient(builder.Configuration);
+            builder.Services.ConfigureTraderFinamApiClient(builder.Configuration);
 
             builder.Services.AddWindowsService(options =>
             {
-                options.ServiceName = "Oid85.FinMarket.Algo";
+                options.ServiceName = "Oid85.FinMarket.Momentum";
             });
 
             bool applyMigrations = builder.Configuration.GetValue<bool>(KnownSettingsKeys.PostgresApplyMigrationsOnStart);

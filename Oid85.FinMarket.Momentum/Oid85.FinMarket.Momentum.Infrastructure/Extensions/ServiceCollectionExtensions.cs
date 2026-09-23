@@ -54,7 +54,20 @@ public static class ServiceCollectionExtensions
             client.BaseAddress = new Uri(baseUrl);
         });
 
-        services.AddScoped<IStorageApiClient, StorageApiClient>();
+        services.AddScoped<IAnalyticsApiClient, AnalyticsApiClient>();
+    }
+
+    public static void ConfigureTraderFinamApiClient(
+    this IServiceCollection services,
+    IConfiguration configuration)
+    {
+        services.AddHttpClient(KnownHttpClients.FinMarketTraderFinamServiceApiClient, client =>
+        {
+            string baseUrl = configuration.GetValue<string>(KnownSettingsKeys.FinMarketTraderFinamServiceApiClientBaseAddress)!;
+            client.BaseAddress = new Uri(baseUrl);
+        });
+
+        services.AddScoped<ITraderFinamApiClient, TraderFinamApiClient>();
     }
 
     public static async Task ApplyMigrations(this IHost host)

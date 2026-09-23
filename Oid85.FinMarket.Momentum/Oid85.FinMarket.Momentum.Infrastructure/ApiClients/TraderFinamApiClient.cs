@@ -11,14 +11,14 @@ using Oid85.FinMarket.Momentum.Core.Responses.ApiClient;
 namespace Oid85.FinMarket.Momentum.Infrastructure.ApiClients
 {
     /// <inheritdoc />
-    public class AnalyticsApiClient(
+    public class TraderFinamApiClient(
         IMemoryCache memoryCache,
         IHttpClientFactory httpClientFactory)
-        : IAnalyticsApiClient
+        : ITraderFinamApiClient
     {
         /// <inheritdoc />
-        public async Task<GetFundamentalRatingShortListResponse> GetFundamentalRatingShortListAsync(GetFundamentalRatingShortListRequest request) =>
-            await GetCachedDataAsync<GetFundamentalRatingShortListRequest, GetFundamentalRatingShortListResponse>("/api/fundamental-parameters/rating-short/list", request);
+        public async Task<PortfolioInfoResponse> GetPortfolioInfoAsync(PortfolioInfoRequest request) =>
+            await GetResponseAsync<PortfolioInfoRequest, PortfolioInfoResponse>("/api/trader-finam/portfolio-info", request);
 
         private async Task<TResponse> GetCachedDataAsync<TRequest, TResponse>(string url, TRequest request) where TResponse : new()
         {
@@ -54,7 +54,7 @@ namespace Oid85.FinMarket.Momentum.Infrastructure.ApiClients
 
         private async Task<HttpResponseMessage> SendPostRequestAsync(string url, HttpContent content)
         {
-            using var httpClient = httpClientFactory.CreateClient(KnownHttpClients.FinMarketAnalyticsServiceApiClient);
+            using var httpClient = httpClientFactory.CreateClient(KnownHttpClients.FinMarketTraderFinamServiceApiClient);
             return await httpClient.PostAsync(url, content);
         }
     }
