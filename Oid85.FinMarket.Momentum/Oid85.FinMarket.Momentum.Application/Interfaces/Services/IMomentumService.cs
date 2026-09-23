@@ -5,7 +5,8 @@ namespace Oid85.FinMarket.Momentum.Application.Interfaces.Services
 {
     public interface IMomentumService
     {
-        Task<MonitorResponse> MonitorVersionAsync(MonitorRequest request);        
+        Task<TerminalResponse> TerminalAsync(TerminalRequest request);
+        Task<MonitorResponse> MonitorVersionAsync(MonitorRequest request);
         Task<EditPortfolioTotalSumResponse> EditPortfolioTotalSumAsync(EditPortfolioTotalSumRequest request);
     }
 }

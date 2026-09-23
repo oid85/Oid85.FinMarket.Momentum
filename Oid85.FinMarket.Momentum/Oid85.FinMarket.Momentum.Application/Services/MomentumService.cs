@@ -47,9 +47,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             strategy.PositionData = tickers.ToDictionary(k => k, v => new PositionData { Ticker = v, Lot = instrumentData[v].Lot ?? 1 });
             strategy.PositionData.TryAdd(MON, new PositionData { Ticker = MON, Lot = 1 });
 
-            // strategy.TotalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum:Momentum")) ?? "0").Replace(" ", "").Trim());
-            strategy.TotalSumLife = Convert.ToDouble((await traderFinamApiClient.GetPortfolioInfoAsync(new())).Result.TotalSum);
-
+            strategy.TotalSumLife = Convert.ToDouble(((await parameterRepository.GetParameterValueAsync("TotalSum:Momentum")) ?? "0").Replace(" ", "").Trim());
+            
             strategy.TradingProcessor = new TradingProcessor
             {
                 CandleData = candleData,
@@ -68,6 +67,15 @@ namespace Oid85.FinMarket.Momentum.Application.Services
         public async Task<EditPortfolioTotalSumResponse> EditPortfolioTotalSumAsync(EditPortfolioTotalSumRequest request)
         {
             await parameterRepository.SetParameterValueAsync($"TotalSum:Momentum", request.TotalSum.ToString("N0"));
+            return new();
+        }
+
+        public async Task<TerminalResponse> TerminalAsync(TerminalRequest request)
+        {
+            var monitorResponse = MonitorVersionAsync(new MonitorRequest { MomentumVersion = request.MomentumVersion });
+
+
+
             return new();
         }
     }
