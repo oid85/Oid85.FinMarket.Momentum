@@ -31,6 +31,19 @@ public class MomentumController(
             result => new BaseResponse<MonitorResponse> { Result = result });
 
     /// <summary>
+    /// Терминал версии
+    /// </summary>
+    [HttpPost("terminal/version")]
+    [ProducesResponseType(typeof(BaseResponse<TerminalResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BaseResponse<TerminalResponse>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(BaseResponse<TerminalResponse>), StatusCodes.Status500InternalServerError)]
+    public Task<IActionResult> TerminalVersion(
+        [FromBody] TerminalRequest request) =>
+        GetResponseAsync(
+            () => momentumService.TerminalAsync(request),
+            result => new BaseResponse<TerminalResponse> { Result = result });
+
+    /// <summary>
     /// Выполнить бэктест
     /// </summary>
     [HttpPost("backtest")]
