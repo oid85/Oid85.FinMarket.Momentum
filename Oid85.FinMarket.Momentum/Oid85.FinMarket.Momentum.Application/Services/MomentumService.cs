@@ -9,6 +9,7 @@ using Oid85.FinMarket.Momentum.Core.Requests;
 using Oid85.FinMarket.Momentum.Core.Responses;
 using static Oid85.FinMarket.Momentum.Common.KnownConstants.KnownTickers;
 using static Oid85.FinMarket.Momentum.Application.Mapping.ApplicationMapper;
+using static Oid85.FinMarket.Momentum.Application.Mapping.TerminalMapper;
 using Oid85.FinMarket.Momentum.Application.Interfaces.ApiClients;
 
 namespace Oid85.FinMarket.Momentum.Application.Services
@@ -72,17 +73,15 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
         public async Task<TerminalResponse> TerminalAsync(TerminalRequest request)
         {
-            var portfolioInfoResponse = (await traderFinamApiClient.GetPortfolioInfoAsync(new())).Result;
+            var portfolioInfoResult = (await traderFinamApiClient.GetPortfolioInfoAsync(new())).Result;
 
-            double totalSumLife = Convert.ToDouble(portfolioInfoResponse.TotalSum);
+            double totalSumLife = Convert.ToDouble(portfolioInfoResult.TotalSum);
 
             await EditPortfolioTotalSumAsync(new EditPortfolioTotalSumRequest { TotalSum = totalSumLife });
 
-            var monitorResponse = MonitorVersionAsync(new MonitorRequest { MomentumVersion = request.MomentumVersion });
+            var monitorResponse = await MonitorVersionAsync(new MonitorRequest { MomentumVersion = request.MomentumVersion });
 
-            
-
-            return new();
+            return ToTerminalResponse(monitorResponse, portfolioInfoResult);
         }
     }
 }

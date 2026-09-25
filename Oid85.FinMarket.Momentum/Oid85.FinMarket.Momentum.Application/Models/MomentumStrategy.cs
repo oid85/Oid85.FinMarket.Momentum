@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using Oid85.FinMarket.Momentum.Application.Helpers;
+﻿using Oid85.FinMarket.Momentum.Application.Helpers;
 using Oid85.FinMarket.Momentum.Common.Extensions;
 using Oid85.FinMarket.Momentum.Common.KnownConstants;
 using Oid85.FinMarket.Momentum.Common.Utils;
