@@ -72,9 +72,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
         public async Task<TerminalResponse> TerminalAsync(TerminalRequest request)
         {
-            var lifePortfolioResponse = (await traderFinamApiClient.GetPortfolioInfoAsync(new())).Result;
+            var portfolioInfoResponse = (await traderFinamApiClient.GetPortfolioInfoAsync(new())).Result;
 
-            double totalSumLife = Convert.ToDouble(lifePortfolioResponse.TotalSum);
+            double totalSumLife = Convert.ToDouble(portfolioInfoResponse.TotalSum);
 
             await EditPortfolioTotalSumAsync(new EditPortfolioTotalSumRequest { TotalSum = totalSumLife });
 
