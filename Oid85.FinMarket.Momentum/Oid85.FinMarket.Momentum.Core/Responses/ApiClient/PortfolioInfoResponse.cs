@@ -8,6 +8,8 @@
     public class PortfolioInfoResult
     {
         public decimal TotalSum { get; set; }
+        public decimal Money { get; set; }
+        public decimal TotalDailyPnl { get; set; }
         public List<PositionDataItem> Positions { get; set; } = [];
     }
 
