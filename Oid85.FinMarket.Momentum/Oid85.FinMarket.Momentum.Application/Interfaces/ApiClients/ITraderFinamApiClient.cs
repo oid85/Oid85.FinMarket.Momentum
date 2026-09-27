@@ -12,5 +12,10 @@ namespace Oid85.FinMarket.Momentum.Application.Interfaces.ApiClients
         /// Получить информацию о портфеле
         /// </summary>
         Task<PortfolioInfoResponse> GetPortfolioInfoAsync(PortfolioInfoRequest request);
+
+        /// <summary>
+        /// Получить список заданий Outbox
+        /// </summary>
+        Task<OutboxTaskListResponse> GetOutboxTaskListAsync(OutboxTaskListRequest request);
     }
 }

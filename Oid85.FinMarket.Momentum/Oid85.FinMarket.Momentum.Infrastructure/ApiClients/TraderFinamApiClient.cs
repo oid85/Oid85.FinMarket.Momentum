@@ -20,6 +20,10 @@ namespace Oid85.FinMarket.Momentum.Infrastructure.ApiClients
         public async Task<PortfolioInfoResponse> GetPortfolioInfoAsync(PortfolioInfoRequest request) =>
             await GetResponseAsync<PortfolioInfoRequest, PortfolioInfoResponse>("/api/trader-finam/portfolio-info", request);
 
+        /// <inheritdoc />
+        public async Task<OutboxTaskListResponse> GetOutboxTaskListAsync(OutboxTaskListRequest request) =>
+            await GetResponseAsync<OutboxTaskListRequest, OutboxTaskListResponse>("/api/trader-finam/task/list", request);
+
         private async Task<TResponse> GetCachedDataAsync<TRequest, TResponse>(string url, TRequest request) where TResponse : new()
         {
             string key = StringUtils.GetMd5($"{nameof(TRequest)}_{JsonSerializer.Serialize(request)}");

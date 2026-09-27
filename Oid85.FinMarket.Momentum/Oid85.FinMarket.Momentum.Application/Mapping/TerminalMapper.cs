@@ -6,7 +6,10 @@ namespace Oid85.FinMarket.Momentum.Application.Mapping;
 
 public static class TerminalMapper
 {
-    public static TerminalResponse ToTerminalResponse(MonitorResponse monitorResponse, PortfolioInfoResult portfolioInfoResult)
+    public static TerminalResponse ToTerminalResponse(
+        MonitorResponse monitorResponse, 
+        PortfolioInfoResult portfolioInfoResult, 
+        OutboxTaskListResult outboxTaskListResult)
     {
         var response = new TerminalResponse
         {
@@ -24,7 +27,7 @@ public static class TerminalMapper
         List<string> terminalTickers = [
             ..distinctTickers.Where(x => targetTickers.Contains(x) && x != KnownTickers.FMMM),
             ..distinctTickers.Where(x => targetTickers.Contains(x) && x == KnownTickers.FMMM),
-            ..distinctTickers.Where(x => lifeTickers.Contains(x))
+            ..distinctTickers.Where(x => lifeTickers.Contains(x) && !targetTickers.Contains(x))
             ];
 
         var rows = new List<TerminalRow>();

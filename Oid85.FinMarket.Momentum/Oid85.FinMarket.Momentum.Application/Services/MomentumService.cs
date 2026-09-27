@@ -1,16 +1,17 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Oid85.FinMarket.Momentum.Application.Interfaces.ApiClients;
 using Oid85.FinMarket.Momentum.Application.Interfaces.Repositories;
 using Oid85.FinMarket.Momentum.Application.Interfaces.Services;
 using Oid85.FinMarket.Momentum.Application.Models;
+using Oid85.FinMarket.Momentum.Common.KnownConstants;
 using Oid85.FinMarket.Momentum.Core.Configuration;
 using Oid85.FinMarket.Momentum.Core.Models;
 using Oid85.FinMarket.Momentum.Core.Requests;
 using Oid85.FinMarket.Momentum.Core.Responses;
-using static Oid85.FinMarket.Momentum.Common.KnownConstants.KnownTickers;
 using static Oid85.FinMarket.Momentum.Application.Mapping.ApplicationMapper;
 using static Oid85.FinMarket.Momentum.Application.Mapping.TerminalMapper;
-using Oid85.FinMarket.Momentum.Application.Interfaces.ApiClients;
+using static Oid85.FinMarket.Momentum.Common.KnownConstants.KnownTickers;
 
 namespace Oid85.FinMarket.Momentum.Application.Services
 {
@@ -74,6 +75,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
         public async Task<TerminalResponse> TerminalAsync(TerminalRequest request)
         {
             var portfolioInfoResult = (await traderFinamApiClient.GetPortfolioInfoAsync(new())).Result;
+            var outboxTaskListResult = (await traderFinamApiClient.GetOutboxTaskListAsync(new())).Result;
 
             double totalSumLife = Convert.ToDouble(portfolioInfoResult.TotalSum);
 
@@ -81,7 +83,9 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var monitorResponse = await MonitorVersionAsync(new MonitorRequest { MomentumVersion = request.MomentumVersion });
 
-            return ToTerminalResponse(monitorResponse, portfolioInfoResult);
+            monitorResponse.CurrentPositions.Find(x => x.Ticker == MON)!.Ticker = FMMM;
+
+            return ToTerminalResponse(monitorResponse, portfolioInfoResult, outboxTaskListResult);
         }
     }
 }
