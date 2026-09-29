@@ -12,6 +12,7 @@ namespace Oid85.FinMarket.Momentum.Core.Responses
 
     public class TerminalRow
     {
+        public int Number { get; set; }
         public string Ticker { get; set; } = string.Empty;
         public TerminalTargetPosition TargetPosition { get; set; } = new();
         public TerminalLifePosition LifePosition { get; set; } = new();

@@ -110,6 +110,10 @@ public static class TerminalMapper
             rows.Add(row);
         }
 
+        int number = 1;
+        foreach (var row in rows)
+            row.Number = number++;
+
         response.Rows = rows;
 
         return response;
