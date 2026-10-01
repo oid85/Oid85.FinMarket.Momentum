@@ -171,7 +171,7 @@ public static class TerminalMapper
 
         return new TerminalSyncSizeButton
         {
-            DoShow = targetSize != lifeSize || ticker == KnownTickers.FMMM,
+            DoShow = targetSize != lifeSize && ticker != KnownTickers.FMMM,
             Title = title,
             Task = "SyncSizeTicker",
             Ticker = ticker,
