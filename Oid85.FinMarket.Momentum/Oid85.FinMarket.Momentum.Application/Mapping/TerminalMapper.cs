@@ -1,4 +1,5 @@
 ﻿using Oid85.FinMarket.Momentum.Common.KnownConstants;
+using Oid85.FinMarket.Momentum.Core.Models;
 using Oid85.FinMarket.Momentum.Core.Responses;
 using Oid85.FinMarket.Momentum.Core.Responses.ApiClient;
 
@@ -19,7 +20,7 @@ public static class TerminalMapper
         };
 
         var targetTickers = monitorResponse.CurrentPositions.Select(x => x.Ticker).ToList();
-        var lifeTickers = portfolioInfoResult.Positions.Select(x => x.Ticker).ToList();
+        var lifeTickers = portfolioInfoResult.Positions.Where(x => x.Size != 0).Select(x => x.Ticker).ToList();
 
         List<string> tickers = [.. targetTickers, .. lifeTickers];
         List<string> distinctTickers = [.. tickers.Distinct()];
@@ -40,70 +41,48 @@ public static class TerminalMapper
             var row = new TerminalRow
             {
                 Ticker = ticker,
-
-                TargetPosition = new TerminalTargetPosition
-                {
-                    DoShow = targetPosition is not null,
-                    Size = 0,
-                    ColorFill = KnownColors.White
-                },
-
-                LifePosition = new TerminalLifePosition
-                {
-                    DoShow = lifePosition is not null,
-                    Size = 0,
-                    ColorFill = KnownColors.White,
-                    Cost = 0,
-                    CurrentPrice = 0,
-                    DailyPnl = 0
-                },
-
-                SyncSizeButton = new TerminalSyncSizeButton
-                {
-                    DoShow = true,
-                    Title = string.Empty,
-                    ColorFill = KnownColors.White,
-                    Task = string.Empty
-                },
+                TargetPosition = GetTerminalTargetPosition(targetPosition, lifePosition),
+                LifePosition = GetTerminalLifePosition(targetPosition, lifePosition),
+                SyncSizeButton = GetTerminalSyncSizeButton(targetPosition, lifePosition),
 
                 TargetStop = new TerminalTargetStop
                 {
-                    DoShow = true,
+                    DoShow = false,
                     Size = 0,
-                    ColorFill = KnownColors.White,
-                    StopPrice = 0
+                    StopPrice = 0,
+                    ColorFill = KnownColors.White
                 },
 
                 LifeStop = new TerminalLifeStop
                 {
-                    DoShow = true,
+                    DoShow = false,
                     Size = 0,
-                    ColorFill = KnownColors.White,
-                    StopPrice = 0
+                    StopPrice = 0,
+                    ColorFill = KnownColors.White
                 },
 
                 SyncStopButton = new TerminalSyncStopButton
                 {
-                    DoShow = true,
+                    DoShow = false,
                     Title = string.Empty,
-                    ColorFill = KnownColors.White,
-                    Task = string.Empty
+                    Task = "SyncStopTicker",
+                    ColorFill = KnownColors.White
                 },
 
                 SyncTickerSizeTask = new TerminalSyncTickerSizeTask
                 {
-                    DoShow = true,
+                    DoShow = false,
                     State = string.Empty,
-                    ColorFill = KnownColors.White,
-                    Task = string.Empty
+                    Task = string.Empty,
+                    ColorFill = KnownColors.White
                 },
 
                 SyncTickerStopTask = new TerminalSyncTickerStopTask
                 {
-                    DoShow = true,
+                    DoShow = false,
                     State = string.Empty,
-                    ColorFill = KnownColors.White,
-                    Task = string.Empty
+                    Task = string.Empty,
+                    ColorFill = KnownColors.White
                 }
             };
 
@@ -117,5 +96,51 @@ public static class TerminalMapper
         response.Rows = rows;
 
         return response;
+    }
+
+    private static TerminalTargetPosition GetTerminalTargetPosition(CurrentPosition? targetPosition, PositionDataItem? lifePosition)
+    {
+        var targetSize = targetPosition?.Size ?? 0;
+
+        return new TerminalTargetPosition
+        {
+            DoShow = targetPosition is not null,
+            Size = targetSize,
+            ColorFill = KnownColors.White
+        };
+    }
+
+    private static TerminalLifePosition GetTerminalLifePosition(CurrentPosition? targetPosition, PositionDataItem? lifePosition)
+    {
+        var lifeSize = lifePosition?.Size ?? 0;
+        var lifeCost = lifePosition?.Cost ?? 0;
+        var currentPrice = lifePosition?.CurrentPrice ?? 0;
+        var dailyPnl = lifePosition?.DailyPnl ?? 0;
+
+        return new TerminalLifePosition
+        {
+            DoShow = lifePosition is not null,
+            Size = lifeSize,
+            Cost = lifeCost,
+            CurrentPrice = currentPrice,
+            DailyPnl = dailyPnl,
+            ColorFill = KnownColors.White
+        };
+    }
+
+    private static TerminalSyncSizeButton GetTerminalSyncSizeButton(CurrentPosition? targetPosition, PositionDataItem? lifePosition)
+    {
+        var targetSize = targetPosition?.Size ?? 0;
+        var lifeSize = lifePosition?.Size ?? 0;
+
+        string title = string.Empty;
+
+        return new TerminalSyncSizeButton
+        {
+            DoShow = targetSize != lifeSize,
+            Title = title,
+            Task = "SyncSizeTicker",
+            ColorFill = KnownColors.White
+        };
     }
 }

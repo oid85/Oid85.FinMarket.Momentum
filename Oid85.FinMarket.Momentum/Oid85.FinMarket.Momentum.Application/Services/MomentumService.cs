@@ -83,7 +83,8 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var monitorResponse = await MonitorVersionAsync(new MonitorRequest { MomentumVersion = request.MomentumVersion });
 
-            monitorResponse.CurrentPositions.Find(x => x.Ticker == MON)!.Ticker = FMMM;
+            if (monitorResponse.CurrentPositions.Select(x => x.Ticker).Contains(MON))
+                monitorResponse.CurrentPositions.Find(x => x.Ticker == MON)!.Ticker = FMMM;
 
             return ToTerminalResponse(monitorResponse, portfolioInfoResult, outboxTaskListResult);
         }
