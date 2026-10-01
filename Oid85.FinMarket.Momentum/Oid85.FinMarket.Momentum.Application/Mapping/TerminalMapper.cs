@@ -101,12 +101,19 @@ public static class TerminalMapper
     private static TerminalTargetPosition GetTerminalTargetPosition(CurrentPosition? targetPosition, PositionDataItem? lifePosition)
     {
         var targetSize = targetPosition?.Size ?? 0;
+        var lifeSize = lifePosition?.Size ?? 0;
+
+        string colorFill = KnownColors.White;
+
+        if (targetSize != 0 || lifeSize != 0)
+            if (targetSize != lifeSize)
+                colorFill = KnownColors.LightYellow;
 
         return new TerminalTargetPosition
         {
             DoShow = targetPosition is not null,
             Size = targetSize,
-            ColorFill = KnownColors.White
+            ColorFill = colorFill
         };
     }
 
