@@ -44,7 +44,7 @@ public static class TerminalMapper
                 TargetPosition = GetTerminalTargetPosition(targetPosition, lifePosition),
                 LifePosition = GetTerminalLifePosition(targetPosition, lifePosition),
                 SyncSizeButton = GetTerminalSyncSizeButton(targetPosition, lifePosition),
-
+                
                 TargetStop = new TerminalTargetStop
                 {
                     DoShow = false,
