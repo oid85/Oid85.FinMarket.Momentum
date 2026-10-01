@@ -144,15 +144,27 @@ public static class TerminalMapper
     {
         var targetSize = targetPosition?.Size ?? 0;
         var lifeSize = lifePosition?.Size ?? 0;
+        string ticker = lifePosition?.Ticker ?? string.Empty;
+        int size = Math.Abs(targetSize - lifeSize);
+
+        string colorFill = KnownColors.White;
+
+        if (targetSize != 0 || lifeSize != 0)
+            if (targetSize != lifeSize)
+                colorFill = KnownColors.LightYellow;
 
         string title = string.Empty;
+        string direction = string.Empty;
 
         return new TerminalSyncSizeButton
         {
             DoShow = targetSize != lifeSize,
             Title = title,
             Task = "SyncSizeTicker",
-            ColorFill = KnownColors.White
+            Ticker = ticker,
+            Direction = direction,
+            Size = size,
+            ColorFill = colorFill
         };
     }
 }

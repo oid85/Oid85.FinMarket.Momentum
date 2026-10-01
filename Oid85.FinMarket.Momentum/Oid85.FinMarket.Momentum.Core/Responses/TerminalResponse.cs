@@ -47,6 +47,9 @@ namespace Oid85.FinMarket.Momentum.Core.Responses
         public string Title { get; set; } = string.Empty;
         public string ColorFill { get; set; } = KnownColors.White;
         public string Task { get; set; } = string.Empty;
+        public int Size { get; set; }
+        public string Ticker { get; set; } = string.Empty;
+        public string Direction { get; set; } = string.Empty;
     }
 
     public class TerminalTargetStop
