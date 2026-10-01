@@ -148,17 +148,30 @@ public static class TerminalMapper
         int size = Math.Abs(targetSize - lifeSize);
 
         string colorFill = KnownColors.White;
-
-        if (targetSize != 0 || lifeSize != 0)
-            if (targetSize != lifeSize)
-                colorFill = KnownColors.LightYellow;
-
         string title = string.Empty;
         string direction = string.Empty;
 
+        if (targetSize != 0 || lifeSize != 0)
+        {
+            if (targetSize != lifeSize)
+                colorFill = KnownColors.LightYellow;
+            
+            if (targetSize > lifeSize)
+            {
+                direction = "Buy";
+                title = $"Купить {size} шт.";
+            }
+
+            if (targetSize < lifeSize)
+            {
+                direction = "Sell";
+                title = $"Продать {size} шт.";
+            }
+        }
+
         return new TerminalSyncSizeButton
         {
-            DoShow = targetSize != lifeSize,
+            DoShow = targetSize != lifeSize || ticker == KnownTickers.FMMM,
             Title = title,
             Task = "SyncSizeTicker",
             Ticker = ticker,
