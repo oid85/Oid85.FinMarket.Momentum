@@ -117,6 +117,11 @@ public static class TerminalMapper
         var currentPrice = lifePosition?.CurrentPrice ?? 0;
         var dailyPnl = lifePosition?.DailyPnl ?? 0;
 
+        string colorFill = KnownColors.White;
+
+        if (dailyPnl > 0) colorFill = KnownColors.LightGreen;
+        if (dailyPnl < 0) colorFill = KnownColors.LightRed;
+
         return new TerminalLifePosition
         {
             DoShow = lifePosition is not null,
@@ -124,7 +129,7 @@ public static class TerminalMapper
             Cost = lifeCost,
             CurrentPrice = currentPrice,
             DailyPnl = dailyPnl,
-            ColorFill = KnownColors.White
+            ColorFill = colorFill
         };
     }
 
