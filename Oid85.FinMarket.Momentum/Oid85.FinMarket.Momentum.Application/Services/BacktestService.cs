@@ -36,7 +36,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
         {
             var momentumSettings = options.Value;
 
-            _tickers = momentumSettings.Tickers;
+            _tickers = momentumSettings.DividendShareTickers;
 
             _candleData = await dataService.GetCandleDataAsync(_tickers);
             _candleData.TryAdd(KnownTickers.MON, await dataService.GetMoneyEquivalentCandlesAsync(_from, _to));

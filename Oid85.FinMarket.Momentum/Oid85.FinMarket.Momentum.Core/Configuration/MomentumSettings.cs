@@ -4,7 +4,8 @@
     {
         public StrategyExecuteResultFilterSettings StrategyExecuteResultFilter { get; set; } = new();
         public double StartMoneySum { get; set; }
-        public List<string> Tickers { get; set; } = [];
+        public List<string> DividendShareTickers { get; set; } = [];
+        public List<string> SevenEtfTickers { get; set; } = [];
     }
 
     public class StrategyExecuteResultFilterSettings

@@ -27,7 +27,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
         {
             var momentumSettings = options.Value;
 
-            var tickers = momentumSettings.Tickers;
+            var tickers = momentumSettings.DividendShareTickers;
 
             var strategy = serviceProvider.GetRequiredKeyedService<MomentumStrategy>($"MomentumStrategy{request.MomentumVersion}");
 
