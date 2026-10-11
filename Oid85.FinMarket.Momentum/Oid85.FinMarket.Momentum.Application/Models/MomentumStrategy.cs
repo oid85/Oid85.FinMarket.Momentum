@@ -221,8 +221,8 @@ namespace Oid85.FinMarket.Momentum.Application.Models
         public void ClosePosition(string ticker)
         {
             // Скорректируем веса портфеля
+            PositionData[MON].Weight += PositionData[ticker].Weight;
             PositionData[ticker].Weight = 0.0;
-            PositionData[MON].Weight += 1.0;
 
             TradingProcessor.ClosePosition(ticker, true);
 
