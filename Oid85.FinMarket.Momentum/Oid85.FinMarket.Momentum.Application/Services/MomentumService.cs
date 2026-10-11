@@ -30,7 +30,11 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             var tickers = request.MomentumVersion switch
             {
                 "SevenEtfClassic" => momentumSettings.SevenEtfTickers,
-                _ => momentumSettings.DividendShareTickers
+                "Classic" => momentumSettings.DividendShareTickers,
+                "BreakEvenStop" => momentumSettings.DividendShareTickers,
+                "TrailStop" => momentumSettings.DividendShareTickers,
+                "UpdateStop" => momentumSettings.DividendShareTickers,
+                _ => []
             };
 
             var strategy = serviceProvider.GetRequiredKeyedService<MomentumStrategy>($"MomentumStrategy{request.MomentumVersion}");
