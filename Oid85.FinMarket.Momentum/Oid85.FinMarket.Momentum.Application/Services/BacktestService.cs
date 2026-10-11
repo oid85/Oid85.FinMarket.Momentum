@@ -37,7 +37,6 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             var momentumSettings = options.Value;
 
             _tickers = momentumSettings.DividendShareTickers;
-
             _candleData = await dataService.GetCandleDataAsync(_tickers);
             _candleData.TryAdd(KnownTickers.MON, await dataService.GetMoneyEquivalentCandlesAsync(_from, _to));
             _instrumentData = await dataService.GetInstrumentDataAsync(_tickers);
@@ -48,6 +47,17 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             await BacktestByStrategyName(nameof(MomentumStrategyBreakEvenStop));
             await BacktestByStrategyName(nameof(MomentumStrategyTrailStop));
             await BacktestByStrategyName(nameof(MomentumStrategyUpdateStop));
+            
+            _tickers.Clear();
+            _candleData.Clear();
+            _instrumentData.Clear();
+
+            _tickers = momentumSettings.SevenEtfTickers;
+            _candleData = await dataService.GetCandleDataAsync(_tickers);
+            _candleData.TryAdd(KnownTickers.MON, await dataService.GetMoneyEquivalentCandlesAsync(_from, _to));
+            _instrumentData = await dataService.GetInstrumentDataAsync(_tickers);
+
+            await BacktestByStrategyName(nameof(MomentumStrategySevenEtfClassic));
 
             return new ();
         }
