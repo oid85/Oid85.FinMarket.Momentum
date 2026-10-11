@@ -1,4 +1,6 @@
-﻿using Oid85.FinMarket.Momentum.Application.Models;
+﻿using System.Timers;
+using Oid85.FinMarket.Momentum.Application.Models;
+using static Oid85.FinMarket.Momentum.Common.KnownConstants.KnownTickers;
 
 namespace Oid85.FinMarket.Momentum.Application.Strategies
 {
@@ -26,9 +28,28 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
             RebalanceDays = [1, 11, 21];
         }
 
-        public void SetSevenEtfWeights()
+        private void SetSevenEtfWeights()
         {
+            PositionData[MON].Weight = 8.0;
 
+            SetWeightForTicker("TDIV", 1.0);
+            SetWeightForTicker("TITR", 1.0);
+            SetWeightForTicker("TMOS", 1.0);
+            SetWeightForTicker("TRND", 1.0);
+            SetWeightForTicker("TBRU", 4.0);
+            SetWeightForTicker("TOFZ", 4.0);
+        }
+
+        private void SetWeightForTicker(string ticker, double defaultWeight)
+        {
+            if (TopTickers.Contains(ticker))
+                PositionData[ticker].Weight = defaultWeight;
+
+            else
+            {
+                PositionData[ticker].Weight = 0.0;
+                PositionData[MON].Weight += defaultWeight;
+            }
         }
 
         public override void Execute()
