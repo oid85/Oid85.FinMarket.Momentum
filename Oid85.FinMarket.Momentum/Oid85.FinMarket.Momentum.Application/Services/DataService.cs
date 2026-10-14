@@ -72,7 +72,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 }
             };
 
-            double keyRate = 12.0;
+            double keyRate = 14.0;
             double dayPercentRate = keyRate / 365.0;
             double multipleCoefficient = 1.0 + dayPercentRate / 100.0;
 

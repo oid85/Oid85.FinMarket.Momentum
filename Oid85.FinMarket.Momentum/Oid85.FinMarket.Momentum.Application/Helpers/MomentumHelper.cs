@@ -17,7 +17,7 @@ namespace Oid85.FinMarket.Momentum.Application.Helpers
                 .Where(x => x.Key != KnownTickers.MON)
                 .ToDictionary(
                     k => k.Key,
-                    v => GetDeltaPricePercent([.. v.Value.Where(x => x.Date >= from && x.Date <= to)]))
+                    v => GetDeltaPricePercent(v.Key, [.. v.Value.Where(x => x.Date >= from && x.Date <= to)]))
                 .Where(x => x.Value > 0.0)
                 .OrderByDescending(x => x.Value)
                 .Take(count)
@@ -27,7 +27,7 @@ namespace Oid85.FinMarket.Momentum.Application.Helpers
             return tickers ?? [];
         }
 
-        public static double GetDeltaPricePercent(List<Candle> candles)
+        public static double GetDeltaPricePercent(string ticker, List<Candle> candles)
         {
             if (candles is []) return 0.0;
 
