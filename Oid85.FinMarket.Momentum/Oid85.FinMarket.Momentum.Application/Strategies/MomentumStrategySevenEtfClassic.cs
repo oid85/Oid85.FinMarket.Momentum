@@ -30,14 +30,14 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
         private void SetSevenEtfWeights()
         {
             Tickers.ForEach(ticker => PositionData[ticker].Weight = 0.0);
-            PositionData[MON].Weight = 4.0;
+            PositionData[MON].Weight = 1.0;
 
             if (TopTickers.Contains(TDIV)) PositionData[TDIV].Weight = 1.0; else PositionData[MON].Weight += 1.0;
             if (TopTickers.Contains(TITR)) PositionData[TITR].Weight = 1.0; else PositionData[MON].Weight += 1.0;
             if (TopTickers.Contains(TMOS)) PositionData[TMOS].Weight = 1.0; else PositionData[MON].Weight += 1.0;
             if (TopTickers.Contains(TRND)) PositionData[TRND].Weight = 1.0; else PositionData[MON].Weight += 1.0;
-            if (TopTickers.Contains(TBRU)) PositionData[TBRU].Weight = 2.0; else PositionData[MON].Weight += 2.0;
-            if (TopTickers.Contains(TOFZ)) PositionData[TOFZ].Weight = 2.0; else PositionData[MON].Weight += 2.0;
+            if (TopTickers.Contains(TBRU)) PositionData[TBRU].Weight = 1.0; else PositionData[MON].Weight += 1.0;
+            if (TopTickers.Contains(TOFZ)) PositionData[TOFZ].Weight = 1.0; else PositionData[MON].Weight += 1.0;
         }
 
         private void SetSevenEtfTopTickers() => TopTickers = [.. MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate.AddDays(-1), Period, CandleData.Count), MON];
@@ -66,7 +66,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
 
                 else
                 {                    
-                    // CheckStopsWithClosePosition();
+                    CheckStopsWithClosePosition();
                 }
 
                 UpdateEquitySeries();
