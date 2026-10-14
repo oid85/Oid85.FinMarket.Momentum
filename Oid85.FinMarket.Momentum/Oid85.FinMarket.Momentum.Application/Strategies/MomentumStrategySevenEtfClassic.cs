@@ -32,24 +32,12 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
             Tickers.ForEach(ticker => PositionData[ticker].Weight = 0.0);
             PositionData[MON].Weight = 4.0;
 
-            if (TopTickers.Contains(TDIV)) SetWeight(TDIV, 1.0); else PositionData[MON].Weight += 1.0;
-            if (TopTickers.Contains(TITR)) SetWeight(TITR, 1.0); else PositionData[MON].Weight += 1.0;
-            if (TopTickers.Contains(TMOS)) SetWeight(TMOS, 1.0); else PositionData[MON].Weight += 1.0;
-            if (TopTickers.Contains(TRND)) SetWeight(TRND, 1.0); else PositionData[MON].Weight += 1.0;
-            if (TopTickers.Contains(TBRU)) SetWeight(TBRU, 2.0); else PositionData[MON].Weight += 2.0;
-            if (TopTickers.Contains(TOFZ)) SetWeight(TOFZ, 2.0); else PositionData[MON].Weight += 2.0;
-        }
-
-        private void SetWeight(string ticker, double weight)
-        {
-            if (TopTickers.Contains(ticker))
-                PositionData[ticker].Weight = weight;
-
-            else
-            {
-                PositionData[ticker].Weight = 0.0;
-                PositionData[MON].Weight += weight;
-            }
+            if (TopTickers.Contains(TDIV)) PositionData[TDIV].Weight = 1.0; else PositionData[MON].Weight += 1.0;
+            if (TopTickers.Contains(TITR)) PositionData[TITR].Weight = 1.0; else PositionData[MON].Weight += 1.0;
+            if (TopTickers.Contains(TMOS)) PositionData[TMOS].Weight = 1.0; else PositionData[MON].Weight += 1.0;
+            if (TopTickers.Contains(TRND)) PositionData[TRND].Weight = 1.0; else PositionData[MON].Weight += 1.0;
+            if (TopTickers.Contains(TBRU)) PositionData[TBRU].Weight = 2.0; else PositionData[MON].Weight += 2.0;
+            if (TopTickers.Contains(TOFZ)) PositionData[TOFZ].Weight = 2.0; else PositionData[MON].Weight += 2.0;
         }
 
         private void SetSevenEtfTopTickers() => TopTickers = [.. MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate.AddDays(-1), Period, CandleData.Count), MON];
