@@ -12,7 +12,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                 "Версия UpdateStop",
                 "Пересчет стопов в середине периода",
                 $"Период моментума: {Period} дней",
-                $"Количество отбираемых тикеров для моментума: {CounTopTickers} шт.",
+                $"Количество отбираемых тикеров для моментума: {CountTopTickers} шт.",
                 $"Дни ребалансировки: {string.Join(", ", RebalanceDays).Trim()} каждого месяца",
                 $"Дни пересчета стопов: {string.Join(", ", UpdateStopDays).Trim()} каждого месяца",
                 $"Стоп расчитывается как двойной средний размер тела свечи за {Period} дней",
@@ -23,7 +23,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
         public override void InitMonitorParameters()
         {
             Period = 10;
-            CounTopTickers = 10;
+            CountTopTickers = 10;
             RebalanceDays = [1, 11, 21];
             UpdateStopDays = [6, 16, 26];
         }

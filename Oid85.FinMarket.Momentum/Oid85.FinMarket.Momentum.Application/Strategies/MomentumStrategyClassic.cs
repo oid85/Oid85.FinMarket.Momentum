@@ -12,7 +12,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                 "Версия Classic",
                 "Классический",
                 $"Период моментума: {Period} дней",
-                $"Количество отбираемых тикеров для моментума: {CounTopTickers} шт.",
+                $"Количество отбираемых тикеров для моментума: {CountTopTickers} шт.",
                 $"Дни ребалансировки: {string.Join(", ", RebalanceDays).Trim()} каждого месяца",
                 $"Стоп расчитывается как двойной средний размер тела свечи за {Period} дней",
                 "При срабатывании стопа закрывать позицию и покупать фонд ликвидности"
@@ -22,7 +22,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
         public override void InitMonitorParameters()
         {
             Period = 10;
-            CounTopTickers = 10;
+            CountTopTickers = 10;
             RebalanceDays = [1, 11, 21];
         }
 

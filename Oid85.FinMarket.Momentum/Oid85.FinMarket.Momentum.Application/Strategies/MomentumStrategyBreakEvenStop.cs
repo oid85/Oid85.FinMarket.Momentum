@@ -12,7 +12,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                 "Версия BreakEvenStop",
                 "С переводом в безубыток",
                 $"Период моментума: {Period} дней",
-                $"Количество отбираемых тикеров для моментума: {CounTopTickers} шт.",
+                $"Количество отбираемых тикеров для моментума: {CountTopTickers} шт.",
                 $"Дни ребалансировки: {string.Join(", ", RebalanceDays).Trim()} каждого месяца",
                 $"Стоп расчитывается как двойной средний размер тела свечи за {Period} дней",
                 $"Если текущая цена отстоит от цены входа больше, чем на двойной средний размер тела свечи за {Period} дней, то стоп переводится в безубыток",
@@ -23,7 +23,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
         public override void InitMonitorParameters()
         {
             Period = 10;
-            CounTopTickers = 10;
+            CountTopTickers = 10;
             RebalanceDays = [1, 11, 21];
         }
 

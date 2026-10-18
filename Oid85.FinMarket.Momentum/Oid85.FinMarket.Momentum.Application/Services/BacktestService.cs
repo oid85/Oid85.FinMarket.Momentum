@@ -102,7 +102,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                         try
                         {
                             strategy.Period = period;
-                            strategy.CounTopTickers = counTopTickers;
+                            strategy.CountTopTickers = counTopTickers;
                             strategy.RebalanceDays = rebalanceDays;
 
                             strategy.StartMoneySum = momentumSettings.StartMoneySum;

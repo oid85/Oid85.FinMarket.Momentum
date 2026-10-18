@@ -13,7 +13,7 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public int Period { get; set; }
 
-        public int CounTopTickers { get; set; }
+        public int CountTopTickers { get; set; }
 
         public List<int> RebalanceDays { get; set; } = [];
 
@@ -107,13 +107,13 @@ namespace Oid85.FinMarket.Momentum.Application.Models
 
         public Candle? GetCandle(string ticker) => CandleData[ticker].FindLast(x => x.Date <= CurrentDate.AddDays(-1));
 
-        public void SetTopTickers() => TopTickers = [.. MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate.AddDays(-1), Period, CounTopTickers), MON];
+        public void SetTopTickers() => TopTickers = [.. MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate.AddDays(-1), Period, CountTopTickers), MON];
 
         public void SetWeights()
         {
             Tickers.ForEach(ticker => PositionData[ticker].Weight = 0.0);
             TopTickers.ForEach(ticker => PositionData[ticker].Weight = 1.0);
-            PositionData[MON].Weight = CounTopTickers - TopTickers.Count(x => x != MON);
+            PositionData[MON].Weight = CountTopTickers - TopTickers.Count(x => x != MON);
         }
 
         public void UpdatePrices() => TradingProcessor.UpdatePrices();
