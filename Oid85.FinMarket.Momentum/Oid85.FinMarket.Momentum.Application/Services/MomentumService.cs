@@ -29,7 +29,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             var tickers = request.MomentumVersion switch
             {
-                "SevenEtfClassic" => momentumSettings.SevenEtfTickers,
+                "SevenEtfClassic" => momentumSettings.EtfTickers,
                 "Classic" => momentumSettings.DividendShareTickers,
                 "BreakEvenStop" => momentumSettings.DividendShareTickers,
                 "TrailStop" => momentumSettings.DividendShareTickers,

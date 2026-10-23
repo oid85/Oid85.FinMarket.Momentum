@@ -52,7 +52,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             _candleData.Clear();
             _instrumentData.Clear();
 
-            _tickers = momentumSettings.SevenEtfTickers;
+            _tickers = momentumSettings.EtfTickers;
             _candleData = await dataService.GetCandleDataAsync(_tickers);
             _candleData.TryAdd(KnownTickers.MON, await dataService.GetMoneyEquivalentCandlesAsync(_from, _to));
             _instrumentData = await dataService.GetInstrumentDataAsync(_tickers);
