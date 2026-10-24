@@ -7,7 +7,7 @@ using static Oid85.FinMarket.Momentum.Common.KnownConstants.KnownTickers;
 
 namespace Oid85.FinMarket.Momentum.Application.Models
 {
-    public class MomentumStrategy
+    public class Strategy
     {
         public virtual string Name { get; set; } = string.Empty;
 

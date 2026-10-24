@@ -7,7 +7,7 @@ namespace Oid85.FinMarket.Momentum.Application.Mapping;
 
 public static class ApplicationMapper
 {
-    public static MonitorResponse ToMonitorResponse(MomentumStrategy strategy) => 
+    public static MonitorResponse ToMonitorResponse(Strategy strategy) => 
         new ()
         {
             Description = strategy.GetDescription(),
@@ -35,7 +35,7 @@ public static class ApplicationMapper
             TickerStatistic = strategy.GetTickerStatistics()
         };
 
-    public static StrategyExecuteResult ToStrategyExecuteResult(MomentumStrategy strategy) =>
+    public static StrategyExecuteResult ToStrategyExecuteResult(Strategy strategy) =>
         new()
         {
             StrategyName = strategy.Name,

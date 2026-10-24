@@ -5,7 +5,7 @@ using static Oid85.FinMarket.Momentum.Common.KnownConstants.KnownTickers;
 
 namespace Oid85.FinMarket.Momentum.Application.Strategies
 {
-    public class MomentumStrategySevenEtfClassic : MomentumStrategy
+    public class MomentumStrategySevenEtfClassic : Strategy
     {
         private readonly double DrawdownLimitPercent = 15.0;
 

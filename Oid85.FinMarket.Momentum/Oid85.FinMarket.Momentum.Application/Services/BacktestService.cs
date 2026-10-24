@@ -66,7 +66,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
         {
             var momentumSettings = options.Value;
 
-            var strategy = serviceProvider.GetRequiredKeyedService<MomentumStrategy>(strategyName);
+            var strategy = serviceProvider.GetRequiredKeyedService<Strategy>(strategyName);
 
             strategy.Name = strategyName;
 
