@@ -43,10 +43,10 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             await strategyExecuteResultRepository.DeleteAsync();
 
-            await BacktestByStrategyName(nameof(MomentumStrategyLifeClassic));
-            await BacktestByStrategyName(nameof(MomentumStrategyBreakEvenStop));
-            await BacktestByStrategyName(nameof(MomentumStrategyTrailStop));
-            await BacktestByStrategyName(nameof(MomentumStrategyUpdateStop));
+            await BacktestByStrategyName(nameof(LifeClassicStrategy));
+            await BacktestByStrategyName(nameof(BreakEvenStopStrategy));
+            await BacktestByStrategyName(nameof(TrailStopStrategy));
+            await BacktestByStrategyName(nameof(UpdateStopStrategy));
             
             _tickers.Clear();
             _candleData.Clear();
@@ -57,7 +57,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
             _candleData.TryAdd(KnownTickers.MON, await dataService.GetMoneyEquivalentCandlesAsync(_from, _to));
             _instrumentData = await dataService.GetInstrumentDataAsync(_tickers);
 
-            await BacktestByStrategyName(nameof(MomentumStrategySevenEtfClassic));
+            await BacktestByStrategyName(nameof(SevenEtfClassicStrategy));
 
             return new ();
         }

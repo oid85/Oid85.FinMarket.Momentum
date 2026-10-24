@@ -2,19 +2,22 @@
 
 namespace Oid85.FinMarket.Momentum.Application.Strategies
 {
-    public class MomentumStrategyLifeClassic : Strategy
+    public class TrailStopStrategy : Strategy
     {
         private readonly double DrawdownLimitPercent = 15.0;
 
         public override List<string> GetDescription()
         {
             return [
-                "Версия Classic",
-                "Классический",
+                "Версия TrailStop",
+                "С трейлинг стопом",
                 $"Период моментума: {Period} дней",
                 $"Количество отбираемых тикеров для моментума: {CountTopTickers} шт.",
                 $"Дни ребалансировки: {string.Join(", ", RebalanceDays).Trim()} каждого месяца",
                 $"Стоп расчитывается как двойной средний размер тела свечи за {Period} дней",
+                $"Стоп пересчитывается на каждой свече",
+                $"Если текущая цена отстоит от цены стопа больше, чем на двойной средний размер тела свечи за {Period} дней,",
+                $"то новая цена стопа равна текущая цена минус двойной средний размер тела свечи за {Period} дней",
                 "При срабатывании стопа закрывать позицию и покупать фонд ликвидности"
                 ];
         }
@@ -43,13 +46,14 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                     SetWeights();
                     SetEntryPrices();
                     SetAverageCandleBodies();
-                    SetClassicStops();                    
+                    SetClassicStops();
                     OpenPositionsByWeights();
                     AddRebalanceMessage();
                 }
 
                 else
-                {                    
+                {
+                    TrailStops();
                     CheckStopsWithClosePosition();
                 }
 

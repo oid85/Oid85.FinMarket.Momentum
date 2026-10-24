@@ -2,19 +2,18 @@
 
 namespace Oid85.FinMarket.Momentum.Application.Strategies
 {
-    public class MomentumStrategyUpdateStop : Strategy
+    public class LifeClassicStrategy : Strategy
     {
         private readonly double DrawdownLimitPercent = 15.0;
 
         public override List<string> GetDescription()
         {
             return [
-                "Версия UpdateStop",
-                "Пересчет стопов в середине периода",
+                "Версия Classic",
+                "Классический",
                 $"Период моментума: {Period} дней",
                 $"Количество отбираемых тикеров для моментума: {CountTopTickers} шт.",
                 $"Дни ребалансировки: {string.Join(", ", RebalanceDays).Trim()} каждого месяца",
-                $"Дни пересчета стопов: {string.Join(", ", UpdateStopDays).Trim()} каждого месяца",
                 $"Стоп расчитывается как двойной средний размер тела свечи за {Period} дней",
                 "При срабатывании стопа закрывать позицию и покупать фонд ликвидности"
                 ];
@@ -25,7 +24,6 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
             Period = 10;
             CountTopTickers = 10;
             RebalanceDays = [1, 11, 21];
-            UpdateStopDays = [6, 16, 26];
         }
 
         public override void Execute()
@@ -51,10 +49,7 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                 }
 
                 else
-                {
-                    if (IsUpdateStopDay)
-                        UpdateClassicStops();
-
+                {                    
                     CheckStopsWithClosePosition();
                 }
 

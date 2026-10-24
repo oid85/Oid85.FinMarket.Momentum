@@ -1,22 +1,21 @@
-﻿using System.Timers;
-using Oid85.FinMarket.Momentum.Application.Helpers;
-using Oid85.FinMarket.Momentum.Application.Models;
-using static Oid85.FinMarket.Momentum.Common.KnownConstants.KnownTickers;
+﻿using Oid85.FinMarket.Momentum.Application.Models;
 
 namespace Oid85.FinMarket.Momentum.Application.Strategies
 {
-    public class MomentumStrategySevenEtfClassic : Strategy
+    public class BreakEvenStopStrategy : Strategy
     {
         private readonly double DrawdownLimitPercent = 15.0;
 
         public override List<string> GetDescription()
         {
             return [
-                "Версия SevenEtfClassic",
-                "Классический для ETF",
+                "Версия BreakEvenStop",
+                "С переводом в безубыток",
                 $"Период моментума: {Period} дней",
+                $"Количество отбираемых тикеров для моментума: {CountTopTickers} шт.",
                 $"Дни ребалансировки: {string.Join(", ", RebalanceDays).Trim()} каждого месяца",
                 $"Стоп расчитывается как двойной средний размер тела свечи за {Period} дней",
+                $"Если текущая цена отстоит от цены входа больше, чем на двойной средний размер тела свечи за {Period} дней, то стоп переводится в безубыток",
                 "При срабатывании стопа закрывать позицию и покупать фонд ликвидности"
                 ];
         }
@@ -24,27 +23,9 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
         public override void InitMonitorParameters()
         {
             Period = 10;
+            CountTopTickers = 10;
             RebalanceDays = [1, 11, 21];
         }
-
-        private void SetSevenEtfWeights()
-        {
-            const double MonWeight = 8.0;
-            const double BondWeight = 4.0;
-            const double ShareWeight = 1.0;
-
-            Tickers.ForEach(ticker => PositionData[ticker].Weight = 0.0);
-            PositionData[MON].Weight = MonWeight;
-
-            if (TopTickers.Contains(TDIV)) PositionData[TDIV].Weight = ShareWeight; else PositionData[MON].Weight += ShareWeight;
-            if (TopTickers.Contains(TITR)) PositionData[TITR].Weight = ShareWeight; else PositionData[MON].Weight += ShareWeight;
-            if (TopTickers.Contains(TMOS)) PositionData[TMOS].Weight = ShareWeight; else PositionData[MON].Weight += ShareWeight;
-            if (TopTickers.Contains(TRND)) PositionData[TRND].Weight = ShareWeight; else PositionData[MON].Weight += ShareWeight;
-            if (TopTickers.Contains(TBRU)) PositionData[TBRU].Weight = BondWeight; else PositionData[MON].Weight += BondWeight;
-            if (TopTickers.Contains(TOFZ)) PositionData[TOFZ].Weight = BondWeight; else PositionData[MON].Weight += BondWeight;
-        }
-
-        private void SetSevenEtfTopTickers() => TopTickers = [.. MomentumHelper.GetMomentumTopTickers(CandleData, CurrentDate.AddDays(-1), Period, CandleData.Count), MON];
 
         public override void Execute()
         {
@@ -59,17 +40,18 @@ namespace Oid85.FinMarket.Momentum.Application.Strategies
                 {
                     CloseAllPositions();
                     ClearMessages();
-                    SetSevenEtfTopTickers();
-                    SetSevenEtfWeights();
+                    SetTopTickers();
+                    SetWeights();
                     SetEntryPrices();
                     SetAverageCandleBodies();
-                    SetClassicStops();                    
+                    SetClassicStops();
                     OpenPositionsByWeights();
                     AddRebalanceMessage();
                 }
 
                 else
-                {                    
+                {
+                    MoveStopsToBreakEven();
                     CheckStopsWithClosePosition();
                 }
 

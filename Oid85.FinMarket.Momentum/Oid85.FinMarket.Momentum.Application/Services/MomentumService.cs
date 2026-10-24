@@ -37,7 +37,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
                 _ => []
             };
 
-            var strategy = serviceProvider.GetRequiredKeyedService<Strategy>($"MomentumStrategy{request.MomentumVersion}");
+            var strategy = serviceProvider.GetRequiredKeyedService<Strategy>($"{request.MomentumVersion}Strategy");
 
             strategy.InitMonitorParameters();
 
