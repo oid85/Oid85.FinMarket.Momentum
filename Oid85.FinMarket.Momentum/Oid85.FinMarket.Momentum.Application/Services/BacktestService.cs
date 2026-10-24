@@ -43,7 +43,7 @@ namespace Oid85.FinMarket.Momentum.Application.Services
 
             await strategyExecuteResultRepository.DeleteAsync();
 
-            await BacktestByStrategyName(nameof(MomentumStrategyClassic));
+            await BacktestByStrategyName(nameof(MomentumStrategyLifeClassic));
             await BacktestByStrategyName(nameof(MomentumStrategyBreakEvenStop));
             await BacktestByStrategyName(nameof(MomentumStrategyTrailStop));
             await BacktestByStrategyName(nameof(MomentumStrategyUpdateStop));

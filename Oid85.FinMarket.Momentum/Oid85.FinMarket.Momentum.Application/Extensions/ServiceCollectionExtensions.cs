@@ -15,7 +15,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMomentumService, MomentumService>();
         services.AddScoped<IBacktestService, BacktestService>();
 
-        services.AddKeyedTransient<MomentumStrategy, MomentumStrategyClassic>(nameof(MomentumStrategyClassic));
+        services.AddKeyedTransient<MomentumStrategy, MomentumStrategyLifeClassic>(nameof(MomentumStrategyLifeClassic));
         services.AddKeyedTransient<MomentumStrategy, MomentumStrategyBreakEvenStop>(nameof(MomentumStrategyBreakEvenStop));
         services.AddKeyedTransient<MomentumStrategy, MomentumStrategyTrailStop>(nameof(MomentumStrategyTrailStop));
         services.AddKeyedTransient<MomentumStrategy, MomentumStrategyUpdateStop>(nameof(MomentumStrategyUpdateStop));
