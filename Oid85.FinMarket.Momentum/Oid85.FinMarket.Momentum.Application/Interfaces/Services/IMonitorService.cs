@@ -3,7 +3,7 @@ using Oid85.FinMarket.Momentum.Core.Responses;
 
 namespace Oid85.FinMarket.Momentum.Application.Interfaces.Services
 {
-    public interface IMomentumService
+    public interface IMonitorService
     {
         Task<TerminalResponse> TerminalAsync(TerminalRequest request);
         Task<MonitorResponse> MonitorVersionAsync(MonitorRequest request);

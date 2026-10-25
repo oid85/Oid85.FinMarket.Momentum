@@ -12,7 +12,7 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services)
     {
         services.AddScoped<IDataService, DataService>();
-        services.AddScoped<IMomentumService, MomentumService>();
+        services.AddScoped<IMonitorService, MonitorService>();
         services.AddScoped<IBacktestService, BacktestService>();
 
         services.AddKeyedTransient<Strategy, LifeClassicStrategy>(nameof(LifeClassicStrategy));

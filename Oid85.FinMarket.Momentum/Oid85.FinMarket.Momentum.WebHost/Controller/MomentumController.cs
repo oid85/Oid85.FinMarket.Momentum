@@ -13,7 +13,7 @@ namespace Oid85.FinMarket.Momentum.WebHost.Controller;
 [Route("api/momentum")]
 [ApiController]
 public class MomentumController(
-    IMomentumService momentumService,
+    IMonitorService monitorService,
     IBacktestService backtestService)
     : BaseController
 {
@@ -27,7 +27,7 @@ public class MomentumController(
     public Task<IActionResult> MonitorVersion(
         [FromBody] MonitorRequest request) =>
         GetResponseAsync(
-            () => momentumService.MonitorVersionAsync(request),
+            () => monitorService.MonitorVersionAsync(request),
             result => new BaseResponse<MonitorResponse> { Result = result });
 
     /// <summary>
@@ -40,7 +40,7 @@ public class MomentumController(
     public Task<IActionResult> TerminalVersion(
         [FromBody] TerminalRequest request) =>
         GetResponseAsync(
-            () => momentumService.TerminalAsync(request),
+            () => monitorService.TerminalAsync(request),
             result => new BaseResponse<TerminalResponse> { Result = result });
 
     /// <summary>
@@ -79,6 +79,6 @@ public class MomentumController(
     public Task<IActionResult> EditPortfolioTotalSumAsync(
         [FromBody] EditPortfolioTotalSumRequest request) =>
         GetResponseAsync(
-            () => momentumService.EditPortfolioTotalSumAsync(request),
+            () => monitorService.EditPortfolioTotalSumAsync(request),
             result => new BaseResponse<EditPortfolioTotalSumResponse> { Result = result });
 }

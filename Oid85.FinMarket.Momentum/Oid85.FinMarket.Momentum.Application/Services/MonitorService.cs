@@ -15,13 +15,13 @@ using static Oid85.FinMarket.Momentum.Common.KnownConstants.KnownTickers;
 
 namespace Oid85.FinMarket.Momentum.Application.Services
 {
-    public class MomentumService(
+    public class MonitorService(
         IOptions<MomentumSettings> options,
         IDataService dataService,
         IParameterRepository parameterRepository,
         ITraderFinamApiClient traderFinamApiClient,
         IServiceProvider serviceProvider)
-        : IMomentumService
+        : IMonitorService
     {
         public async Task<MonitorResponse> MonitorVersionAsync(MonitorRequest request)
         {
